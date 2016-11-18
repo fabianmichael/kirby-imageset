@@ -6,29 +6,32 @@ use Exception;
 
 class Source {
   
-  public $attributes = [];
   public $image;
+  public $options;
+  public $kirby;
+  protected $thumb;
 
-  public $params = [
-    // 'width'  => false,
-    // 'height' => false,
-    // 'ratio'  => false,
-  ];
-
-  public function __construct($image, $params) {
-    $this->image  = $image;
-    $this->params = array_merge($this->params, $params);
-    $this->thumb  = $this->image->thumb($this->params);
+  public function __construct($image, $options = [], $kirby = null) {
+    $this->image   = $image;
+    $this->options = is_array($options) ? $options : [];
+    $this->kirby   = $kirby ?: kirby();
+    $this->thumb   = $this->image->thumb($this->options);
   }
 
   public function density() {
     return 1;
   }
 
-  public function __debugInfo() {
-    return [
-      'image' => 'bla', // $this->image, // $this->image,
-    ];
+  public function ratio() {
+    if(@$this->options['crop']) {
+      return $this->thumb->ratio();
+    } else {
+      return $this->image->ratio();
+    }
+  }
+
+  public function src() {
+    return $this->thumb->url();
   }
 
   function __call($name, $value) {
@@ -38,4 +41,11 @@ class Source {
       throw new Exception("Call to undefined method '$name' on Source class.");
     }
   }
+
+  public function __debugInfo() {
+    return [
+      'image' => 'bla', // $this->image, // $this->image,
+    ];
+  }
+
 }

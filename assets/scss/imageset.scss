@@ -1,105 +1,97 @@
 /*!
- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
- * Eye Candy
- * An image manipulation plugin made for responsive design.
+ * ImageSet for Kirby CMS — A Responsive Image Component
  *
- * @author Fabian Michael <hallo@fabianmichael.de>
- * @copyright Fabian Michael
- * @link https://fabianmichael.de/eyecandy
- * @license EYECANDY LICENSE (see LICENSE.md)
- * @package eyecandy
- * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ * Copyright (c) 2016 Fabian Michael
+ * 
+ * URL: https://github.com/fabianmichael/kirby-imageset
  */
 
-// Default settings. Use your stylesheet to override the defaults, if you feel
-// like doing so.
-$imageset-namespace   : imageset                     !default;
-$imageset-shadow      : 0 2px 4px rgba(#000,.25)     !default;
-$imageset-ratios      : '16:9', '4:3', '3:2', '2:1',
-                        '1:1', '1:2', '2:3', '3:4'   !default;
+// =====  Default settings  ================================================= //
+
+$imageset--namespace   : imageset                           !default;
 
 // Enable Noscript fallback selector?
-$imageset-noscript-fallback    : true                !default;
-$imageset-js-enabled-selector  : ".js"               !default;
+$imageset--noscript-fallback    : true                      !default;
+$imageset--js-enabled-selector  : ".js"                     !default;
 
 // Duration of the unveil animation for loaded images
-$imageset-unveil-duration      : .5s                 !default;
+$imageset--unveil-duration      : .5s                       !default;
 
-// A short delay gives the browser time to »breathe« after an imageset has loaded,
-// often resulting in a smoother animation. This default is not based on scientific
+// A short delay gives the browser time to »breathe« after
+// an imageset has loaded, often resulting in a smoother
+// animation. This default is not based on scientific
 // research, but rather on personal experience.
-$imageset-unveil-delay         : .05s                !default;
+$imageset--unveil-delay         : .05s                      !default;
 
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// Core Functionality:
-// Only change, if you know know what you are doing. Add stuff like custom
-// styling for backgrounds, shadows, rounded corners etc. at the bottom of this
-// file or in a different stylesheet.
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-@if not $imageset-noscript-fallback {
-  $imageset-js-enabled-selector: "";
+// =====  ImageSet  ========================================================= //
+
+@if not $imageset--noscript-fallback {
+  $imageset--js-enabled-selector: "";
 }
 
-.#{$imageset-namespace} {
-  // A default imageset does not have too many parameters set. It’s behavior is
-  // mostly determed by the modifiers to the container element.
+.#{$imageset--namespace} {
+  /* A default imageset does not have too many parameters 
+     set. It’s behavior is mostly determed by the modifiers
+     on its container element. */
 
-  // Fixes a glitch in Firefox, where (in rare cases) a black border appears
-  // for no abvious reason at the left side of an imageset.
+  /* Fixes a glitch in Firefox, where (in rare cases) a
+     black border appears for no abvious reason at the
+     left side of an imageset. */
   overflow: hidden;
+    
+  /* Improve rendering speed in supported browsers. */
+  contain: content;
 
   &--ratio {
-    display: block;
+    display: inline-block;
     width: 100%;
     position: relative;
-    // Create a new stacking context for this imageset. See comments below on
-    // why this is important.
+    /* Create a new stacking context for this imageset.
+       See comments below to learn about why this
+       is important. */
     z-index: 0;
 
-    // Image with a ratio placeholder
-    .#{$imageset-namespace}__element {
+    /* Image with a ratio placeholder */
+    .#{$imageset--namespace}__element {
       //object-fit: cover;
       display: block;
       position: absolute;
       left: 0;
       top: 0;
-      // Override issues introduced by common rules
-      // for responsive images, e.g. `img { max-width: 100%; height: auto; }`
+
+      /* Override issues introduced by common rules
+         for responsive images,
+         e.g. `img { max-width: 100%; height: auto; }` */
       width:      100% !important;
       height:     100% !important;
       max-width:  none !important;
       max-height: none !important;
       zoom: 1;
+      //display: none;
     }
   }
 
-  &__ratio-placeholder {
+  &__ratio-fill {
     display: block;
-    // Settings the width of the placeholder pseudo-element and adding
-    // overflow: hidden prevents rendering bugs in IE 11
+    /* Setting the width of the placeholder element and
+       adding `overflow: hidden` prevents rendering bugs
+       in IE 11. */
     width: 100%;
     overflow: hidden;
     z-index: -1;
-
-    @each $ratio in $imageset-ratios {
-      $separator   : str-index($ratio, ':');
-      $denominator : str-slice($ratio, 1, $separator - 1);
-      $nominator   : str-slice($ratio, $separator + 1);
-
-      &[data-ratio="#{$ratio}"] {
-        padding-top: 100% * $nominator / $denominator;
-      }
-    }
   }
 
 
-  #{$imageset-js-enabled-selector} &--ratio#{&}--lazy &__element {
-    // The actual image is kept behind the placeholder. Instead of fading in the
-    // image, the placeholder is faded out instead. This prevents the image layer
-    // to switch from hardware-acceleration during the animation to CPU rendering
-    // after the animation has ended, because this can cause rendering issues in
-    // Safari 9 and possibly any other browser.
+  #{$imageset--js-enabled-selector} &--ratio#{&}--lazyload &__element {
+    /* The actual image is kept behind the placeholder.
+       Rather than fading in the image, the placeholder is
+       faded out instead. This prevents the image layer to
+       switch from hardware-accelerated rendering during the
+       animation to CPU rendering after the animation has
+       ended, because this can cause rendering issues in
+       WebKit- and Blink-based (and possibly any other)
+       browsers. */
     z-index: 1;
   }
 
@@ -110,61 +102,53 @@ $imageset-unveil-delay         : .05s                !default;
     left: 0;
     width: 100%;
     height: 100%;
+    max-width: none !important;
     overflow: hidden;
+    object-fit: cover;
+    contain: strict;
   }
 
-  #{$imageset-js-enabled-selector} #{&}--lazy &__placeholder {
-    // Placeholder will be placed on top of the actual image element.
-    // This will only applied, when JavaScript is enabled.
-    pointer-events: none;
-    will-change: opacity;
-    transition: opacity $imageset-unveil-duration $imageset-unveil-delay, visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
+  #{$imageset--js-enabled-selector} #{&}--lazyload &__placeholder {
+    /* Placeholder will be placed on top of the actual
+       image element. This will only be applied, when
+       JavaScript is enabled. */
+    
+    /* A nice addition here would be:
+     * `will-change: opacity;`, but it causes
+     * subpixel-rendering issues in Safari 10 :-(
+     */
+    transition: opacity $imageset--unveil-duration $imageset--unveil-delay, visibility 0s ($imageset--unveil-duration + $imageset--unveil-delay + .25s);
     z-index: 2;
 
-    // Background color is needed to avoid `image-rendering` property
-    // beeing ignored when layer is rendered on the GPU during animation
-    // Tested in: Chrome 49, Safari 9.1
-    background: #bbbbbb;
+    /* Prevent user interaction like accidently saving the
+       placeholder via tap/right-click */
+    pointer-events: none;
+
+    /* Background color is needed to avoid `image-rendering`
+       property beeing ignored when layer is rendered on
+       the GPU during animation
+       Tested in: Chrome 49, Safari 9.1 */
+    background-color: #bbbbbb;
   }
 
-  &[data-placeholder="mosaic"] &__placeholder {
-    // Mosaic placeholders should render crisp
-    image-rendering: pixelated;
+  &--placeholder--mosaic &__placeholder {
+    /* Mosaic placeholders should render crisp */
+    image-rendering: optimizeSpeed;             /* Legal fallback */
+    image-rendering: -moz-crisp-edges;          /* Firefox        */
+    image-rendering: -o-crisp-edges;            /* Opera          */
+    image-rendering: -webkit-optimize-contrast; /* Safari         */
+    image-rendering: optimize-contrast;         /* CSS3 Proposed  */
+    image-rendering: crisp-edges;               /* CSS4 Proposed  */
+    image-rendering: pixelated;                 /* CSS4 Proposed  */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+           */
   }
 
-  &[data-placeholder="blurred"],
-  &[data-placeholder="lqip"] {
-    overflow: hidden;
-  }
-
-  &[data-placeholder="blurred"] &__placeholder {
-    filter: blur(22px);
-  }
-
-  &[data-placeholder="lqip"] &__placeholder {
-    filter: blur(3px);
-  }
-
-  #{$imageset-js-enabled-selector} .#{$imageset-namespace}--loaded &__placeholder {
-    // After image is loaded, the placeholder will fade out and then change
-    // visibility to allow mouse interation with the loaded image in browsers,
-    // where the `pointer-events` property is not supported.
+  #{$imageset--js-enabled-selector} .#{$imageset--namespace}--loaded &__placeholder {
+    /* After image is loaded, the placeholder will fade out
+       and then change visibility to allow mouse interation
+       with the loaded image in browsers, where the
+       `pointer-events` property is not supported. */
     opacity: 0;
     visibility: hidden;
   }
 }
-
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-// Custom Utility classes:
-// Add your custom styles below.
-// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-// .#{$imageset-namespace} {
-//   // An example utility class that adds a dropshadow to an imageset. All styling
-//   // should always be added to the <img> tag by using the class
-//   // .imageset__element (exact name is depending on your namespace parameter).
-//   // Feel free to remove the following selector, if you don’t need it.
-//   &--shadow &__element {
-//     box-shadow: $imageset-shadow;
-//   }
-// }

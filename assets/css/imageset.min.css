@@ -1,0 +1,9 @@
+@charset "UTF-8";
+/*!
+ * ImageSet for Kirby CMS — A Responsive Image Component
+ *
+ * Copyright (c) 2016 Fabian Michael
+ * 
+ * URL: https://github.com/fabianmichael/kirby-imageset
+ */
+.imageset{overflow:hidden;contain:content}.imageset--ratio{display:inline-block;width:100%;position:relative;z-index:0}.imageset--ratio .imageset__element,.imageset__placeholder{display:block;position:absolute;top:0;left:0;max-width:none!important}.imageset--ratio .imageset__element{width:100%!important;height:100%!important;max-height:none!important;zoom:1}.imageset__ratio-fill{display:block;width:100%;overflow:hidden;z-index:-1}.js .imageset--ratio.imageset--lazyload .imageset__element{z-index:1}.imageset__placeholder{width:100%;height:100%;overflow:hidden;object-fit:cover;contain:strict}.js .imageset--lazyload .imageset__placeholder{transition:opacity .5s .05s,visibility 0s .8s;z-index:2;pointer-events:none;background-color:#bbb}.imageset--placeholder--mosaic .imageset__placeholder{image-rendering:-moz-crisp-edges;image-rendering:-o-crisp-edges;image-rendering:-webkit-optimize-contrast;image-rendering:pixelated;-ms-interpolation-mode:nearest-neighbor}.js .imageset--loaded .imageset__placeholder{opacity:0;visibility:hidden}

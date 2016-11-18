@@ -1,0 +1,14 @@
+{
+    "name": "fabianmichael/kirby-imageset",
+    "description": "A flexible, responsive image component for Kirby.",
+    "license": "COMMERCIAL (see license.md)",
+    "authors": [
+        {
+            "name": "Fabian Michael",
+            "email": "hallo@fabianmichael.de"
+        }
+    ],
+    "require": {
+        "ksubileau/color-thief-php": "^1.3"
+    }
+}

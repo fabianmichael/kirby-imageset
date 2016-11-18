@@ -3,233 +3,98 @@
 namespace Kirby\Plugins\ImageSet;
 
 use Exception;
+use F;
+use Html;
 use Media;
+use Str;
 
-class ImageSet {
+use Kirby\Plugins\ImageSet\Placeholder\Base as Placeholder;
+use ColorThief\ColorThief;
 
-  use Traits\SourceSet;
+class ImageSet extends SourceSet {
 
-  // ~~<source srcset="a.jpg 4100w, a.jpg 1x" type="image/jpeg" media="min-width: 400px">~
-  // <img src="a.jpg" srcset="b.jpg 1x, c.jpg 2x" alt="" class="imageset__image">
-  // <img src="a.jpg" alt="">
+  use Traits\Template;
 
-  // imageset::simple()
-  // imageset::picture()
-  // imageset::srcset()
-  // 
-  // Sources
-  
-  // - a 1x, b 2x, c 2x
-  
-  // - 1x: a, b, c
-  // - 2x: a@2x, b@2x, c@2x
-  // 
-  // [200, 400, 500, 600]
-  // [
-  //   ['width' => 200, 'media' => '…'],
-  //   ['width' => 400, 'media' => '…'],
-  // ]
-  // 
-  // [
-  //   ['width' => [200, 400, 600], 'ratio' => 1,    'media' => '…'], 
-  //   ['width' => [600, 800, 100], 'ratio' => '16:9', 'media' => '…'], 
-  // ]
-  // 
-  // 
-  // 
-  // echo imageset($image, [
-  //   ['width' => 200],
-  //   ['width' => 400],
-  // ]);
-  // 
-  // echo imageset($image, '200-600');
-  // echo imageset($image, '200-600,1'); => 200, 400, 600
-  // echo imageset($image, '200-600,2'); => 200, 333, 467, 600
-  // 
-  // echo imageset($image, '200,400,600');
-  // 
-  // echo imageset($image, [200, 400, 600]);
-  // 
-  // echo imageset($image, [
-  //   [ 'width' => 400, 'ratio' => 1, 'media' => '(max-width: 600px)' ],
-  //   [ 'width' => [600, 800, 1200] ],
-  // ]);
-  // 
-  // echo imageset([
-  //   [$image, 'width' => 400, 'ratio' => 1]
-  // ]);
-  // 
-  // # Sizes by height
-  // 
-  // 
-  // echo imageset($image, 600);
-  // 
-  // echo imageset($image, [
-  //   [ 'height' => [200,400,600] ],
-  // ]);
-  // 
-  // echo imageset($image, [
-  //  [ 'height' => '200,400,600' ],
-  // ])
-  // 
-  // echo imageset($image, [
-  //   [ 'height' => '200-600,2' ]
-  // ])
-  // 
-  // echo imageset($image, '200-600')
-  // 
-  // 
-  // # Sizes by width*height
-  // 
-  // ~~echo imageset($image, '200x133,640x480') // Fit in dimensions
-  // 
-  // ~~echo imageset($image, '200x133c') // Crop
-  // 
-  // ImageSet:  Allgemeiner Container, enthält alle Informationen
-  // SourceSet: Eine oder mehrere Thumbnails mit Informationen wie Media,
-  // Source:    Repräsentation eines Bildes in einer oder mehrere Größen
+  public static $defaults = [
+    'css.namespace'       => 'imageset',
 
-  public $image;
-  public $sources;
-  //public $sizes;
-  public $params = [];
-
-  // protected $options = [
-  //   'placeholder'  => false,
-  //   'sizes'        => false,
-  //   'density'      => [
-  //     [ 1, false ],
-  //     [ 2, 1.1   ],
-  //   ],
-  // ];
-
-  public function __construct($image = null, $sizes = 'default', $params = null, $options = null) {
-
-    if(is_null($image) || !($image instanceof Media)) {
-      throw new Exception('$image argument must be an instance of Media.');
-    }
-
-    print_r($options);
-
-    $this->image   = $image;
-    $this->params  = array_merge($this->params,  is_array($params)  ? $params  : []);
-    $this->options = array_merge($this->options, is_array($options) ? $options : []);
-
-    $this->setupSources($sizes);
+    'class'               => '',
+    'fallback.noscript'   => true,
+    'ratio'               => true,
+    'placeholder'         => 'mosaic',
     
-    // echo '<pre>';
-    // print_r($this->sources);
-    // echo '</pre>';
+    'lazyload'            => true,
+    'lazyload.attr'       => 'data-{attr}',
 
-    // if(is_array($sizes)) {
+    'output.style'        => 'auto',
+    'alt'                 => '',
+    'prettyprint'         => true,
+    'noscript'            => true,
+  ];
 
-    //   if(utils::isArrayAssoc($sizes)) {
-    //     // Single size given as associative array is
-    //     // wrapped in a numeric array.
-    //     $sizes = [ $sizes ];
-    //   }
+  public static $instanceCount = 64161;
+  public $id                   = 0;
 
-    //   if(utils::isArrayAssoc($sizes[0])) {
-    //     $this->sizes = [];
+  protected $placeholder;
+  protected $color;
 
-    //     // multiple sizes given, each one has to be an associative array
-    //     foreach($sizes as $size) {
-    //       if(!utils::isArrayAssoc($size)) {
-    //         throw new Exception('Invalid sizes parameter');
-    //       }
-
-    //       if(isset($size['width'])) {
-    //         $size['width'] = static::parseSizesParameter($size['width']);
-    //       }
-          
-    //       if(isset($size['height'])) {
-    //         $size['height'] = static::parseSizesParameter($size['height']);
-    //       }
-
-    //       $this->sizes[] = $size;        
-    //     }
-    //   }
-
-    // } else {
-    //   try {
-    //     $this->sizes = [ [ 'width' => static::parseSizesParameter($sizes) ] ];
-    //   } catch(Exception $e) {
-    //     throw $e;
-    //   }
-
-    //}
-
-
-    //$this->normalizeSources($sizes);
-
-
-    // if(is_array($sizes)) {
-    //   $this->add($sizes);
-    // } else if(is_string($sizes) && preset::exists($sizes)) {
-    //   $this->add(preset::get($sizes));
-    // }
+  /**
+   * 
+   */
+  public function __construct($image = null, $sizes = 'default', $options = [], $kirby = null) {
+    parent::__construct($image, array_merge(static::$defaults, is_array($options) ? $options : []));
+    $this->sources = $this->setupSources($sizes);
+    $this->id      = ++static::$instanceCount;
+    $this->kirby   = $kirby ?: kirby();
   }
 
+  /**
+   * Takes a sizes parameter and transforms it into an array of SourceSet instances.
+   * @param  array|string|int $sizes Sizes to use on this SourceSet.
+   * @return array An array of SourcSets
+   */
   public function setupSources($sizes) {
+
+    $sources = [];
 
     if(!is_array($sizes) || utils::isArrayAssoc($sizes)) {
        // Single size given, wrap in array
-       $sizes = [$sizes];
+       $sizes = [ $sizes ];
     }
 
     foreach($sizes as $size) {
-      echo "s:";
-      var_dump($size);
-      $subSizes = static::parseSizesParameter($size);
-      $sourceSet = new SourceSet($this->image);
+      $subSizes = static::parseSizesDescriptor($size);
+      
+      if(!isset($subSizes[0])) {
+        continue;
+      }
+      
+      $sourceSet = new SourceSet($this->image, array_intersect_key($subSizes[0], SourceSet::$defaults), $this->kirby);
+      
       foreach($subSizes as $subSize) {
-        $sourceSet->add(new Source($this->image, $subSize));
+        $sourceSet[] = new Source($this->image, $subSize, $this->kirby);
       }
 
-      $this->add($sourceSet);
+      $sources[] = $sourceSet;
     }
 
-    
-    // $sourceset = new SourceSet($this->image);
-    // foreach(static::parseSizesParameter($sizes) as $size) {
-    //   var_dump($size);
-    // //   $sourceset->add(new Source($this->image, array_merge($this->params, [
-    // // //         'width' => $width,
-    // // //       ])));
-    // } 
-
-      //var_dump($size);
-
-    //   $sourceset = new SourceSet($this->image);
-    
-    //   if(Utils::isArrayAssoc($size)) {
-    //     //if(is_array($width))
-    //     $sourceset->add(new SourceSet($this->image, array_merge($this->params, $size)));
-    //     //$this->sources[] = 
-
-    //     //;new SourceSet($this->image, array_merge($this->params, $size));
-    //   } else if (Utils::isArraySequential($size)) {
-    //     // var_dump($size);
-    //     // die("young!");
-    //     foreach($size as $width) {
-    //       $sourceset->add(new Source($this->image, array_merge($this->params, [
-    //         'width' => $width,
-    //       ])));
-    //     }
-    //     // var_dump($this->params); exit;
-    //      // $sourceset->add(new Source($this->image, array_merge($this->params, [
-    //      //  'width' => $size,
-    //     //])));
-    //   }
-      
-    //   $this->sources[] = $sourceset;
-    // }
+    return $sources;
   }
 
-
-  public static function parseSizesParameter($sizes) {
-
+  /**
+   * Transforms a Single Sizes descriptor into an array of
+   * thumbnail creation instructions.
+   *
+   * array|string|int $sizes
+   * @return array An array of Thumb creation params.
+   */
+  public static function parseSizesDescriptor($sizes) {
     $values = [];
+
+    if(utils::isArraySequential($sizes) && sizeof($sizes) === 1 && is_string($sizes[0])) {
+      // Unwrap ['200,400'] etc.
+      $sizes = $sizes[0];
+    }
 
     if(is_string($sizes) || is_int($sizes)) {
 
@@ -247,7 +112,7 @@ class ImageSet {
 
       } else if(preg_match('/^(\d+)-(\d+)\s*(?:,\s*(\d+))?$/', $sizes, $matches)) {
         // '200-600' or '200-600,3'
-        
+        //         
         $min          = (int) $matches[1];
         $max          = (int) $matches[2];
         $intermediate = isset($matches[3]) ? (int) $matches[3] : 2;
@@ -284,8 +149,13 @@ class ImageSet {
       }
 
     } else if(is_array($sizes)) {
-
       if(!utils::isArrayAssoc($sizes)) {
+        
+        if(sizeof($sizes) === 1 && Utils::isArraySequential($sizes[0])) {
+          // Remove unnecessary wrapper array if there is one.
+          $sizes = $sizes[0];
+        }
+
         foreach($sizes as $i => $value) {
           // [200, 300, 400] etc.
           $value = (int) $value;
@@ -303,56 +173,141 @@ class ImageSet {
           unset($sizes[1]);
         }
         
-        $subSizes = static::parseSizesParameter($sizes[0]);
+        $subSizes = static::parseSizesDescriptor($sizes[0]);
         unset($sizes[0]);
 
         foreach($subSizes as $size) {
           $values[] = array_merge($sizes, $size);
         }
-
-
-
-        // static::parseSizesParameter($sizes[0])
-        // foreach($subsizes as $size) {
-        // $value = [];
-
-        // if(isset($sizes[1]) && is_object($sizes[1])) {
-        //   $value['image'] = $sizes[1];
-        //   unset($sizes[1]);
-        // }
-
-        // //$value['width'] = static::parseSizesParameter($sizes[0]);
-
-        // unset($sizes[0]);
-
-        // $values[] = array_merge($sizes, $value);
       }
 
     } else if(isset($sizes[0])) {
       throw new Exception('Unrecognized sizes parameter.');
     }
 
-    return $values; // (sizeof($values) === 1 ? $values[0] : $values);
-
+    return $values;
   }
 
-  public function tag() {
-    $html = [];
 
-      // var_dump($this->sources);
-      // exit;
+  public function image() {
+    return $this->image;
+  }
 
-    foreach($this->sources as $source) {
-      $html[] = $source->tag();
+  /**
+   *  Returns the dominant color of the imageset’s source
+   *  image. As this calculation is very expensive, the color
+   *  is always cached in a file.
+   *
+   *  @return string An HTML hes representation of the color (e.g. #cccccc)
+   */
+  public function color() {
+
+    if(!$this->color) {
+      $image     = $this->image();
+      $cacheFile = utils::thumbDestinationDir($image);
+      $cacheFile = $this->kirby->roots()->thumbs() . DS . str_replace('/', DS, $cacheFile) . DS . $image->filename() . '-color.cache';
+
+      if(!f::exists($cacheFile) || (f::modified($cacheFile) < $image->modified())) {
+        $this->color = ColorThief::getColor($this->image()->root(), max(20, round($image->width() / 50)));
+        $this->color = utils::rgb2hex($this->color);
+        f::write($cacheFile, $this->color); 
+      } else {
+        $this->color = f::read($cacheFile);
+      }
     }
 
-    return implode("\n", $html);
+    return $this->color;
   }
 
+  /**
+   * Returns the HTML representation of this Imageset
+   *
+   * @return string
+   */
+  public function html() {
+
+    $sources = [];
+    $image   = null;    
+
+    // $sourcesCount = sizeof($this->sources);
+    // for($i = 0; $i < $sourcesCount; $i++) {
+    //   $source = $this->sources[$i];
+
+    //   if($i < $sourcesCount - 1) {
+    //     $sources[] = $source;
+    //   } else {
+    //     if(!empty($source->media())) {
+    //       throw new Exception('The last image size that is specified must not have a media attribute, because it‘s treated as fallback.');          
+    //     }
+        
+    //     $image = $source;
+    //   }
+    // }
+
+    $data = [
+      'imageset' => $this,
+      'sources'  => $this->sources,
+    ];
+
+    return $this->kirby->component('snippet')->render('imageset', $data, true);
+  }
+
+  /**
+   * Returns the HTML representation of this Imageset
+   *
+   * @return string
+   */
   public function __toString() {
-    //var_dump($this->srcset());
-    return $this->tag();
-    //return $this->html();
+    return $this->html();
+  }
+
+  public function hasMultipleRatios() {
+    $ratios = [];
+    foreach($this->sources as $source) {
+      $ratios[] = (string) utils::formatFloat($source->ratio(), 8);
+    }
+
+    return (sizeof(array_unique($ratios)) !== 1);
+  }
+
+
+
+  public function alt() {
+    return $this->option('alt');
+  }
+
+
+  public function placeholder() {
+    if(!$this->option('placeholder') && !$this->option('ratio')) {
+      return null;
+    }
+
+    if(is_null($this->placeholder)) {
+      $this->placeholder = Placeholder::create($this->image, ['style' => $this->option('placeholder'), 'class' => $this->className('__placeholder')], $this->kirby);
+    }
+
+    return $this->placeholder;
+  }
+
+  public function outputStyle($value = null) {
+    if(!is_null($value)) {
+      // setter 
+      return $this->option('output.style', $value);
+    } else {
+      $style = $this->option('output.style');
+
+      if($style !== 'auto') {
+        // forced style
+        return $style;
+      }
+
+      // calculate output style
+      if(sizeof($this->sources) > 1) {
+        return 'picture';
+      } else {
+        return 'img';
+      }
+    }
   }
 
   public function __debugInfo() {
@@ -361,109 +316,4 @@ class ImageSet {
       'sources' => $this->sources,
     ];
   }
-
-
-  // public function add($sizes) {
-  //   if(utils::isArrayAssoc($sizes)) {
-  //     // add a single size
-  //     $this->addSize($sizes);
-  //   } else if(is_array($sizes)) {
-  //     // add multiple sizes
-  //     foreach($sizes as $size) {
-  //       $this->addSize($size);
-  //     }
-  //   } else {
-  //     throw new Exception('Parameter $sizes must be an array.');
-  //   }
-  // }
-
-
-  /*
-    
-  $image->imageset([200, 400, 600])
-
-  [
-    [ 'width' => 200 ],
-    [ 'width' => 400 ],
-    [ 'width' => 600 ],
-  ]
-
-  $image->imageset([
-    [ 'width' => '600', 'density' => [1], media' => '…' ],
-    [ 'width' => '400', 'media' => '…' ],
-    [ 'width' => '200' ],
-  ], [
-    [ 'density' => [1, 2] ],
-  ]);
-  
-  [
-    ['width' => 600, 'densitiy' => [1], 'media' => '' ],
-    ['width' => 400, 'densitiy' => [1, 2], 'media' => '' ],
-    ['width' => 200, 'densitiy' => [1, 2] ],
-  ]
-
-
-  $image->imageset([
-    [ 'width' => [200,400,600], 'media' => '…' ],
-    [ 'width' => [350,500] ],
-  ]);
-
-  */
-
-  // public function normalizeSources($sources) {
-  //   if(is_array($sources)) {
-      
-  //     if(sizeof($sources) > 0 && !utils::isArrayAssoc($sources)) {
-  //       // Sources parameter was a numeric array of one or multiple sizes
-  //       foreach($sources as $i => $source) {
-  //         if(!utils::isArrayAssoc($source) || !isset($source['width'])) {
-  //           throw new Exception('When providing multiple sources, every source must be an associative array with a width parameter.');
-  //         }
-          
-  //         $sources[$i] = $this->normalizeSources($source);
-  //       }
-  //     }
-
-  //   } else if(is_string($sources)) {
-      
-  //     if(preg_match('/^(\d+)\s*(?:,\s*(\d+))*$/', $sources)) {
-  //        // "200" or "200,400,600"
-        
-  //       $widths  = array_map('intval', explode(',', $sources));
-  //       $sources = [];
-
-  //       foreach($widths as $width) {
-  //         $sources[] = [ 'width' => $width ];
-  //       }
-  //     } else if(preg_match('/^(\d+)-(\d+)(?:,(\d+))?$/', $sources, $matches)) {
-  //       // 200-600 or 200-600,3
-        
-  //       $min = (int) $matches[1];
-  //       $max = (int) $matches[2];
-  //       $intermediate = (isset($matches[3]) && (int) $matches[3] > 0) ? (int) $matches[3] : 2;
-        
-  //       if($min >= $max) {
-  //         throw new Exception('Min size must be smaller than max size.');
-  //       }
-
-  //       $step = ($max - $min) / ($intermediate + 1);
-  //       $sources   = [];
-  //       for($i = 0; $i < $intermediate + 2; $i++) {
-  //         $sources[] = [ 'width' => round($min + ($i * $step)) ];
-  //       }
-
-  //       var_dump($sources);
-  //       exit;
-
-  //     } else {
-  //       throw new Exception('Unrecognized sizes string form imageset.');
-  //     }
-
-  //   } else if(is_int($sources)) {
-  //     $sources = [ [ 'width' => $sources ] ];
-  //   }
-
-  //   return $sources;
-  ////return print_r($this->sizes, true);
-  // }
 }

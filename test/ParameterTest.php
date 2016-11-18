@@ -18,64 +18,119 @@ class ParameterTest extends ImageSetTestCase {
 
   // Number as String
   public function testSingleStringValue() {
-    $this->assertEquals(200, ImageSet::parseSizesParameter('200'));
+    $this->assertEquals([
+      ['width' => 200]
+    ], ImageSet::parseSizesDescriptor('200'));
   }
 
   // Number as Integer
   public function testSingleIntegerValue() {
-    $this->assertEquals(200, ImageSet::parseSizesParameter('200'));
+    $this->assertEquals([
+      ['width' => 200]
+    ], ImageSet::parseSizesDescriptor(200));
   }
 
   // Multiple Sizes as String
   public function testMultipleSizesAsString() {
-    $this->assertEquals([200, 400, 600], ImageSet::parseSizesParameter('200,400,600'));
+    $this->assertEquals([
+      ['width' => 200],
+      ['width' => 400],
+      ['width' => 600],
+    ], ImageSet::parseSizesDescriptor('200,400,600'));
+  }
+
+  // Mutliple Sizes as String wrapped in array
+  public function testMultipleSizesAsStringWrappedInArray() {
+    $this->assertEquals([
+      ['width' => 200],
+      ['width' => 400],
+      ['width' => 600],
+    ], ImageSet::parseSizesDescriptor(['200,400,600']));
   }
 
   // [200, 400, 600]
   public function testSimpleArray() {
-    $this->assertEquals([200, 400, 600], ImageSet::parseSizesParameter([200, 400, 600]));
+    $this->assertEquals([
+      ['width' => 200],
+      ['width' => 400],
+      ['width' => 600],
+    ], ImageSet::parseSizesDescriptor([200, 400, 600]));
   }
 
   // [0, 400, 600]
   public function testSimpleArrayWithZeroValue() {
     $this->expectException('Exception');
-    ImageSet::parseSizesParameter([0, 400, 600]);
+    ImageSet::parseSizesDescriptor([0, 400, 600]);
   }
 
   // '200-600'
   public function testRange() {
-    $this->assertEquals([200, 334, 467, 600], ImageSet::parseSizesParameter('200-600'));
+    $this->assertEquals([
+      ['width' => 200],
+      ['width' => 334],
+      ['width' => 467],
+      ['width' => 600],
+    ], ImageSet::parseSizesDescriptor('200-600'));
   }
 
   // '0-600'
   public function testRangeWithZeroValue() {
     $this->expectException('Exception');
-    ImageSet::parseSizesParameter('0-600');
+    ImageSet::parseSizesDescriptor('0-600');
   }
   
   // Different amount of intermediate sizes
   public function testRangeWithIntermediateSizes() {
-    $this->assertEquals([200, 300, 400, 500, 600],           ImageSet::parseSizesParameter('200-600,3'));
-    $this->assertEquals([200, 280, 360, 440, 520, 600],      ImageSet::parseSizesParameter('200-600,4'));
-    $this->assertEquals([200, 267, 334, 400, 467, 534, 600], ImageSet::parseSizesParameter('200-600,5'));
+    $this->assertEquals([
+      ['width' => 200],
+      ['width' => 300],
+      ['width' => 400],
+      ['width' => 500],
+      ['width' => 600],
+    ], ImageSet::parseSizesDescriptor('200-600,3'));
+    
+
+    $this->assertEquals([
+      ['width' => 200],
+      ['width' => 280],
+      ['width' => 360],
+      ['width' => 440],
+      ['width' => 520],
+      ['width' => 600],
+    ], ImageSet::parseSizesDescriptor('200-600,4'));
+    
+
+    $this->assertEquals([
+      ['width' => 200],
+      ['width' => 267],
+      ['width' => 334],
+      ['width' => 400],
+      ['width' => 467],
+      ['width' => 534],
+      ['width' => 600],
+    ], ImageSet::parseSizesDescriptor('200-600,5'));
   }
 
   // Zero Intermediate Sizes
+  public function testRangeWithZeroValueSizes() {
+    $this->expectException('Exception');
+    ImageSet::parseSizesDescriptor('0-600');
+  }
+
   public function testRangeWithZeroIntermediateSizes() {
     $this->expectException('Exception');
-    ImageSet::parseSizesParameter('0-600');
+    ImageSet::parseSizesDescriptor('0-600, 0');
   }
 
   public function testSingleCropValue() {
-    $this->assertEquals(
-      [ 'width' => 400, 'height' => 300, 'crop' => true],
-      ImageSet::parseSizesParameter('400x300')
-    );
+    $this->assertEquals([
+      ['width' => 400, 'height' => 300, 'crop' => true],
+    ], ImageSet::parseSizesDescriptor('400x300'));
   }
 
   public function testSingleCropValueWithZero() {
     $this->expectException('Exception');
-    ImageSet::parseSizesParameter('400x0');
+    ImageSet::parseSizesDescriptor('400x0');
   }
 
   public function testMultipleCropValues() {
@@ -84,7 +139,7 @@ class ParameterTest extends ImageSetTestCase {
         [ 'width' => 400, 'height' => 300, 'crop' => true],
         [ 'width' => 600, 'height' => 200, 'crop' => true],
       ],
-      ImageSet::parseSizesParameter('400x300,600x200')
+      ImageSet::parseSizesDescriptor('400x300,600x200')
     );
   }
 
@@ -96,7 +151,7 @@ class ParameterTest extends ImageSetTestCase {
 
   // public function testSimpleArrayFloatValue() {
   //   $this->expectException('Exception');
-  //   ImageSet::parseSizesParameter([200, 400.5, 600]);
+  //   ImageSet::parseSizesDescriptor([200, 400.5, 600]);
   // }
   
 }
