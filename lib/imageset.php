@@ -2,7 +2,7 @@
 /**
  * ImageSet - reponsive, lazyloading images for Kirby CMS
  * 
- * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @copyright (c) 2016 Fabian Michael <https://fabianmichael.de>
  * @link https://github.com/fabianmichael/kirby-imageset
  */
 
@@ -93,6 +93,11 @@ class ImageSet extends SourceSet {
   public function setupSources($sizes) {
 
     $sources = [];
+
+    if(is_string($sizes) && presets::exists($sizes)) {
+      // Load preset if set
+      $sizes = presets::get($sizes);
+    }
 
     if(!is_array($sizes) || utils::isArrayAssoc($sizes)) {
        // Single size given, wrap in array

@@ -2,7 +2,7 @@
 /**
  * ImageSet - reponsive, lazyloading images for Kirby CMS
  * 
- * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @copyright (c) 2016 Fabian Michael <https://fabianmichael.de>
  * @link https://github.com/fabianmichael/kirby-imageset
  */
 
@@ -37,7 +37,7 @@ require_once __DIR__ . DS . 'helpers.php';
 
 // Load presets from config.
 if($presets = $kirby->option('imageset.presets')) {
-  presets::set($presets);
+  presets::init($presets);  
 }
 
 // Register Snippet for ImageSet output. Can be overriden by
