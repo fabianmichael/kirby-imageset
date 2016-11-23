@@ -142,16 +142,5 @@ class ParameterTest extends ImageSetTestCase {
       ImageSet::parseSizesDescriptor('400x300,600x200')
     );
   }
-
-  // 
-
-  // public function
-
-  //public function 
-
-  // public function testSimpleArrayFloatValue() {
-  //   $this->expectException('Exception');
-  //   ImageSet::parseSizesDescriptor([200, 400.5, 600]);
-  // }
-  
+ 
 }

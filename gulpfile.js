@@ -1,14 +1,15 @@
 /*jshint expr:true, -W083, esversion: 6, unused: false */
-const gulp    = require("gulp");
-const rename  = require("gulp-rename");
-const csso    = require("gulp-csso");
-const uglify  = require("gulp-uglify");
-const sass    = require("gulp-sass");
-const toc     = require("gulp-doctoc");
-const postcss = require("gulp-postcss");
-const include = require("gulp-include");
-const assets  = require("postcss-assets");
-const cached  = require('gulp-cached');
+const gulp         = require("gulp");
+const rename       = require("gulp-rename");
+const csso         = require("gulp-csso");
+const uglify       = require("gulp-uglify");
+const sass         = require("gulp-sass");
+const toc          = require("gulp-doctoc");
+const postcss      = require("gulp-postcss");
+const include      = require("gulp-include");
+const assets       = require("postcss-assets");
+const cached       = require('gulp-cached');
+const autoprefixer = require('gulp-autoprefixer');
 
 gulp.task("styles", function () {
   return gulp.src([ "assets/scss/*.scss" ])
@@ -19,6 +20,9 @@ gulp.task("styles", function () {
     .pipe(postcss([
       assets({ loadPaths: ['assets/images/'] }),
     ]))
+    .pipe(autoprefixer({
+        browsers: ['last 2 versions'],
+    }))
     .pipe(gulp.dest("assets/css"))
     .pipe(csso())
     .pipe(rename({ suffix: ".min" }))

@@ -1,4 +1,10 @@
 <?php
+/**
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * 
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ */
 
 namespace Kirby\Plugins\ImageSet\Placeholder;
 
@@ -30,11 +36,13 @@ class Mosaic extends Base {
   }
 
   public function html() {
-    return html::img($this->thumb->dataUri(), [
+    $attr = [
       'class' => $this->option('class'),
       'alt'   => ' ', // one space generates creates empty alt attribute 
       'role'  => 'presentation',
-    ]);
+    ];
+
+    return html::img($this->thumb->dataUri(), $attr);
   }
  
   // http://php.net/manual/de/function.imagetruecolortopalette.php#44803

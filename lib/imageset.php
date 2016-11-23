@@ -1,4 +1,10 @@
 <?php
+/**
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * 
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ */
 
 namespace Kirby\Plugins\ImageSet;
 
@@ -11,37 +17,68 @@ use Str;
 use Kirby\Plugins\ImageSet\Placeholder\Base as Placeholder;
 use ColorThief\ColorThief;
 
+
+/**
+ * The main class of ImageSet, holding an array of
+ * SourceSets, comparable to to HTML5 picture element. ALso
+ * defines how an ImageSet should behave in terms of
+ * lazyloading, output style and placeholder.
+ */
 class ImageSet extends SourceSet {
 
-  use Traits\Template;
-
+  /**
+   * @var array An associative array holding the default
+   *            options ImageSets.
+   */
   public static $defaults = [
+    // The CSS namespace, should not be changed without
+    // further adjustments to the JavaScript and CSS
+    // configuration.
     'css.namespace'       => 'imageset',
 
+    // User-defined class, added to the imageset.
     'class'               => '',
-    'fallback.noscript'   => true,
+
+    // Should the resulting code contain a fallback
+    // for devices with disabled JavaScript/No JavaScript
+    // support?
+    'noscript'            => true,
+
+    // Include an intrinsic ratio to avoid reflows upon
+    // images are loaded.
     'ratio'               => true,
+
+    // Style of the placeholder image.
     'placeholder'         => 'mosaic',
     
+    // Lazyload imageset?
     'lazyload'            => true,
     'lazyload.attr'       => 'data-{attr}',
 
-    'output.style'        => 'auto',
+    // Output style
+    'output'              => 'auto',
+    
+    // Alternative text
     'alt'                 => '',
-    'prettyprint'         => true,
-    'noscript'            => true,
   ];
 
-  public static $instanceCount = 64161;
-  public $id                   = 0;
+  protected static $instanceCount = 0;
+  protected $id                   = 0;
 
   protected $placeholder;
   protected $color;
-
+  protected $cssRules;
+  protected $hash;
+  
   /**
+   * Creates a new ImageSet.
    * 
+   * @param Media|File $image
+   * @param string|array|int $sizes;
+   * @param array $options
+   * @param Kirby $paramname
    */
-  public function __construct($image = null, $sizes = 'default', $options = [], $kirby = null) {
+  public function __construct(Media $image = null, $sizes = 'default', $options = [], Kirby $kirby = null) {
     parent::__construct($image, array_merge(static::$defaults, is_array($options) ? $options : []));
     $this->sources = $this->setupSources($sizes);
     $this->id      = ++static::$instanceCount;
@@ -59,7 +96,7 @@ class ImageSet extends SourceSet {
 
     if(!is_array($sizes) || utils::isArrayAssoc($sizes)) {
        // Single size given, wrap in array
-       $sizes = [ $sizes ];
+       $sizes = [$sizes];
     }
 
     foreach($sizes as $size) {
@@ -72,13 +109,22 @@ class ImageSet extends SourceSet {
       $sourceSet = new SourceSet($this->image, array_intersect_key($subSizes[0], SourceSet::$defaults), $this->kirby);
       
       foreach($subSizes as $subSize) {
-        $sourceSet[] = new Source($this->image, $subSize, $this->kirby);
+        $sourceSet->push(new Source($this->image, $subSize, $this->kirby));
       }
 
       $sources[] = $sourceSet;
     }
 
     return $sources;
+  }
+
+  /**
+   * @return int The id of the imageset, where id is
+   *             increased by 1 for each instance of
+   *             this class created.
+   */
+  public function id() {
+    return $this->id;
   }
 
   /**
@@ -188,16 +234,47 @@ class ImageSet extends SourceSet {
     return $values;
   }
 
+  /**
+   * Generates and returns a hash based on the page of
+   * imageset’s main image, image filename and instance id.
+   * 
+   * @return string A hash string that can be used as a
+   *                unique identifier for this imageset 
+   *                for targeting it with CSS rules.
+   */
+  public function hash() {
+    if(is_null($this->hash)) {
 
+      $image = $this->image();
+      $hash  = [];
+
+      if(is_a($image, 'File')) {
+        $hash[] = $image->page->hash();
+      }
+      
+      $hash[] = base_convert(sprintf('%u', crc32($image->root())) + $this->id(), 10, 36);
+
+      $this->hash = implode('', $hash);
+    }
+
+    return $this->hash;
+  }
+
+
+  /**
+   * Returns the main image of this ImageSet
+   * 
+   * @return File|Media
+   */
   public function image() {
     return $this->image;
   }
 
   /**
    *  Returns the dominant color of the imageset’s source
-   *  image. As this calculation is very expensive, the color
-   *  is always cached in a file.
-   *
+   *  image. As this calculation is very expensive, the
+   *  resulting color is always cached in a file.
+   * 
    *  @return string An HTML hes representation of the color (e.g. #cccccc)
    */
   public function color() {
@@ -219,34 +296,123 @@ class ImageSet extends SourceSet {
     return $this->color;
   }
 
+
+  /**
+   * Returns the full classname for a partial of this
+   * imageset, with CSS namespace prepended.
+   * 
+   * @param  string The class name that should be prefixed.
+   * @return string Namespaced CSS class name.
+   */
+  public function className($className = '') {
+    return $this->option('css.namespace') . $className;
+  }
+
+  /**
+   * Returns the unique classname of this imageset, can
+   * be used for targeting it with CSS rules.
+   * 
+   * @return string Unique CSS class name of this imageset.
+   */
+  public function uniqueClassName() {
+    return $this->className('--' . $this->hash());
+  }
+
+  /**
+   * Returns the wrapper class.
+   * 
+   * @return string
+   */
+  public function wrapperClass() {
+    $className = [];
+
+    $className[] = $this->className();
+
+    if($this->hasMultipleRatios()) {
+      $className[] = $this->uniqueClassName();
+    }
+
+    if($this->option('ratio')) {
+      $className[] = $this->className('--ratio');
+    }
+
+    if($this->option('lazyload')) {
+      $className[] = $this->className('--lazyload');
+    }
+
+    if($placeholder = $this->option('placeholder')) {
+      $className[] = $this->className('--placeholder--' . $placeholder);
+    }
+
+    if($cls = $this->option('class')) {
+      $className[] = '/';
+      $className[] = $cls;
+    }
+
+    return implode(' ', $className);
+  }
+
+  /**
+   * Returns the class name of this ImageSet’s main `<img>` tag.
+   */
+  public function elementClass() {
+    $className = [];
+
+    $className[] = $this->className('__element');
+
+    if($this->option('lazyload')) {
+      $className[] = '/';
+      $className[] = 'lazyload';
+    }
+
+    return implode(' ', $className);
+  }
+
+  /**
+   * Returns CSS rules, if ImageSet has multiple ratios and
+   * ratio placeholders enabled.
+   * 
+   * @return string A multip
+   */
+  public function cssRules() {
+    
+    if(is_null($this->cssRules)) {
+      if(!$this->option('ratio') || sizeof($this->sources) === 1 || !$this->hasMultipleRatios()) {
+        $this->cssRules = '';
+        return $this->cssRules;
+      }
+
+      $rules = [];
+
+      foreach(array_reverse($this->sources) as $source) {
+        $rule = ".{$this->uniqueClassName()} .{$this->className('__ratio-fill')}{padding-top:" . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%;}";
+        if($media = $source->media()) {
+          $rule = '@media ' . $media . '{' . $rule . '}';
+        }
+        $rules[] = $rule;
+      }
+      $this->cssRules = implode('', $rules);
+    }
+
+    return $this->cssRules;
+  }
+
+  public function hasCssRules() {
+    return !empty($this->cssRules());
+  }
+
   /**
    * Returns the HTML representation of this Imageset
    *
-   * @return string
+   * @return string The HTML represenation of this ImageSet.
    */
   public function html() {
 
     $sources = [];
     $image   = null;    
 
-    // $sourcesCount = sizeof($this->sources);
-    // for($i = 0; $i < $sourcesCount; $i++) {
-    //   $source = $this->sources[$i];
-
-    //   if($i < $sourcesCount - 1) {
-    //     $sources[] = $source;
-    //   } else {
-    //     if(!empty($source->media())) {
-    //       throw new Exception('The last image size that is specified must not have a media attribute, because it‘s treated as fallback.');          
-    //     }
-        
-    //     $image = $source;
-    //   }
-    // }
-
     $data = [
       'imageset' => $this,
-      'sources'  => $this->sources,
     ];
 
     return $this->kirby->component('snippet')->render('imageset', $data, true);
@@ -255,12 +421,16 @@ class ImageSet extends SourceSet {
   /**
    * Returns the HTML representation of this Imageset
    *
-   * @return string
+   * @return string The HTML represenation of this ImageSet.
    */
   public function __toString() {
     return $this->html();
   }
 
+  /**
+   * @return bool Returns `true`, if this imageset has
+   *              multiple aspect ratios, otherwise `false`.
+   */
   public function hasMultipleRatios() {
     $ratios = [];
     foreach($this->sources as $source) {
@@ -270,45 +440,62 @@ class ImageSet extends SourceSet {
     return (sizeof(array_unique($ratios)) !== 1);
   }
 
-
-
+  /**
+   * @return string Alternative text of this ImageSet
+   */
   public function alt() {
     return $this->option('alt');
   }
 
+  public function styleIdentifierAttribute() {
+    if($this->kirby->option('imageset.styles.consolidate')) {
+      return ' data-imagekit-styles';
+    } else {
+      return '';
+    }
+  }
 
+  /**
+   * @return Kirby\Plugins\ImageSet\Placeholder\Base Returns the placeholder, if activated in options.
+   */
   public function placeholder() {
     if(!$this->option('placeholder') && !$this->option('ratio')) {
       return null;
     }
 
     if(is_null($this->placeholder)) {
-      $this->placeholder = Placeholder::create($this->image, ['style' => $this->option('placeholder'), 'class' => $this->className('__placeholder')], $this->kirby);
+      
+      $settings = [
+        'style' => $this->option('placeholder'),
+        'class' => $this->className('__placeholder')
+      ];
+
+      $this->placeholder = Placeholder::create($this->image, $settings, $this->kirby);
     }
 
     return $this->placeholder;
   }
 
-  public function outputStyle($value = null) {
-    if(!is_null($value)) {
-      // setter 
-      return $this->option('output.style', $value);
+  /**
+   * @return string Either 'picture', 'img' or 'plain'
+   */
+  public function outputStyle() {
+    $style = $this->option('output');
+
+    if($style !== 'auto') {
+      // forced style
+      return $style;
+    }
+
+    // calculate output style
+    if(sizeof($this->sources) > 1) {
+      return 'picture';
     } else {
-      $style = $this->option('output.style');
-
-      if($style !== 'auto') {
-        // forced style
-        return $style;
-      }
-
-      // calculate output style
-      if(sizeof($this->sources) > 1) {
-        return 'picture';
-      } else {
-        return 'img';
-      }
+      return 'img';
     }
   }
+
+  // =====  Debugging Helper  =============================================== //
 
   public function __debugInfo() {
     return [

@@ -1,6 +1,15 @@
 <?php
+/**
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * 
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ */
 
-class Presets {
+namespace Kirby\Plugins\ImageSet;
+
+
+class Preset {
 
   protected static $presets = [];
 

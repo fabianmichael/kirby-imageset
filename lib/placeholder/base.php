@@ -1,9 +1,16 @@
 <?php
+/**
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * 
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ */
 
 namespace Kirby\Plugins\ImageSet\Placeholder;
 
 use Exception;
 use F;
+use Focus; // Focus plugin
 use Html;
 use Media;
 use Obj;
@@ -18,11 +25,16 @@ class Base {
   public $options;
   public $style;
 
+  protected $focus;
+
   public static $styles = [];
   
   public static $defaults = [
     'style'        => null,
     'class'        => 'placeholder',
+
+    // Support for focus plugin
+    'focus'        => null,
   ];
 
   protected $extension;
@@ -60,7 +72,7 @@ class Base {
       return $this;
     } else {
       // getter
-      if(isset($this->options[$name])) {
+      if(array_key_exists($name, $this->options)) {
         return $this->options[$name];
       } else {
         throw new Exception('Trying to access undefined option "' . $name . '" on ' . get_called_class() . '.');

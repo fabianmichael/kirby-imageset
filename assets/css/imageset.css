@@ -1,10 +1,9 @@
 @charset "UTF-8";
 /*!
- * ImageSet for Kirby CMS — A Responsive Image Component
- *
- * Copyright (c) 2016 Fabian Michael
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
  * 
- * URL: https://github.com/fabianmichael/kirby-imageset
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
  */
 .imageset {
   /* A default imageset does not have too many parameters 
@@ -46,12 +45,13 @@
 
 .imageset__ratio-fill {
   display: block;
+  overflow: hidden;
+  position: relative;
+  z-index: -1;
   /* Setting the width of the placeholder element and
        adding `overflow: hidden` prevents rendering bugs
        in IE 11. */
   width: 100%;
-  overflow: hidden;
-  z-index: -1;
 }
 
 .js .imageset--ratio.imageset--lazyload .imageset__element {
@@ -75,19 +75,22 @@
   height: 100%;
   max-width: none !important;
   overflow: hidden;
-  object-fit: cover;
   contain: strict;
+  object-fit: cover;
+  object-position: 0 0;
 }
 
 .js .imageset--lazyload .imageset__placeholder {
   /* Placeholder will be placed on top of the actual
        image element. This will only be applied, when
        JavaScript is enabled. */
-  /* A nice addition here would be:
-     * `will-change: opacity;`, but it causes
-     * subpixel-rendering issues in Safari 10 :-(
-     */
+  /* Visibility of placeholder is changed to hidden after
+       the transition. */
   transition: opacity 0.5s 0.05s, visibility 0s 0.8s;
+  /* The actual placeholder is in front of the actual
+       image, so we don’t have to fade in the image, which
+       would lead to artifacts in WebKit- and Blink-based
+       browsers. */
   z-index: 2;
   /* Prevent user interaction like accidently saving the
        placeholder via tap/right-click */
@@ -101,22 +104,9 @@
 
 .imageset--placeholder--mosaic .imageset__placeholder {
   /* Mosaic placeholders should render crisp */
-  image-rendering: optimizeSpeed;
-  /* Legal fallback */
-  image-rendering: -moz-crisp-edges;
-  /* Firefox        */
-  image-rendering: -o-crisp-edges;
-  /* Opera          */
-  image-rendering: -webkit-optimize-contrast;
-  /* Safari         */
-  image-rendering: optimize-contrast;
-  /* CSS3 Proposed  */
-  image-rendering: crisp-edges;
-  /* CSS4 Proposed  */
-  image-rendering: pixelated;
-  /* CSS4 Proposed  */
   -ms-interpolation-mode: nearest-neighbor;
-  /* IE8+           */
+      image-rendering: -moz-crisp-edges;
+      image-rendering: pixelated;
 }
 
 .js .imageset--loaded .imageset__placeholder {

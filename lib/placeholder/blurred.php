@@ -1,4 +1,10 @@
 <?php
+/**
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * 
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ */
 
 namespace Kirby\Plugins\ImageSet\Placeholder;
 
@@ -48,14 +54,5 @@ class Blurred extends Base {
     ];
 
     return implode('', $html);
-
-    // return html::img($this->thumb->dataUri(), [
-    //   'class' => $this->option('class'),
-    // ]);
-
-    // return html::tag('span', $img, [
-    //   'class' => $this->option('class'),
-    //   'style' => 'background-color: ' . $color . ';',
-    // ]);
   }
 }

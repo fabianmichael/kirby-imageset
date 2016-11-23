@@ -1,8 +1,15 @@
 <?php
+/**
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * 
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ */
 
 namespace Kirby\Plugins\ImageSet;
 
 use Exception;
+
 
 class Source {
   

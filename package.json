@@ -1,6 +1,6 @@
 {
   "name": "imageset",
-  "description": "A flexible, responsive image component for Kirby.",
+  "description": "ImageSet - reponsive, lazyloading images for Kirby CMS.",
   "author": "Fabian Michael <hallo@fabianmichael.de>",
   "license": "SEE LICENSE IN license.md",
   "version": "1.0.0-beta1",
@@ -26,6 +26,7 @@
     "respimage": "^1.4.2"
   },
   "devDependencies": {
-    "gulp-cached": "^1.1.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-cached": "^1.1.1"
   }
 }

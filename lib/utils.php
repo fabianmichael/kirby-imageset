@@ -1,4 +1,10 @@
 <?php
+/**
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * 
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ */
 
 namespace Kirby\Plugins\ImageSet;
 
@@ -75,8 +81,7 @@ class Utils {
 
     return $cache[$media->root()];
   }
-
-
+  
   public static function imagekitAvailable() {
     return function_exists('imagekit');
   }

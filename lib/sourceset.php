@@ -1,13 +1,20 @@
 <?php
+/**
+ * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * 
+ * @copyright (c)2016 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ */
 
 namespace Kirby\Plugins\ImageSet;
 
+use A;
 use ArrayAccess;
 use Exception;
 use Html;
 
 
-class SourceSet implements ArrayAccess {
+class SourceSet {
 
   public $image;
   public $sources = [];
@@ -15,7 +22,7 @@ class SourceSet implements ArrayAccess {
 
   public static $defaults  = [
     'media'      => '',
-    'sizes'      => '',   
+    'sizes'      => '100vw',   
     'descriptor' => 'width',
     'lazyload'   => true,
   ];
@@ -26,47 +33,36 @@ class SourceSet implements ArrayAccess {
     $this->kirby   = $kirby ?: kirby();
   }
 
-  public function option($name, $value = null) {
-    if(!is_null($value)) {
-      // setter
-      $this->options[$name] = $value;
-      return $this;
-    } else {
-      // getter
-      if(isset($this->options[$name])) {
-        return $this->options[$name];
-      } else {
-        throw new Exception('Trying to access undefined option "' . $name . '" on SourceSet.');
-      }
-    }
+  public function push($source) {
+    $this->sources[] = $source;
+  }
+
+  public function option($key, $default = null) {
+    return a::get($this->options, $key, $default);
   }
 
   public function ratio() {
     return $this->sources[0]->ratio();
   }
 
-  
+  public function sources() {
+    return $this->sources;
+  }
 
   public function descriptor() {
-    return 'width'; // $this->options['descriptor'];
+    return 'width';
   }
   
-  public function media($media = null) {
-    return $this->option('media', $media);
-  }
-
-  public function sizes($sizes = null) {
-    if(!is_null($sizes)) {
-      return $this->option('sizes', $sizes);
-    }
-    $sizes = $this->option('sizes');
-    if(empty($sizes)) {
-      return '100vw';
-    }
+  public function media() {
+    return $this->option('media');
   }
 
   public function density() {
     return 1;
+  }
+
+  public function sizes() {
+    return $this->option('sizes');
   }
 
   public function src() {
@@ -99,9 +95,6 @@ class SourceSet implements ArrayAccess {
   public function tag($tagName = 'source', $attributes = []) {
     $attr = [];
 
-    //$attr['src'] = Utils::blankInlineImage();
-    //print_r($this->option('lazyload'));
-
     if($this->option('lazyload')) {
       $attr['srcset']      = Utils::blankInlineImage() . ' 1w';
       $attr['data-srcset'] = $this->srcset();
@@ -126,27 +119,7 @@ class SourceSet implements ArrayAccess {
     return $this->tag();
   }
 
-  /* ArrayAccess */
-  public function offsetSet($offset, $value) {
-    if(is_null($offset)) {
-      $this->sources[] = $value;
-    } else {
-      $this->sources[$offset] = $value;
-    }
-  }
-
-  public function offsetExists($offset) {
-    return isset($this->sources[$offset]);
-  }
-
-  public function offsetUnset($offset) {
-    unset($this->sources[$offset]);
-  }
-
-  public function offsetGet($offset) {
-    return isset($this->sources[$offset]) ? $this->sources[$offset] : null;
-  }
-
+  // =====  Debugging Helper  =============================================== //
 
   public function __debugInfo() {
     return [
