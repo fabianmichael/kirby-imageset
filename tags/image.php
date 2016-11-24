@@ -6,9 +6,13 @@
  * @link https://github.com/fabianmichael/kirby-imageset
  */
 
-// image tag
-kirbytext::$tags['image'] = array(
-  'attr' => array(
+use Kirby\Plugins\ImageSet\ImageSet;
+
+
+$kirby = kirby();
+
+kirbytext::$tags['image'] = [
+  'attr' => [
     'width',
     'height',
     'alt',
@@ -21,9 +25,11 @@ kirbytext::$tags['image'] = array(
     'link',
     'target',
     'popup',
-    'rel'
-  ),
-  'html' => function($tag) {
+    'rel',
+    'site',
+  ],
+
+  'html' => function($tag) use ($kirby) {
 
     $url     = $tag->attr('image');
     $alt     = $tag->attr('alt');
@@ -31,6 +37,7 @@ kirbytext::$tags['image'] = array(
     $link    = $tag->attr('link');
     $caption = $tag->attr('caption');
     $file    = $tag->file($url);
+    $size    = $tag->attr('size', $kirby->option('imageset.kirbytext.image.sizes.default'));
 
     // use the file url if available and otherwise the given url
     $url = $file ? $file->url() : url($url);
@@ -80,14 +87,18 @@ kirbytext::$tags['image'] = array(
     };
 
     // image builder
-    $_image = function($class) use($tag, $url, $alt, $title) {
-      return html::img($url, array(
-        'width'  => $tag->attr('width'),
-        'height' => $tag->attr('height'),
-        'class'  => $class,
-        'title'  => $title,
-        'alt'    => $alt
-      ));
+    $_image = function($class) use($file, $tag, $url, $alt, $title, $size) {
+      if($file && !empty($size)) {
+        return imageset($file, $size);
+      } else {
+        return html::img($url, array(
+          'width'  => $tag->attr('width'),
+          'height' => $tag->attr('height'),
+          'class'  => $class,
+          'title'  => $title,
+          'alt'    => $alt
+        ));
+      }
     };
 
     if(kirby()->option('kirbytext.image.figure') or !empty($caption)) {
@@ -105,4 +116,4 @@ kirbytext::$tags['image'] = array(
     }
 
   }
-);
+];

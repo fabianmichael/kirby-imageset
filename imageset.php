@@ -40,6 +40,14 @@ if($presets = $kirby->option('imageset.presets')) {
   presets::init($presets);  
 }
 
+// Load defaults
+foreach(ImageSet::$defaults as $key => $val) {
+  $option = $kirby->option("imageset.$key");
+  if(!is_null($option) && $val !== $option) {
+    ImageSet::$defaults[$key] = $opion;
+  }
+}
+
 // Register Snippet for ImageSet output. Can be overriden by
 // placing a file called `imageset.php` within your snippets
 // directory.
@@ -54,4 +62,8 @@ if($kirby->option('imageset.tags.image') !== false && !file_exists($kirby->roots
 // Register style consolidator if enabled in options
 if($kirby->option('imageset.styles.consolidate')) {
   $kirby->set('component', 'response', __NAMESPACE__ . '\\Component\\StylesConsolidatorResponse');
+}
+
+if(plugin::instance()->license()->type === 'trial') {
+  $kirby->set('widget', 'imageset', __DIR__ . DS . 'widgets' . DS . 'imageset');
 }

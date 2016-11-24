@@ -28,7 +28,6 @@ if($imageset->outputStyle() === 'plain'):
   <?php endif ?>
   <span class="<?= $imageset->className('__ratio-fill') ?>" <?= r(!$imageset->hasCssRules(), 'style="padding-top: ' . utils::formatFloat(1 / $imageset->ratio() * 100, 10) . '%;"') ?>></span>
   <?= $imageset->placeholder() ?>
-  
   <?php if($imageset->outputStyle() === 'picture'): ?> 
   <picture>
     <?php foreach($imageset->sources() as $source): ?>

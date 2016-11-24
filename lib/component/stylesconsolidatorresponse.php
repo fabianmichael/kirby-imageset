@@ -29,7 +29,7 @@ class StylesConsolidatorResponse extends Response {
   public function make($response) {
     $response = parent::make($response);
 
-    if(stripos($response, '<!DOCTYPE html>') !== 0) {
+    if(stripos($response, '<!DOCTYPE html') !== 0) {
       // If document does not start with a doctype, assume
       // that it’s not an HTML document and just
       // pass-through the response.
@@ -39,7 +39,7 @@ class StylesConsolidatorResponse extends Response {
     $rules = [];
     $replace = [];
    
-    preg_match_all('/<style data-imagekit-styles>[\s\r\n]*(.*)[\s\r\n]*<\/style>/siU', $response, $matches);
+    preg_match_all('/\s*<style data-imagekit-styles>[\s\r\n]*(.*)[\s\r\n]*<\/style>\s*/siU', $response, $matches);
 
     if($matches) {
       
