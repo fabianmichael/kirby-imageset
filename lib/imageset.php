@@ -64,11 +64,7 @@ class ImageSet extends SourceSet {
 
   protected static $instanceCount = 0;
   protected $id                   = 0;
-
-  protected $placeholder;
-  protected $color;
-  protected $cssRules;
-  protected $hash;
+  protected $cache = [];
   
   /**
    * Creates a new ImageSet.
@@ -83,6 +79,23 @@ class ImageSet extends SourceSet {
     $this->sources = $this->setupSources($sizes);
     $this->id      = ++static::$instanceCount;
     $this->kirby   = $kirby ?: kirby();
+  }
+
+  /**
+   * Loads the settings defined in your `config.php` file
+   * and overrides the plugin defaults.
+   * 
+   * @param $kirby The Kirby instance to read settings from.
+   */
+  public static function loadConfig($kirby = null) {
+    $kirby = $kirby ?: kirby();
+
+    foreach(static::$defaults as $key => $value) {
+      $configValue = $kirby->option("imageset.$key");
+      if(!is_null($configValue)) {
+        static::$defaults[$key] = $configValue;
+      }
+    }
   }
 
   /**
@@ -248,21 +261,23 @@ class ImageSet extends SourceSet {
    *                for targeting it with CSS rules.
    */
   public function hash() {
-    if(is_null($this->hash)) {
+    if(!isset($this->cache['hash'])) {
 
       $image = $this->image();
       $hash  = [];
 
       if(is_a($image, 'File')) {
         $hash[] = $image->page->hash();
+      } else {
+        $hash[] = base_convert(sprintf('%u', crc32(url::path())));
       }
       
       $hash[] = base_convert(sprintf('%u', crc32($image->root())) + $this->id(), 10, 36);
 
-      $this->hash = implode('', $hash);
+      $this->cache['hash'] = implode('', $hash);
     }
 
-    return $this->hash;
+    return $this->cache['hash'];
   }
 
 
@@ -284,21 +299,22 @@ class ImageSet extends SourceSet {
    */
   public function color() {
 
-    if(!$this->color) {
+    if(!array_key_exists('color', $this->cache)) {
       $image     = $this->image();
       $cacheFile = utils::thumbDestinationDir($image);
       $cacheFile = $this->kirby->roots()->thumbs() . DS . str_replace('/', DS, $cacheFile) . DS . $image->filename() . '-color.cache';
 
       if(!f::exists($cacheFile) || (f::modified($cacheFile) < $image->modified())) {
-        $this->color = ColorThief::getColor($this->image()->root(), max(20, round($image->width() / 50)));
-        $this->color = utils::rgb2hex($this->color);
-        f::write($cacheFile, $this->color); 
+        $color = ColorThief::getColor($this->image()->root(), max(20, round($image->width() / 50)));
+        $color = utils::rgb2hex($color);
+        f::write($cacheFile, $color); 
+        $this->cache['color'] = $color;
       } else {
-        $this->color = f::read($cacheFile);
+        $this->cache['color'] = f::read($cacheFile);
       }
     }
 
-    return $this->color;
+    return $this->cache['color'];
   }
 
 
@@ -381,25 +397,28 @@ class ImageSet extends SourceSet {
    */
   public function cssRules() {
     
-    if(is_null($this->cssRules)) {
+    if(!array_key_exists('cssRules', $this->cache)) {
+      
       if(!$this->option('ratio') || sizeof($this->sources) === 1 || !$this->hasMultipleRatios()) {
-        $this->cssRules = '';
-        return $this->cssRules;
-      }
+        
+        $this->cache['cssRules'] = '';
 
-      $rules = [];
+      } else {
+        $rules = [];
 
-      foreach(array_reverse($this->sources) as $source) {
-        $rule = ".{$this->uniqueClassName()} .{$this->className('__ratio-fill')}{padding-top:" . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%;}";
-        if($media = $source->media()) {
-          $rule = '@media ' . $media . '{' . $rule . '}';
+        foreach(array_reverse($this->sources) as $source) {
+          $rule = ".{$this->uniqueClassName()} .{$this->className('__ratio-fill')}{padding-top:" . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%;}";
+          if($media = $source->media()) {
+            $rule = '@media ' . $media . '{' . $rule . '}';
+          }
+          $rules[] = $rule;
         }
-        $rules[] = $rule;
+
+        $this->cache['cssRules'] = implode('', $rules);
       }
-      $this->cssRules = implode('', $rules);
     }
 
-    return $this->cssRules;
+    return $this->cache['cssRules'];
   }
 
   public function hasCssRules() {
@@ -468,17 +487,22 @@ class ImageSet extends SourceSet {
       return null;
     }
 
-    if(is_null($this->placeholder)) {
-      
-      $settings = [
-        'style' => $this->option('placeholder'),
-        'class' => $this->className('__placeholder')
-      ];
+    if(!array_key_exists('placeholder', $this->cache)) {
+      $placeholderStyle = $this->option('placeholder');
 
-      $this->placeholder = Placeholder::create($this->image, $settings, $this->kirby);
+      if($placeholderStyle !== false) {
+        $settings = [
+          'style' => $placeholderStyle,
+          'class' => $this->className('__placeholder')
+        ];
+
+        $this->cache['placeholder'] = Placeholder::create($this->image, $settings, $this->kirby);
+      } else {
+        $this->cache['placeholder'] = null;
+      }
     }
 
-    return $this->placeholder;
+    return $this->cache['placeholder'];
   }
 
   /**
