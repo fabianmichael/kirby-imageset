@@ -8,7 +8,7 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 
 **NOTE:** This is not be a free plugin. In order to use it on a production server, you need to buy a license. For details on ImageSet’s license model, scroll down to the [License](#license) section of this document.
 
-{{{ SCREENSHOTS }}}
+![Placeholder styles available in ImageSet](https://fabianmichael.de/shared/imageset-animation.gif)
 
 ***
 
@@ -19,13 +19,19 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 - [1 Key Features](#1-key-features)
 - [2 Download and Installation](#2-download-and-installation)
   - [2.1 Requirements](#21-requirements)
-  - [2.2 Kirby CLI](#22-kirby-cli)
-  - [2.3 Git Submodule](#23-git-submodule)
-  - [2.4 Copy and Paste](#24-copy-and-paste)
+    - [2.1.1 Server](#211-server)
+    - [2.1.2 Client](#212-client)
+  - [2.2 Plugin Installation](#22-plugin-installation)
+    - [2.2.1 Kirby CLI](#221-kirby-cli)
+    - [2.2.2 Git Submodule](#222-git-submodule)
+    - [2.2.3 Copy and Paste](#223-copy-and-paste)
+  - [2.3 Template Setup](#23-template-setup)
 - [3 Usage](#3-usage)
-- [4 How it works](#4-how-it-works)
-  - [4.1 Discovery mode](#41-discovery-mode)
-- [5 Basic Configuration](#5-basic-configuration)
+  - [3.2 Template Usage](#32-template-usage)
+  - [3.3 Kirbytext](#33-kirbytext)
+  - [3.4 Size Presets](#34-size-presets)
+- [4](#4)
+- [5 Configuration](#5-configuration)
 - [6 Image Optimization](#6-image-optimization)
   - [6.1 Setup](#61-setup)
   - [6.2 Overriding Global Settings](#62-overriding-global-settings)

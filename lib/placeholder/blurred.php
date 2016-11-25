@@ -1,6 +1,6 @@
 <?php
 /**
- * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * ImageSet - responsive, lazy-loading images for Kirby CMS
  * 
  * @copyright (c) 2016 Fabian Michael <https://fabianmichael.de>
  * @link https://github.com/fabianmichael/kirby-imageset
@@ -38,9 +38,7 @@ class Blurred extends Base {
     $img = html::tag('span', [
       'style' => 'background-image: url(' . $this->thumb->dataUri() . ');',
     ]);
-
-    //$filter ='<svg><filter id="blur"><feGaussianBlur stdDeviation="22" /></filter></svg>';
-    
+        
     $width  = $this->thumb->width();
     $height = $this->thumb->height();
     $id     = 'imageset-filter-' . uniqid();

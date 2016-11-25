@@ -1,6 +1,6 @@
 @charset "UTF-8";
 /*!
- * ImageSet - reponsive, lazyloading images for Kirby CMS
+ * ImageSet - responsive, lazy-loading images for Kirby CMS
  * 
  * @copyright (c) 2016 Fabian Michael <https://fabianmichael.de>
  * @link https://github.com/fabianmichael/kirby-imageset
@@ -77,7 +77,7 @@
   overflow: hidden;
   contain: strict;
   object-fit: cover;
-  object-position: 0 0;
+  object-position: 50% 50%;
 }
 
 .js .imageset--lazyload .imageset__placeholder {
@@ -99,7 +99,7 @@
        property beeing ignored when layer is rendered on
        the GPU during animation
        Tested in: Chrome 49, Safari 9.1 */
-  background-color: #bbbbbb;
+  background-color: #fff;
 }
 
 .imageset--placeholder--mosaic .imageset__placeholder {
