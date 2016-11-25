@@ -43,11 +43,10 @@ class Blurred extends Base {
     
     $width  = $this->thumb->width();
     $height = $this->thumb->height();
-    $color  = utils::dominantColor($this->source);
     $id     = 'imageset-filter-' . uniqid();
 
     $html = [
-      '<svg color-interpolation-filters="sRGB" viewbox="0 0 ' . $width . ' ' . $height . '" preserveAspectRatio="xMidYMid slice" class="imageset__placeholder" style="background: ' . $color . ';">',
+      '<svg color-interpolation-filters="sRGB" viewbox="0 0 ' . $width . ' ' . $height . '" preserveAspectRatio="xMidYMid slice" class="imageset__placeholder" aria-hidden="true">',
       '<filter id="' . $id . '"><feGaussianBlur in="SourceGraphic" stdDeviation="2" /></filter>',
       '<image width="' . $width . '" height="' . $height . '" xlink:href="' . $this->thumb->dataUri() . '" filter="url(#' . $id . ')" />',
       '</svg>',

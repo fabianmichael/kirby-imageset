@@ -116,7 +116,7 @@ class Base {
   }
 
   public function html() {
-    return html::tag('span', '🖼', ['style' => 'background: silver; font-size: 36px; line-height: normal; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-filter: grayscale(1); filter: grayscale(1); ']);
+    return html::tag('span', '🖼', ['style' => 'background: silver; font-size: 36px; line-height: normal; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-filter: grayscale(1); filter: grayscale(1); ', 'aria-hidden' => true]);
   }
 
   public function __toString() {

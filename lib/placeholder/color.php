@@ -26,8 +26,9 @@ class Color extends Base {
 
   public function html() {
     return html::tag('span', [
-      'class' => $this->option('class'),
-      'style' => 'background-color: ' . utils::dominantColor($this->source) . ';',
+      'class'       => $this->option('class'),
+      'style'       => 'background-color: ' . utils::dominantColor($this->source) . ';',
+      'aria-hidden' => 'true',
     ]);
   }
 }

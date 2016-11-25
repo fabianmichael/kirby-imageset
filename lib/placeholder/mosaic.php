@@ -37,9 +37,9 @@ class Mosaic extends Base {
 
   public function html() {
     $attr = [
-      'class' => $this->option('class'),
-      'alt'   => ' ', // one space generates creates empty alt attribute 
-      'role'  => 'presentation',
+      'class'        => $this->option('class'),
+      'alt'          => ' ', // one space generates creates empty alt attribute 
+      'aria-hidden'  => 'true',
     ];
 
     return html::img($this->thumb->dataUri(), $attr);
