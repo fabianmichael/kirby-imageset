@@ -1,4 +1,4 @@
-Title: ImageKit Test Site
+Title: ImageSet Test Site
 
 ----
 

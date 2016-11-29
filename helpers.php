@@ -21,6 +21,10 @@ kirby()->set('file::method', 'imageset', function($file, $sizes = null, $params 
 });
 
 class imageset {
+  
+  /**
+   * API functions for getting/setting presets.
+   */
   public static function presets($action, $value = null) {
     if($action === 'reset') {
       return presets::reset();
@@ -30,6 +34,18 @@ class imageset {
       return presets::save($value);
     } else if(is_array($action)) {
       return presets::set($action);
+    }
+  }
+
+  /**
+   * Static helper method to override imageset defaults in 
+   * template files.
+   */
+  public static function set($key, $value = null) {
+    if(is_array($key)) {
+      return ImageSetClass::$defaults = array_merge(ImageSetClass::$defaults, $key);
+    } else {
+      return ImageSetClass::$defaults[$key] = $value;
     }
   }
 }

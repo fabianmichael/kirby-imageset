@@ -43,6 +43,7 @@ class ImageSet extends SourceSet {
     // for devices with disabled JavaScript/No JavaScript
     // support?
     'noscript'            => true,
+    'noscript.mode'       => 'appearance', // compatibility | appearance
 
     // Include an intrinsic ratio to avoid reflows upon
     // images are loaded.
@@ -357,6 +358,10 @@ class ImageSet extends SourceSet {
       $className[] = $this->className('--ratio');
     }
 
+    if($this->hasMultipleRatios()) {
+      $className[] = $this->className('--multiple-ratios');
+    }
+
     if($this->option('lazyload')) {
       $className[] = $this->className('--lazyload');
     }
@@ -404,10 +409,19 @@ class ImageSet extends SourceSet {
         $this->cache['cssRules'] = '';
 
       } else {
+        
         $rules = [];
 
+        $compatMode = ($this->option('noscript.mode') === 'compatibility');
+        $jsSelector = ($compatMode ? '.js ' : '');
+        $important  = ($compatMode ? ' !important' : '');
+
         foreach(array_reverse($this->sources) as $source) {
-          $rule = ".{$this->uniqueClassName()} .{$this->className('__ratio-fill')}{padding-top:" . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%;}";
+          // !important is used to override the fallback ratio set on the `.ratio__fill` element.
+          $property   = "padding-top:" . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%{$important};";
+          
+
+          $rule = "{$jsSelector}.{$this->uniqueClassName()} .{$this->className('__ratio-fill')}{{$property}}";
           if($media = $source->media()) {
             $rule = '@media ' . $media . '{' . $rule . '}';
           }
@@ -522,6 +536,18 @@ class ImageSet extends SourceSet {
     } else {
       return 'img';
     }
+  }
+
+  public function ratio() {
+    return $this->lastSource()->ratio();
+  }
+
+  public function srcset() {
+    return $this->lastSource()->srcset();
+  }
+
+  public function src() {
+    return $this->lastSource()->src();
   }
 
   // =====  Debugging Helper  =============================================== //

@@ -41,8 +41,12 @@ class SourceSet {
     return a::get($this->options, $key, $default);
   }
 
-  public function ratio() {
-    return $this->sources[0]->ratio();
+  public function firstSource() {
+    return $this->sources[0];
+  }
+
+  public function lastSource() {
+    return $this->sources[sizeof($this->sources) - 1];
   }
 
   public function sources() {
@@ -66,11 +70,11 @@ class SourceSet {
   }
 
   public function src() {
-    if(isset($this->sources[0])) {
-      return $this->sources[0]->src();
-    } else {
-      return null;
-    }
+    return $this->firstSource()->src();
+  }
+
+  public function ratio() {
+    return $this->firstSource()->ratio();
   }
 
   public function srcset() {
@@ -92,10 +96,12 @@ class SourceSet {
     return implode(', ', $srcset);
   }
 
-  public function tag($tagName = 'source', $attributes = []) {
-    $attr = [];
+  public function tag($tagName = 'source', $attributes = [], $lazyload = null) {
+    
+    $attr     = [];
+    $lazyload = !is_null($lazyload) ? $lazyload : $this->option('lazyload');
 
-    if($this->option('lazyload')) {
+    if($lazyload) {
       $attr['srcset']      = Utils::blankInlineImage() . ' 1w';
       $attr['data-srcset'] = $this->srcset();
     } else {
@@ -112,7 +118,7 @@ class SourceSet {
 
     $attr = array_merge($attr, $attributes);
 
-    return Html::tag($tagName, $attr);
+    return html::tag($tagName, $attr);
   }
 
   public function __toString() {

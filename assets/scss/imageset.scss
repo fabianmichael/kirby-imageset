@@ -30,14 +30,11 @@ $imageset--unveil-delay         : .05s                      !default;
 }
 
 .#{$imageset--namespace} {
-  /* A default imageset does not have too many parameters 
-     set. It’s behavior is mostly determed by the modifiers
-     on its container element. */
-
   /* Fixes a glitch in Firefox, where (in rare cases) a
      black border appears for no abvious reason at the
      left side of an imageset. */
   overflow: hidden;
+  background: red;
     
   /* Improve rendering speed in supported browsers. */
   contain: content;
@@ -70,6 +67,13 @@ $imageset--unveil-delay         : .05s                      !default;
     }
   }
 
+  &--multiple-ratios &__element {
+    /* Prevent flash of a skewed image after ratio has
+       changed, but new image was not loaded yet.
+       Not supported in IE & EDGE <= 14 */
+    object-fit: cover;
+  }
+
   &__ratio-fill {
     display: block;
     overflow: hidden;
@@ -81,7 +85,6 @@ $imageset--unveil-delay         : .05s                      !default;
     width: 100%;
   }
 
-
   #{$imageset--js-enabled-selector} &--ratio#{&}--lazyload &__element {
     /* The actual image is kept behind the placeholder.
        Rather than fading in the image, the placeholder is
@@ -92,6 +95,10 @@ $imageset--unveil-delay         : .05s                      !default;
        WebKit- and Blink-based (and possibly any other)
        browsers. */
     z-index: 1;
+
+    .operamini & {
+      z-index: auto !important;
+    }
   }
 
   &__placeholder {
@@ -106,6 +113,10 @@ $imageset--unveil-delay         : .05s                      !default;
     contain: strict;
     object-fit: cover;
     object-position: 50% 50%;
+
+    .operamini & {
+      display: none !important;
+    }
   }
 
   #{$imageset--js-enabled-selector} #{&}--lazyload &__placeholder {
@@ -141,8 +152,12 @@ $imageset--unveil-delay         : .05s                      !default;
   }
 
   &--placeholder--mosaic &__placeholder {
-    /* Mosaic placeholders should render crisp */
-    image-rendering: pixelated;
+    /* autoprefixer: off */
+    /* Mosaic placeholders should render crisp! */
+    image-rendering: -moz-crisp-edges;          /* Firefox */
+    image-rendering: -o-crisp-edges;            /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
   }
 
   #{$imageset--js-enabled-selector} .#{$imageset--namespace}--loaded &__placeholder {
@@ -152,5 +167,17 @@ $imageset--unveil-delay         : .05s                      !default;
        `pointer-events` property is not supported. */
     opacity: 0;
     visibility: hidden;
+  }
+
+  &--ratio &__fallback {
+    /* autoprefixer: off */
+    position: absolute;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -o-object-fit: cover;
+    object-fit: cover;
   }
 }

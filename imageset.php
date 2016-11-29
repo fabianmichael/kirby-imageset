@@ -35,6 +35,9 @@ $kirby = kirby();
 // Include helper functions / template API.
 require_once __DIR__ . DS . 'helpers.php';
 
+// Load default configuration from current Kirby instance.
+imageset::loadConfig($kirby);
+
 // Load presets from config.
 if($presets = $kirby->option('imageset.presets')) {
   presets::init($presets);  

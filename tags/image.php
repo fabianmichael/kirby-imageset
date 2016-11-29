@@ -37,7 +37,7 @@ kirbytext::$tags['image'] = [
     $link    = $tag->attr('link');
     $caption = $tag->attr('caption');
     $file    = $tag->file($url);
-    $size    = $tag->attr('size', $kirby->option('imageset.kirbytext.image.sizes.default'));
+    $size    = $tag->attr('size', $kirby->option('imageset.kirbytext.sizes.default'));
 
     // use the file url if available and otherwise the given url
     $url = $file ? $file->url() : url($url);

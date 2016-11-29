@@ -13,11 +13,14 @@
 
   var SETTINGS = {
     'wrapperClass'           : 'imageset',
+    'wrapperLazyloadClass'   : 'imageset--lazyload',
     'wrapperLoadedClass'     : 'imageset--loaded',
     'imageElementClass'      : 'imageset__element',
     'placeholderClass'       : 'imageset__placeholder',
     'placeholderLoadedClass' : 'imageset__placeholder--loaded',
   };
+
+  var isOperaMini = (Object.prototype.toString.call(window.operamini) === "[object OperaMini]");
 
   // Shim layer with setTimeout fallback. Look only for unprefixed
   // requestAnimationFrame, because all modern browsern already removed the
@@ -68,11 +71,94 @@
     return base;
   }
 
+    function ready(fn) {
+    if (document.readyState != 'loading'){
+      fn();
+    } else {
+      document.addEventListener('DOMContentLoaded', fn);
+    }
+  }
+
   // Make sure to add JS class to document element, if
   // it has not been done by any other script.
   removeClass(document.documentElement, "no-js");
   addClass(document.documentElement, "js");
 
+  if(true || isOperaMini) {
+    window.lazySizesConfig = window.lazySizesConfig || {};
+    window.lazySizesConfig.init = false;
+
+    addClass(document.documentElement, "operamini");
+
+    var loadImageSet = function(el) {
+      
+      addClass(el, SETTINGS.wrapperLoadedClass);
+      
+      var sources = el.getElementsByTagName("source"),
+          fallbackSource,
+          fallbackSrc,
+          img     = el.getElementsByClassName(SETTINGS.imageElementClass)[0];
+      
+      if(sources.length > 0) {
+        fallbackSource = sources[sources.length - 1];
+      } else {
+        fallbackSource = img;
+      }
+
+      //img.setAttribute("srcset", fallbackSource.getAttribute("data-srcset"));
+      var fallback;
+      var candidates = fallbackSource.getAttribute("data-srcset").split(/,\s*/);
+      if("console" in window) console.log("c", candidates);
+
+      var node;
+      //while(node =)
+
+      // var wrap = el.getElementsByTagName("picture")[0];
+      // console.log("srcsetzt", sources);
+      // for(var i = 0; i < sources.length; i++) {
+      //   sources[i].parentNode.removeChild(sources[i]);
+      // }
+      for (var i = sources.length; i--; ) {
+        sources[i].parentNode.removeChild(sources[i]);
+      }
+
+      img.src = candidates.pop().replace(/\s*\d+[wx]$/, '');
+
+      // if(fallbackSource.hasAttribute("data-srcset")) {
+
+      // }
+
+      // img.setAttribute("srcset", fallbackSource.getAttribute("data-srcset");
+      // //img.setAttribute("src", fallbackSource.getAttribute("data-src");
+
+      // "console" in window && console.log("img", el);
+      // for(var i = 0, l = sources.length; i < l; i++) {
+      //   var source = sources[i];
+      //   if(source.hasAttribute("data-srcset")) {
+      //     source.setAttribute("srcset", source.getAttribute("data-srcset"));
+      //     //"console" in window && console.log("src: ", source);
+      //     //source.removeAttribute("data-src");
+      //   }
+      //   // if(source.hasAttribute("data-srcset")) {
+      //   //   source.setAttribute("srcset", source.getAttribute("data-srcset"));
+      //   //   //source.removeAttribute("data-srcset");
+      //   // }
+      // }
+    };
+
+    ready(function() {
+      document.getElementsByTagName("h1")[0].innerHTML = "mini";
+      var imagesets = document.getElementsByClassName(SETTINGS.wrapperLazyloadClass);
+      //"console" in window && console.log("st", imagesets);
+      for(var i = 0, l = imagesets.length; i < l; i++) {
+        loadImageSet(imagesets[i]);
+      }
+    });
+
+    return;
+  } else {
+    removeClass(document.documentElement, "no-js");
+  }
 
     // =====
   
@@ -256,3 +342,33 @@
  */
 //=require lazysizes/lazysizes.js
 //=require lazysizes/plugins/static-gecko-picture/ls.static-gecko-picture.js
+
+
+// Opera Mini
+// ;(function(){
+
+
+//   function ready(fn) {
+//     if (document.readyState != 'loading'){
+//       fn();
+//     } else {
+//       document.addEventListener('DOMContentLoaded', fn);
+//     }
+//   }
+
+
+
+//   var isOperaMini = (Object.prototype.toString.call(window.operamini) === "[object OperaMini]");
+//   if(isOperaMini) {
+//     //window.lazySizesConfig = window.lazySizesConfig || {};
+//    // window.lazySizesConfig.init = false;
+    
+//     ready(function() {
+//       document.getElementsByTagName("h1")[0].innerHTML = "mini!!!!";
+//       var images = document.getElementsByClassName("imageset__element");
+//       for(var i = 0, l = images.length; i < l; i++) {
+//         lazySizes.loader.unveil(images[i]);
+//       }
+//     });
+//   }
+// })();

@@ -26,12 +26,13 @@ if($imageset->outputStyle() === 'plain'):
   <?php if($imageset->hasCssRules()): ?>
   <style<?= $imageset->styleIdentifierAttribute() ?>><?= $imageset->cssRules() ?></style>
   <?php endif ?>
-  <span class="<?= $imageset->className('__ratio-fill') ?>" <?= r(!$imageset->hasCssRules(), 'style="padding-top: ' . utils::formatFloat(1 / $imageset->ratio() * 100, 10) . '%;"') ?>></span>
+  <span class="<?= $imageset->className('__ratio-fill') ?>" <?= $imageset->option('noscript.mode') === 'compatibility' ? 'style="padding-top: ' . utils::formatFloat(1 / $imageset->ratio() * 100, 10) . '%;"' : '' ?>></span>
   <?= $imageset->placeholder() ?>
   <?php if($imageset->outputStyle() === 'picture'): ?> 
   <picture>
     <?php foreach($imageset->sources() as $source): ?>
     <?= $source ?>
+
     <?php endforeach; ?>
     <img src="<?= utils::blankInlineImage() ?>" class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>">
   </picture>
@@ -40,7 +41,26 @@ if($imageset->outputStyle() === 'plain'):
   <?php endif ?>  
   
   <?php if($imageset->option('noscript')): ?>
-  <noscript><img src="<?= $imageset->src() ?>" srcset="<?= $imageset->srcset() ?>" sizes="<?= $imageset->sizes() ?>" alt="<?= $imageset->alt() ?>"></noscript>
+  <noscript>
+    <?php if($imageset->option('noscript.mode') === 'appearance'): ?>
+      <?php if($imageset->outputStyle() === 'picture'): ?> 
+      <picture>
+        <?php
+        $sources = $imageset->sources();
+        for($i = 0, $l = sizeof($sources); $i < $l - 1; $i++): ?>
+        <?= $sources[$i]->tag('source', [], false) ?>
+
+        <?php endfor; ?>
+        <img src="<?= $imageset->src() ?>" srcset="<?= $imageset->srcset() ?>" class="<?= $imageset->className('__fallback') ?>" alt="<?= $imageset->alt() ?>" sizes="<?= $imageset->sizes() ?>">
+      </picture>
+      <?php else: ?>
+      <img src="<?= $imageset->src() ?>" srcset="<?= $imageset->srcset() ?>" class="<?= $imageset->className('__fallback') ?>" alt="<?= $imageset->alt() ?>" sizes="<?= $imageset->sizes() ?>">
+      <?php endif ?>  
+    <?php else: ?>
+    <img src="<?= $imageset->src() ?>" srcset="<?= $imageset->srcset() ?>" sizes="<?= $imageset->sizes() ?>" alt="<?= $imageset->alt() ?>" class="<?= $imageset->className('__fallback') ?>" sizes="<?= $imageset->sizes() ?>">
   <?php endif ?>
+  </noscript>
+  <?php endif ?>
+
 </span>
 <?php endif  ?>
