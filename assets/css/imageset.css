@@ -10,7 +10,6 @@
      black border appears for no abvious reason at the
      left side of an imageset. */
   overflow: hidden;
-  background: red;
   /* Improve rendering speed in supported browsers. */
   contain: content;
 }
@@ -71,10 +70,6 @@
   z-index: 1;
 }
 
-.operamini .js .imageset--ratio.imageset--lazyload .imageset__element {
-  z-index: auto !important;
-}
-
 .imageset__placeholder {
   display: block;
   position: absolute;
@@ -87,10 +82,6 @@
   contain: strict;
   object-fit: cover;
   object-position: 50% 50%;
-}
-
-.operamini .imageset__placeholder {
-  display: none !important;
 }
 
 .js .imageset--lazyload .imageset__placeholder {
@@ -118,13 +109,18 @@
 .imageset--placeholder--mosaic .imageset__placeholder {
   /* autoprefixer: off */
   /* Mosaic placeholders should render crisp! */
+  -ms-interpolation-mode: nearest-neighbor;
+  /* IE 10, 11 */
   image-rendering: -moz-crisp-edges;
   /* Firefox */
   image-rendering: -o-crisp-edges;
   /* Opera */
   image-rendering: -webkit-optimize-contrast;
   /* Webkit (non-standard naming) */
+  image-rendering: pixelated;
+  /* Opera 26+, Chrome */
   image-rendering: crisp-edges;
+  /* Safari 10+ */
 }
 
 .js .imageset--loaded .imageset__placeholder {
@@ -132,8 +128,6 @@
        and then change visibility to allow mouse interation
        with the loaded image in browsers, where the
        `pointer-events` property is not supported. */
-  opacity: 0;
-  visibility: hidden;
 }
 
 .imageset--ratio .imageset__fallback {

@@ -34,7 +34,6 @@ $imageset--unveil-delay         : .05s                      !default;
      black border appears for no abvious reason at the
      left side of an imageset. */
   overflow: hidden;
-  background: red;
     
   /* Improve rendering speed in supported browsers. */
   contain: content;
@@ -95,10 +94,6 @@ $imageset--unveil-delay         : .05s                      !default;
        WebKit- and Blink-based (and possibly any other)
        browsers. */
     z-index: 1;
-
-    .operamini & {
-      z-index: auto !important;
-    }
   }
 
   &__placeholder {
@@ -113,10 +108,6 @@ $imageset--unveil-delay         : .05s                      !default;
     contain: strict;
     object-fit: cover;
     object-position: 50% 50%;
-
-    .operamini & {
-      display: none !important;
-    }
   }
 
   #{$imageset--js-enabled-selector} #{&}--lazyload &__placeholder {
@@ -154,10 +145,12 @@ $imageset--unveil-delay         : .05s                      !default;
   &--placeholder--mosaic &__placeholder {
     /* autoprefixer: off */
     /* Mosaic placeholders should render crisp! */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE 10, 11 */
     image-rendering: -moz-crisp-edges;          /* Firefox */
     image-rendering: -o-crisp-edges;            /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
-    image-rendering: crisp-edges;
+    image-rendering: pixelated;                 /* Opera 26+, Chrome */
+    image-rendering: crisp-edges;               /* Safari 10+ */
   }
 
   #{$imageset--js-enabled-selector} .#{$imageset--namespace}--loaded &__placeholder {
@@ -165,8 +158,8 @@ $imageset--unveil-delay         : .05s                      !default;
        and then change visibility to allow mouse interation
        with the loaded image in browsers, where the
        `pointer-events` property is not supported. */
-    opacity: 0;
-    visibility: hidden;
+    //opacity: 0;
+    //visibility: hidden;
   }
 
   &--ratio &__fallback {
