@@ -128,6 +128,8 @@
        and then change visibility to allow mouse interation
        with the loaded image in browsers, where the
        `pointer-events` property is not supported. */
+  opacity: 0;
+  visibility: hidden;
 }
 
 .imageset--ratio .imageset__fallback {

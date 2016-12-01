@@ -67,7 +67,7 @@ class ParameterTest extends ImageSetTestCase {
   public function testRange() {
     $this->assertEquals([
       ['width' => 200],
-      ['width' => 334],
+      ['width' => 333],
       ['width' => 467],
       ['width' => 600],
     ], ImageSet::parseSizesDescriptor('200-600'));
@@ -103,10 +103,10 @@ class ParameterTest extends ImageSetTestCase {
     $this->assertEquals([
       ['width' => 200],
       ['width' => 267],
-      ['width' => 334],
+      ['width' => 333],
       ['width' => 400],
       ['width' => 467],
-      ['width' => 534],
+      ['width' => 533],
       ['width' => 600],
     ], ImageSet::parseSizesDescriptor('200-600,5'));
   }
@@ -141,6 +141,37 @@ class ParameterTest extends ImageSetTestCase {
       ],
       ImageSet::parseSizesDescriptor('400x300,600x200')
     );
+  }
+
+  public function testCropRangeValues() {
+    $this->assertEquals(
+      [
+        [ 'width' => 300, 'height' => 200, 'crop' => true ],
+        [ 'width' => 500, 'height' => 333, 'crop' => true ],
+        [ 'width' => 700, 'height' => 467, 'crop' => true ],
+        [ 'width' => 900, 'height' => 600, 'crop' => true ],
+      ],
+      ImageSet::parseSizesDescriptor('300x200-900x600')
+    );
+  }
+
+  public function testCropRangeValuesWithIntermadiateSizesParameter() {
+    $this->assertEquals(
+      [
+        [ 'width' => 400, 'height' => 200, 'crop' => true ],
+        [ 'width' => 480, 'height' => 240, 'crop' => true ],
+        [ 'width' => 560, 'height' => 280, 'crop' => true ],
+        [ 'width' => 640, 'height' => 320, 'crop' => true ],
+        [ 'width' => 720, 'height' => 360, 'crop' => true ],
+        [ 'width' => 800, 'height' => 400, 'crop' => true ],
+      ],
+      ImageSet::parseSizesDescriptor('400x200-800x400,4')
+    );
+  }
+
+  public function testInvalidDifferentRatioCropRangeValues() {
+    $this->expectException('Exception');
+    ImageSet::parseSizesDescriptor('400x200-800x500,4');
   }
  
 }

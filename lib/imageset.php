@@ -31,36 +31,38 @@ class ImageSet extends SourceSet {
    *            options ImageSets.
    */
   public static $defaults = [
-    // The CSS namespace, should not be changed without
-    // further adjustments to the JavaScript and CSS
-    // configuration.
-    'css.namespace'       => 'imageset',
-
     // User-defined class, added to the imageset.
     'class'               => '',
-
-    // Should the resulting code contain a fallback
-    // for devices with disabled JavaScript/No JavaScript
-    // support?
-    'noscript'            => true,
-    'noscript.mode'       => 'appearance', // compatibility | appearance
 
     // Include an intrinsic ratio to avoid reflows upon
     // images are loaded.
     'ratio'               => true,
 
+
     // Style of the placeholder image.
     'placeholder'         => 'mosaic',
-    
+
     // Lazyload imageset?
     'lazyload'            => true,
-    'lazyload.attr'       => 'data-{attr}',
+
+    // Should the resulting code contain a fallback
+    // for devices with disabled JavaScript/No JavaScript
+    // support?
+    'noscript'            => true,
+    'noscript.priority'   => 'ratio', // ratio | compatibility
+    
 
     // Output style
     'output'              => 'auto',
     
     // Alternative text
     'alt'                 => '',
+
+    // The CSS namespace, should not be changed without
+    // further adjustments to the JavaScript and CSS
+    // configuration.
+    'css.namespace'       => 'imageset',
+    'lazyload.attr'       => 'data-{attr}',
   ];
 
   protected static $instanceCount = 0;
@@ -75,7 +77,7 @@ class ImageSet extends SourceSet {
    * @param array $options
    * @param Kirby $paramname
    */
-  public function __construct(Media $image = null, $sizes = 'default', $options = [], Kirby $kirby = null) {
+  public function __construct(Media $image = null, $sizes = 'default', $options = null, Kirby $kirby = null) {
     parent::__construct($image, array_merge(static::$defaults, is_array($options) ? $options : []));
     $this->sources = $this->setupSources($sizes);
     $this->id      = ++static::$instanceCount;
@@ -175,7 +177,7 @@ class ImageSet extends SourceSet {
           $values[] = ['width' => (int) $value];
         }
 
-      } else if(preg_match('/^(\d+)-(\d+)\s*(?:,\s*(\d+))?$/', $sizes, $matches)) {
+      } else if(preg_match('/^(\d+)\s*-\s*(\d+)\s*(?:,\s*(\d+))?$/', $sizes, $matches)) {
         // '200-600' or '200-600,3'
         //         
         $min          = (int) $matches[1];
@@ -193,10 +195,10 @@ class ImageSet extends SourceSet {
         $step = ($max - $min) / ($intermediate + 1);
         
         for($i = 0; $i < $intermediate + 2; $i++) {
-          $values[] = ['width' => (int) ceil($min + ($i * $step))];
+          $values[] = ['width' => (int) round($min + ($i * $step))];
         }
 
-      } else if(preg_match('/^(\d+(?:x\d+)?)\s*(?:,\s*(\d+(?:x\d+)?))*$/', $sizes, $matches)) {
+      } else if(preg_match('/^(\d+x\d+)\s*(?:,\s*(\d+x\d+))*$/', $sizes, $matches)) {
         // '200x400,600x400'
 
         for($i = 1; $i < sizeof($matches); $i++) {
@@ -209,14 +211,48 @@ class ImageSet extends SourceSet {
           $values[] = ['width' => $width, 'height' => $height, 'crop' => true];
         }
 
+      } else if(preg_match('/^(\d+x\d+)\s*-\s*(\d+x\d+)\s*(?:,\s*(\d+))?$/', $sizes, $matches)) {
+        // '300x200-600x400' or '300x200-600x400,3'
+        list($minW, $minH) = array_map('intval', explode('x', $matches[1]));
+        list($maxW, $maxH) = array_map('intval', explode('x', $matches[2]));
+        $intermediate      = isset($matches[3]) ? (int) $matches[3] : 2;
+
+        if($minW === 0 || $minH === 0 || $maxW === 0 || $maxH === 0) {
+          throw new Exception('Any value must not be zero.');
+        }
+
+        if($minW >= $maxW || $minH >= $maxH) {
+          throw new Exception('Minimum size must not be greater than maximum size');
+        }
+
+        if(!utils::compareFloats($minW / $minH, $maxW / $maxH)) {
+          throw new Exception('Apsect-ratio of minium and maximum sizes must match.');
+        }
+
+        if($intermediate < 1) {
+          throw new Exception('Intermediate sizes must be equal 1 or greater.');
+        }
+
+        $stepW = ($maxW - $minW) / ($intermediate + 1);
+        $stepH = ($maxH - $minH) / ($intermediate + 1);
+        
+        for($i = 0; $i < $intermediate + 2; $i++) {
+          $values[] = [
+            'width'  => (int) round($minW + ($i * $stepW)),
+            'height' => (int) round($minH + ($i * $stepH)),
+            'crop'   => true,
+          ];
+        }
+
       } else {
         throw new Exception('Unrecognized sizes string from imageset.');
       }
 
     } else if(is_array($sizes)) {
+
       if(!utils::isArrayAssoc($sizes)) {
-        
-        if(sizeof($sizes) === 1 && Utils::isArraySequential($sizes[0])) {
+  
+        if(sizeof($sizes) === 1 && utils::isArraySequential($sizes[0])) {
           // Remove unnecessary wrapper array if there is one.
           $sizes = $sizes[0];
         }
@@ -412,7 +448,7 @@ class ImageSet extends SourceSet {
         
         $rules = [];
 
-        $compatMode = ($this->option('noscript.mode') === 'compatibility');
+        $compatMode = ($this->option('noscript.priority') === 'compatibility');
         $jsSelector = ($compatMode ? '.js ' : '');
         $important  = ($compatMode ? ' !important' : '');
 
@@ -548,6 +584,10 @@ class ImageSet extends SourceSet {
 
   public function src() {
     return $this->lastSource()->src();
+  }
+
+  public function sizesAttributes($lazyload = null) {
+    return $this->lastSource()->sizesAttributes($lazyload);
   }
 
   // =====  Debugging Helper  =============================================== //

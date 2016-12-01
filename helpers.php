@@ -11,13 +11,13 @@ use Kirby\Plugins\ImageSet\Presets;
  * @param  [type] $params [description]
  * @return [type]         [description]
  */
-function imageset($image, $sizes = null, $params = null) {
-  return (new ImageSetClass($image, $sizes, $params));
+function imageset($image, $sizes = 'default', $options = null) {
+  return (new ImageSetClass($image, $sizes, $options));
 }
 
 // Register file helper method.
-kirby()->set('file::method', 'imageset', function($file, $sizes = null, $params = null) {
-  return (new ImageSetClass($file, $sizes, $params));
+kirby()->set('file::method', 'imageset', function($file, $sizes = 'default', $options = null) {
+  return (new ImageSetClass($file, $sizes, $options));
 });
 
 class imageset {

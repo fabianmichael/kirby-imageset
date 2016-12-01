@@ -158,8 +158,8 @@ $imageset--unveil-delay         : .05s                      !default;
        and then change visibility to allow mouse interation
        with the loaded image in browsers, where the
        `pointer-events` property is not supported. */
-    //opacity: 0;
-    //visibility: hidden;
+    opacity: 0;
+    visibility: hidden;
   }
 
   &--ratio &__fallback {

@@ -180,6 +180,11 @@
       
       var createScaledPlaceholder = function(el) {
 
+        if(el.querySelector("canvas." + SETTINGS.placeholderClass)) {
+          // Skip already transformed imagesets
+          return;
+        }
+
         var canvas      = document.createElement("canvas"),
             ctx         = canvas.getContext("2d"),
             placeholder = el.getElementsByClassName(SETTINGS.placeholderClass)[0];
@@ -199,14 +204,13 @@
           ctx.msImageSmoothingEnabled = false;
           ctx.imageSmoothingEnabled = false;
           
-          ctx.drawImage(placeholder, 0, 0, scaledWidth, scaledHeight);
-
           canvas.setAttribute("aria-hidden", true);
           canvas.className = placeholder.className;
           
           // replaceChild() results in erros,
           // so using the workaround here …
           rAF(function(){
+            ctx.drawImage(placeholder, 0, 0, scaledWidth, scaledHeight);
             placeholder.parentNode.appendChild(canvas);
             placeholder.parentNode.removeChild(placeholder);
           });
@@ -220,9 +224,41 @@
       };
 
       ready(function() {
+
+        // Fix existing imagesets …
         var imagesets = document.getElementsByClassName(SETTINGS.placeholderMosaicClass);
         for(var i = 0, l = imagesets.length; i < l; i++) {
           createScaledPlaceholder(imagesets[i]);
+        }
+
+        // … and watch for new ones.
+        if(supportsMutationObserver) {
+          var observer = new MutationObserver(function(mutations) {
+            for (var i = 0; i < mutations.length; i++) {
+              var mutation = mutations[i];
+              if (mutation.type === 'childList' && mutation.addedNodes.length) { 
+
+                for(var n = 0; n < mutation.addedNodes.length; n++) {
+                  var node = mutation.addedNodes[n];
+                  if(node.nodeType !== Node.ELEMENT_NODE) continue; // skip everything but element nodes  
+                  if(hasClass(node, SETTINGS.placeholderMosaicClass)) {
+                    createScaledPlaceholder(node);
+                  }
+                  
+                }
+                return;
+              }
+            }
+          });
+
+          var config = {
+            attributes: false,
+            childList: true,
+            characterData: false,
+            subtree: true
+          };
+
+          observer.observe(document.documentElement, config);
         }
       });
     }
@@ -253,8 +289,7 @@
         element.addEventListener("load", cb);
       }
     });
-
-   }
+  }
 
 })(window, document);
 

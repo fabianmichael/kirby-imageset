@@ -19,7 +19,7 @@ class Presets {
   protected static $presets = [];
   protected static $saved   = [];
 
-  public static function save($name = '') {
+  public static function save($name) {
     static::$saved[$name] = static::$presets;
   }
 

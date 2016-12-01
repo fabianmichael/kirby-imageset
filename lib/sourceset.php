@@ -22,7 +22,7 @@ class SourceSet {
 
   public static $defaults  = [
     'media'      => '',
-    'sizes'      => '100vw',   
+    'sizes'      => '',   
     'descriptor' => 'width',
     'lazyload'   => true,
   ];
@@ -112,14 +112,35 @@ class SourceSet {
       $attr['media'] = $this->media();
     }
 
-    if(!empty($this->sizes())) {
-      $attr['sizes'] = $this->sizes();
-    }
-
-    $attr = array_merge($attr, $attributes);
+    $attr = array_merge(
+      $attr,
+      $attributes,
+      $this->getSizesAttributes($lazyload)
+    );
 
     return html::tag($tagName, $attr);
   }
+
+
+  public function getSizesAttributes($lazyload = null) {
+    
+    $attr = [];
+    $lazyload = !is_null($lazyload) ? $lazyload : $this->option('lazyload');
+
+    if(!empty($this->sizes())) {
+      $attr['sizes'] = $this->sizes();
+    } else {
+      $attr['sizes'] = '100vw';
+    }
+
+    return $attr;
+  }
+
+  public function sizesAttributes($lazyload = null) {
+    return ' ' . html::attr($this->getSizesAttributes($lazyload));
+  }
+
+
 
   public function __toString() {
     return $this->tag();
