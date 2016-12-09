@@ -1,6 +1,6 @@
 {
   "name": "imageset",
-  "description": "ImageSet - responsive, lazy-loading images for Kirby CMS.",
+  "description": "A flexible, responsive image component for Kirby CMS, featuring lazy loading, fancy placeholders and more.",
   "author": "Fabian Michael <hallo@fabianmichael.de>",
   "license": "SEE LICENSE IN license.md",
   "version": "1.0.0-alpha1",
