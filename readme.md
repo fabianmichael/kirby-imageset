@@ -241,7 +241,7 @@ echo $image->imageset('400x200,800x400');
 
 You can also describe explicit width and height parameters for images to create cropped thumbnails.
 
-<table><tr><td> ℹ️ All images described in one size must have the same aspect-ratio. If you want to serve differently cropped images based on viewport-size , continue reading for more detailed information on more complex usage scenarios. </td></tr></table>
+<table><tr><td> ℹ️ All images described in one size must have the same aspect-ratio. If you want to serve differently cropped images based on viewport-size, continue reading for more detailed information on more complex usage scenarios. </td></tr></table>
 
 **Range between cropped sizes**
 
@@ -430,7 +430,7 @@ In `imageset-presets.php`, two different sets of presets are defined, one for th
 […]
 ```
 
-<table><tr><td> ⚠️ If you’re using a snippet file for storing presets, it must **not** be named `imageset.php` as this name is reserved for a custom image set snippet as described in [7 Generating Custom Markup](#7-generating-custom-markup).</td></tr></table>
+<table><tr><td markdown="1"> ⚠️ If you’re using a snippet file for storing presets, it must **not** be named `imageset.php` as this name is reserved for a custom image set snippet as described in [7 Generating Custom Markup](#7-generating-custom-markup).</td></tr></table>
 
 ### 4.5 Kirbytext
 
