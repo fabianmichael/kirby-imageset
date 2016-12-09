@@ -6,10 +6,12 @@
 
 A flexible, responsive image component for [Kirby CMS](http://getkirby.com), featuring lazy loading, fancy placeholders and more.
 
+[<img src="https://img.shields.io/badge/%E2%80%BA-See%20the%20Demo-555555.svg?style=flat" alt="Download mozjpeg">](http://imagesetdemo.fabianmichael.de/)
+
 **NOTE:** This is not a free plugin. In order to use it on a production server, you need to buy a license. For details on ImageSet’s license model, scroll down to the [License](#license) section of this document.
 
 |:--|
-| 🚧 *Licenses will be evailable, once version 1.0.0 final has been released.* |
+| 🚧 *The plugin is currently available as a pre-release. Licenses will be evailable, once version 1.0.0 final has been released.* |
 
 ![Placeholder styles available in ImageSet](https://fabianmichael.de/shared/imageset-animation.gif)
 
