@@ -524,7 +524,7 @@ class ImageSet extends SourceSet {
       'imageset' => $this,
     ];
 
-    return $this->kirby->component('snippet')->render('imageset', $data, true);
+    return trim($this->kirby->component('snippet')->render('imageset', $data, true));
   }
 
   /**
