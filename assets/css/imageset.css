@@ -117,10 +117,10 @@
   /* Opera */
   image-rendering: -webkit-optimize-contrast;
   /* Webkit (non-standard naming) */
-  image-rendering: pixelated;
-  /* Opera 26+, Chrome */
   image-rendering: crisp-edges;
   /* Safari 10+ */
+  image-rendering: pixelated;
+  /* Opera 26+, Chrome */
 }
 
 .js .imageset--loaded .imageset__placeholder {

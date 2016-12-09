@@ -149,8 +149,8 @@ $imageset--unveil-delay         : .05s                      !default;
     image-rendering: -moz-crisp-edges;          /* Firefox */
     image-rendering: -o-crisp-edges;            /* Opera */
     image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
-    image-rendering: pixelated;                 /* Opera 26+, Chrome */
     image-rendering: crisp-edges;               /* Safari 10+ */
+    image-rendering: pixelated;                 /* Opera 26+, Chrome */
   }
 
   #{$imageset--js-enabled-selector} .#{$imageset--namespace}--loaded &__placeholder {
