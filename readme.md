@@ -181,14 +181,16 @@ imageset(Media $image, mixed $sizes = 'default', array $options = null)
 
 **Parameters:**
 
-`$image`
-: The source image used to generate all resized versions. Must be an instance of the `Media` or `File` objects.
+<dl>
+<dt><code>$image</code></dt>
+<dd>The source image used to generate all resized versions. Must be an instance of the <code>Media</code> or <code>File</code> objects.</dd>
 
-`$sizes` 
-: Describes the image sizes, which should be generated. Must be a size descriptor or a preset. If no sizes are given, the function will check for a sizes preset called `'default'` and uses it, if defined.<br>→ [4.2 Describing Sizes](#42-describing-sizes)
+<dt><code>$sizes</code></dt>
+<dd>Describes the image sizes, which should be generated. Must be a size descriptor or a preset. If no sizes are given, the function will check for a sizes preset called <code>'default'</code> and uses it, if defined.<br>→ <a href="#42-describing-sizes">4.2 Describing Sizes</a></dd>
 
-`$options`
-: An associative array of options, letting you override default settings and adjust things like placeholder style, fallback behavior etc.<br>→ [4.3 Setting Options](#43-setting-options)
+<dt><code>$options</code></dt>
+<dd>An associative array of options, letting you override default settings and adjust things like placeholder style, fallback behavior etc.<br>→ <a href="#43-setting-options">4.3 Setting Options</a></dd>
+</dl>
 
 **Working with `File` objects:**
 
@@ -351,20 +353,22 @@ c::set('imageset.presets', [
 In more complex scenarios, you might want to use different size presets depending on the current template, snippet or content area. 
 Maybe your project uses Kirbytext in differently sized columns and you don’t want to use size names like “sidebar-small” in your Kirbytext markup. In these cases, you should have a look ate the dynamic presets API:
 
-`imageset::presets([ 'default' => … , 'small' => … ])`
-: Defines new Presets. Extending presets will be overridden if a name preset of the same name already existed. A preset can be anything you can pass as `$sizes` parameter to the `imageset()` function.
+<dl>
+<dt><code>imageset::presets([ 'default' =&gt; … , 'small' =&gt; … ])</code></dt>
+<dd>Defines new Presets. Extending presets will be overridden if a name preset of the same name already existed. A preset can be anything you can pass as <code>$sizes</code> parameter to the <code>imageset()</code> function.</dd>
 
-`imageset::presets('clear')`
-: Clears all currently available presets, leaving you with no presets at all. However, this does not delete presets which have been defined in `config.php` via the `imageset.presets`. You can still load any presets that have been saved before by calling `imageset::presets('save', …)`.
+<dt><code>imageset::presets('clear')</code></dt>
+<dd>Clears all currently available presets, leaving you with no presets at all. However, this does not delete presets which have been defined in <code>config.php</code> via the <code>imageset.presets</code>. You can still load any presets that have been saved before by calling <code>imageset::presets('save', …)</code>.</dd>
 
-`imageset::presets('load', $name)`
-: Replaces all current set of  presets with those that have been saved as `$name` before.
+<dt><code>imageset::presets('load', $name)</code></dt>
+<dd>Replaces all current set of presets with those that have been saved as <code>$name</code> before.</dd>
 
-`imageset::presets('reset')`
-: Restores the presets defined in your `config.php` file.
+<dt><code>imageset::presets('reset')</code></dt>
+<dd>Restores the presets defined in your <code>config.php</code> file.</dd>
 
-`imageset::presets('save', $name)`
-: Saves all currently available presets for later use, where `$name` has to be anything that would be a valid PHP array key, except for the word 'inital', which is reserved.
+<dt><code>imageset::presets('save', $name)</code></dt>
+<dd>Saves all currently available presets for later use, where <code>$name</code> has to be anything that would be a valid PHP array key, except for the word 'inital', which is reserved.</dd>
+</dl>
 
 **Example**
 
