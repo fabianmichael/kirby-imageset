@@ -37,7 +37,12 @@ kirbytext::$tags['image'] = [
     $link    = $tag->attr('link');
     $caption = $tag->attr('caption');
     $file    = $tag->file($url);
-    $size    = $tag->attr('size', $kirby->option('imageset.tags.image.sizes.default'));
+    
+    // ImageSet
+    $size              = $tag->attr('size', $kirby->option('imageset.tags.image.sizes.default'));
+    $makeImageSet      = $file && !empty($size) && $file->isWebsafe();
+    $sizeClassTemplate = $kirby->option('imageset.tags.image.class', 'size-{size}');
+    $sizeClass         = $makeImageSet ? str::template($sizeClassTemplate, [ 'size' => $size ]) : '';
 
     // use the file url if available and otherwise the given url
     $url = $file ? $file->url() : url($url);
@@ -62,7 +67,7 @@ kirbytext::$tags['image'] = [
     if(empty($alt)) $alt = ' ';
 
     // link builder
-    $_link = function($image) use($tag, $url, $link, $file) {
+    $_link = function($image) use($tag, $url, $link, $file, $sizeClass, $makeImageSet) {
 
       if(empty($link)) return $image;
 
@@ -79,7 +84,7 @@ kirbytext::$tags['image'] = [
 
       return html::a(url($href), $image, array(
         'rel'    => $tag->attr('rel'),
-        'class'  => $tag->attr('linkclass'),
+        'class'  => trim($tag->attr('linkclass') . ' ' . $sizeClass),
         'title'  => $tag->attr('title'),
         'target' => $tag->target()
       ));
@@ -87,9 +92,11 @@ kirbytext::$tags['image'] = [
     };
 
     // image builder
-    $_image = function($class) use($file, $tag, $url, $alt, $title, $size) {
-      if($file && !empty($size)) {
-        return imageset($file, $size);
+    $_image = function($class) use($file, $tag, $url, $alt, $title, $size, $makeImageSet, $link, $sizeClass) {
+      if($makeImageSet) {
+        return imageset($file, $size, [
+          'class' => trim($class . (empty($link) ? ' ' . $sizeClass : '')),
+        ]);
       } else {
         return html::img($url, array(
           'width'  => $tag->attr('width'),
@@ -105,7 +112,13 @@ kirbytext::$tags['image'] = [
       $image  = $_link($_image($tag->attr('imgclass')));
       $figure = new Brick('figure');
       $figure->addClass($tag->attr('class'));
+
+      if(!empty($sizeClass)) {
+        $figure->addClass($sizeClass);
+      }
+
       $figure->append($image);
+      
       if(!empty($caption)) {
         $figure->append('<figcaption>' . html($caption) . '</figcaption>');
       }

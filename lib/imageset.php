@@ -109,6 +109,8 @@ class ImageSet extends SourceSet {
   public function setupSources($sizes) {
 
     $sources = [];
+    $sourceWidth  = $this->image->width();
+    $sourceHeight = $this->image->height();
 
     if(is_string($sizes) && presets::exists($sizes)) {
       // Load preset if set
@@ -130,7 +132,29 @@ class ImageSet extends SourceSet {
       $sourceSet = new SourceSet($this->image, array_intersect_key($subSizes[0], SourceSet::$defaults), $this->kirby);
       
       foreach($subSizes as $subSize) {
-        $sourceSet->push(new Source($this->image, $subSize, $this->kirby));
+
+        if(@$subSize['upscale'] || @$subSize['blur'] || @$subSize['crop']) {
+          // Always add a source, if upscaling, cropping or
+          // blur filter is enabled. Mimicking the behaviour
+          // of Kirby’s thumbs API.
+          $addSource = true;
+        } else if((isset($subSize['width'])  && $subSize['width']  <= $sourceWidth) ||
+                  (isset($subSize['height']) && $subSize['height'] <= $sourceHeight)) {
+          // If upscaling cropping and blur are disabled,
+          // only add size if source image is large enough.
+          $addSource = true;
+        } else {
+          $addSource = false;
+        }
+
+        if($addSource) {
+          $sourceSet->push(new Source($this->image, $subSize, $this->kirby));
+        }
+      }
+
+      if($sourceSet->count() === 0) {
+        // Don’t create empty source sets!
+        $sourceSet->push($this->image);
       }
 
       $sources[] = $sourceSet;
@@ -169,7 +193,11 @@ class ImageSet extends SourceSet {
 
       if(preg_match('/^(\d+)\s*(?:,\s*(\d+))*$/', $sizes)) {
          // "200" or "200,400,600"
-        foreach(array_map('intval', explode(',', $sizes)) as $value) {
+        
+        $sizes = array_map('intval', explode(',', $sizes));
+        sort($sizes, SORT_NUMERIC);
+
+        foreach($sizes as $value) {
           if($value < 1) {
             throw new Exception('Image dimensions must have value of 1 or greater.');
           }
@@ -257,11 +285,13 @@ class ImageSet extends SourceSet {
           $sizes = $sizes[0];
         }
 
+        $sizes = array_map('intval', $sizes);
+        sort($sizes, SORT_NUMERIC);
+
         foreach($sizes as $i => $value) {
           // [200, 300, 400] etc.
-          $value = (int) $value;
-          if(!is_int($i) || $value < 1) {
-            throw new Exception('A size must be an indexed array of integers greater zero.');
+          if($value < 1) {
+            throw new Exception('A size must be a numeric array of integers greater zero.');
           }
           $values[] = ['width' => $value];
         }
@@ -390,7 +420,7 @@ class ImageSet extends SourceSet {
       $className[] = $this->uniqueClassName();
     }
 
-    if($this->option('ratio')) {
+    if($this->option('ratio') || $this->option('placeholder') || $this->option('lazyload')) {
       $className[] = $this->className('--ratio');
     }
 
@@ -454,17 +484,22 @@ class ImageSet extends SourceSet {
 
         foreach(array_reverse($this->sources) as $source) {
           // !important is used to override the fallback ratio set on the `.ratio__fill` element.
-          $property   = "padding-top:" . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%{$important};";
+          $property   = "padding-top: " . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%{$important};";
           
+          $rule = "{$jsSelector}.{$this->uniqueClassName()} .{$this->className('__ratio-fill')} { {$property} }";
 
-          $rule = "{$jsSelector}.{$this->uniqueClassName()} .{$this->className('__ratio-fill')}{{$property}}";
           if($media = $source->media()) {
-            $rule = '@media ' . $media . '{' . $rule . '}';
+            $rule = '@media ' . $media . ' { ' . $rule . ' }';
+          } else if ($compatMode) {
+            $rule = '';
           }
-          $rules[] = $rule;
+
+          if(!empty($rule)) {
+            $rules[] = $rule;
+          }
         }
 
-        $this->cache['cssRules'] = implode('', $rules);
+        $this->cache['cssRules'] = implode(' ', $rules);
       }
     }
 

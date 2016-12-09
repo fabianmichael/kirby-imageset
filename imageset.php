@@ -23,10 +23,20 @@ load([
   'kirby\\plugins\\imageset\\placeholder\\lqip'                      => 'lib' . DS . 'placeholder' . DS . 'lqip.php',
   'kirby\\plugins\\imageset\\placeholder\\blurred'                   => 'lib' . DS . 'placeholder' . DS . 'blurred.php',
   'kirby\\plugins\\imageset\\placeholder\\color'                     => 'lib' . DS . 'placeholder' . DS . 'color.php',
+
+  // ColorThief
+  'colorthief\\cmap'                                                 => 'vendors' . DS . 'ColorThief' . DS . 'CMap.php',
+  'colorthief\\colorthief'                                           => 'vendors' . DS . 'ColorThief' . DS . 'ColorThief.php',
+  'colorthief\\pqueue'                                               => 'vendors' . DS . 'ColorThief' . DS . 'PQueue.php',
+  'colorthief\\vbox'                                                 => 'vendors' . DS . 'ColorThief' . DS . 'vbox.php',
+  'colorthief\\image\\imageloader'                                   => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'ImageLoader.php',
+  'colorthief\\image\\adapter\\gdimageadapter'                       => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'Adapter' . DS . 'GDImageAdapter.php',
+  'colorthief\\image\\adapter\\gmagickimageadapter'                  => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'Adapter' . DS . 'GmagickImageAdapter.php',
+  'colorthief\\image\\adapter\\iimageadapter'                        => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'Adapter' . DS . 'IImageAdapter.php',
+  'colorthief\\image\\adapter\\imageadapter'                         => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'Adapter' . DS . 'ImageAdapter.php',
+  'colorthief\\image\\adapter\\imagickimageadapter'                  => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'Adapter' . DS . 'ImagickImageAdapter.php',
+
 ], __DIR__);
-
-require __DIR__ . DS . 'vendor' . DS . 'autoload.php';
-
 
 // =====  Register Snippets, Tags and Methods  ============================== */
 

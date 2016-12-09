@@ -1,14 +1,19 @@
 {
-    "name": "fabianmichael/kirby-imageset",
-    "description": "A flexible, responsive image component for Kirby.",
-    "license": "COMMERCIAL (see license.md)",
-    "authors": [
-        {
-            "name": "Fabian Michael",
-            "email": "hallo@fabianmichael.de"
-        }
-    ],
-    "require": {
-        "ksubileau/color-thief-php": "^1.3"
+  "name": "fabianmichael/kirby-imageset",
+  "description": "A flexible, responsive image component for Kirby CMS, featuring lazy loading, fancy placeholders and more.",
+  "keywords": ["plugin", "kirby", "picture"],
+  "homepage": "https://github.com/fabianmichael/kirby-imageset",
+  "license": "SEE LICENSE IN license.md",
+  "authors": [
+    {
+      "name": "Fabian Michael",
+      "email": "hallo@fabianmichael.de",
+      "homepage": "https://fabianmichael.de"
     }
+  ],
+  "support": {
+    "email": "support@fabianmichael.de",
+    "issues": "https://github.com/fabianmichael/kirby-imageset/issues",
+    "source": "https://github.com/fabianmichael/kirby-imageset"
+  }
 }

@@ -32,9 +32,17 @@ class imageset {
       return presets::load($value);
     } else if($action === 'save') {
       return presets::save($value);
+    } else if($action === 'clear') {
+      return presets::clear();
     } else if(is_array($action)) {
       return presets::set($action);
+    } else {
+      throw new Exception('Unknown presets API method "' . $action . '".');
     }
+  }
+
+  public static function outputStyle($style) {
+    ImageSetClass::$defaults['output'] = $style;
   }
 
   /**
@@ -43,9 +51,9 @@ class imageset {
    */
   public static function set($key, $value = null) {
     if(is_array($key)) {
-      return ImageSetClass::$defaults = array_merge(ImageSetClass::$defaults, $key);
+      ImageSetClass::$defaults = array_merge(ImageSetClass::$defaults, $key);
     } else {
-      return ImageSetClass::$defaults[$key] = $value;
+      ImageSetClass::$defaults[$key] = $value;
     }
   }
 }

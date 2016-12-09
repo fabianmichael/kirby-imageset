@@ -42,11 +42,16 @@ class SourceSet {
   }
 
   public function firstSource() {
-    return $this->sources[0];
+    return isset($this->sources[0]) ? $this->sources[0] : null;
   }
 
   public function lastSource() {
-    return $this->sources[sizeof($this->sources) - 1];
+    $last = sizeof($this->sources) - 1;
+    return isset($this->sources[$last]) ? $this->sources[$last] : null;
+  }
+
+  public function count() {
+    return count($this->sources);
   }
 
   public function sources() {
@@ -70,11 +75,16 @@ class SourceSet {
   }
 
   public function src() {
-    return $this->firstSource()->src();
+    if($this->lastSource() instanceof Source) {
+      return $this->lastSource()->src();
+    } else {
+      // File or Media object
+      return $this->lastSource()->url();
+    }
   }
 
   public function ratio() {
-    return $this->firstSource()->ratio();
+    return $this->lastSource()->ratio();
   }
 
   public function srcset() {
@@ -86,7 +96,7 @@ class SourceSet {
 
     foreach($this->sources as $source) {
       
-      if($source instanceof \Kirby\Plugins\ImageSet\SourceSet) {
+      if($source instanceof SourceSet) {
         $srcset[] = $source->srcset();
       } else {
         $srcset[] = $source->url() . ' ' . ($this->descriptor() === 'width' ? $source->width()   . 'w' : $source->density() . 'x'); 
@@ -96,10 +106,12 @@ class SourceSet {
     return implode(', ', $srcset);
   }
 
-  public function tag($tagName = 'source', $attributes = [], $lazyload = null) {
+  public function tag($attributes = null, $lazyload = null) {
     
-    $attr     = [];
-    $lazyload = !is_null($lazyload) ? $lazyload : $this->option('lazyload');
+    $attributes = !is_null($attributes) ? $attributes : [];
+    $lazyload   = !is_null($lazyload) ? $lazyload : $this->option('lazyload');
+    
+    $attr      = [];
 
     if($lazyload) {
       $attr['srcset']      = Utils::blankInlineImage() . ' 1w';
@@ -118,9 +130,8 @@ class SourceSet {
       $this->getSizesAttributes($lazyload)
     );
 
-    return html::tag($tagName, $attr);
+    return html::tag('source', $attr);
   }
-
 
   public function getSizesAttributes($lazyload = null) {
     
