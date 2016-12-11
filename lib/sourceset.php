@@ -136,8 +136,7 @@ class SourceSet {
   public function getSizesAttributes($lazyload = null) {
     
     $attr = [];
-    $lazyload = !is_null($lazyload) ? $lazyload : $this->option('lazyload');
-
+    
     if(!empty($this->sizes())) {
       $attr['sizes'] = $this->sizes();
     } else {

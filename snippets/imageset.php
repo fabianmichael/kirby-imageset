@@ -44,14 +44,13 @@ else: ?>
   <?= $imageset->placeholder() ?>
   <?php if($imageset->outputStyle() === 'picture'): ?> 
   <picture>
-    <?php foreach($imageset->sources() as $source): ?>
-    <?= $source ?>
-
-    <?php endforeach; ?>
-    <img src="<?= utils::blankInlineImage() ?>" class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>"<?= empty($imageset->sizes()) ? ' data-sizes="auto"' : '' ?>>
+    <?php foreach($imageset->sources() as $source):
+      echo $source;
+    endforeach; ?>
+    <img src="<?= utils::blankInlineImage() ?>" class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>"<?= (empty($imageset->sizes()) && $imageset->option('lazyload')) ? ' data-sizes="auto"' : '' ?>>
   </picture>
   <?php else: ?>
-  <img src="<?= utils::blankInlineImage() ?>" srcset="<?= utils::blankInlineImage() ?> 1w" <?= html::attr($imageset->option('lazyload') ? 'data-srcset' : 'srcset', $imageset->srcset()) ?><?= $imageset->sizesAttributes() ?> class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>">
+  <img src="<?= utils::blankInlineImage() ?>" srcset="<?= utils::blankInlineImage() ?> 1w" <?= html::attr($imageset->option('lazyload') ? 'data-srcset' : 'srcset', $imageset->srcset()) ?><?= $imageset->sizesAttributes() ?><?= (empty($imageset->sizes()) && $imageset->option('lazyload')) ? ' data-sizes="auto"' : '' ?> class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>">
   <?php endif ?>  
   <?php if($imageset->option('noscript')): ?>
   <noscript><?php
