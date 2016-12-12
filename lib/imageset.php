@@ -109,6 +109,16 @@ class ImageSet extends SourceSet {
   public function setupSources($sizes) {
 
     $sources = [];
+
+    if(strtolower($this->image->extension()) === 'svg') {
+
+      $sourceSet = new SourceSet($this->image);
+      $sourceSet->push(new Source($this->image, null, $this->kirby));
+      $sources[] = $sourceSet;
+
+      return $sources;
+    }
+
     $sourceWidth  = $this->image->width();
     $sourceHeight = $this->image->height();
 
@@ -433,7 +443,7 @@ class ImageSet extends SourceSet {
     }
 
     if($placeholder = $this->option('placeholder')) {
-      $className[] = $this->className('--placeholder--' . $placeholder);
+      $className[] = $this->className('--placeholder--' . $this->placeholder()->style());
     }
 
     if($cls = $this->option('class')) {
@@ -623,6 +633,54 @@ class ImageSet extends SourceSet {
 
   public function sizesAttributes($lazyload = null) {
     return $this->lastSource()->sizesAttributes($lazyload);
+  }
+
+  public function srcAttributes($lazyload = null) {
+
+    $attr = [];
+
+    $lazyload = !is_null($lazyload) ? $lazyload : $this->option('lazyload');
+
+    // if($this->hasMultipleRatios()) {
+
+    // }
+    // 
+
+    $attr['src']    = utils::blankInlineImage();
+      
+      
+    $lastSource = $this->lastSource();
+
+    // echo "|||||||";
+    // print_r($lastSource->count());
+    // echo "|||||||";
+
+    if($lazyload) {
+      // foreach($this->sources as $s) {
+      //   echo "(((";
+      //   echo $s->srcset();
+      //   echo ")))";
+      // }
+      if($lastSource->count() > 1) {
+        $attr['srcset']      = utils::blankInlineImage() . ' 1w';
+        $attr['data-srcset'] = $this->srcset();
+      } else {
+        $attr['src']         = utils::blankInlineImage();
+        $attr['data-src']    = $this->src();
+      }
+    } else {
+      if($lastSource->count() > 1) {
+        $attr['srcset']      = $this->srcset();
+      } else {
+        $attr['src']         = $this->src();
+      }
+    }
+
+    return html::attr($attr);
+
+   // src="<?= utils::blankInlineImage()"
+         //srcset="<?= utils::blankInlineImage() 1w"
+         //<?= html::attr($imageset->option('lazyload') ? 'data-srcset' : 'srcset', $imageset->srcset())
   }
 
   // =====  Debugging Helper  =============================================== //

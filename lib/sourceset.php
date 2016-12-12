@@ -137,10 +137,12 @@ class SourceSet {
     
     $attr = [];
     
-    if(!empty($this->sizes())) {
-      $attr['sizes'] = $this->sizes();
-    } else {
-      $attr['sizes'] = '100vw';
+    if($this->count() > 1) {
+      if(!empty($this->sizes())) {
+        $attr['sizes'] = $this->sizes();
+      } else {
+        $attr['sizes'] = '100vw';
+      }
     }
 
     return $attr;
@@ -150,7 +152,19 @@ class SourceSet {
     return ' ' . html::attr($this->getSizesAttributes($lazyload));
   }
 
+  // public function img($attributes = null, $xhtml = false) {
 
+  //   $attr = [];
+
+  //   // src
+  //   if($this->option()) {
+
+  //   }
+
+  //   $attr = array_merge($attr, is_array($attributes) ? $attributes : []);
+
+  //   return '<img ' . html::attr($attr) . ($xhtml ? ' />' : '>');
+  // }
 
   public function __toString() {
     return $this->tag();

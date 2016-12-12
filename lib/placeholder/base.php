@@ -26,8 +26,6 @@ class Base {
   public $style;
 
   protected $focus;
-
-  public static $styles = [];
   
   public static $defaults = [
     'style'        => null,
@@ -46,14 +44,23 @@ class Base {
       throw new Exception('Cannot create placeholder without a "style" beeing given.');
     }
 
-    $style = $options['style']; // ?: 'mock';
+    $style = $options['style'];
+
+    if(strtolower($source->extension()) === 'svg') {
+      // SVG files do not support rendered placeholders
+      $style = 'base';
+    }
+
     $placeholderClass = __NAMESPACE__ . "\\$style";
 
     if(!class_exists($placeholderClass)) {
       throw new Exception('Unknown placeholder style "' . $style . '".');
     }
 
-    return new $placeholderClass($source, $options, $kirby);
+    $placeholder = new $placeholderClass($source, $options, $kirby);
+    $placeholder->style = $style;
+
+    return $placeholder;
   }
   
   protected function __construct($source, $options = [], $kirby = null) {
@@ -63,6 +70,12 @@ class Base {
 
     $this->destination();
     $this->make();
+  }
+
+  protected function make() {}
+
+  public function style() {
+    return $this->style;
   }
 
   public function option($name, $value = null) {
@@ -116,7 +129,7 @@ class Base {
   }
 
   public function html() {
-    return html::tag('span', '🖼', ['style' => 'background: silver; font-size: 36px; line-height: normal; display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-box-orient: vertical; -webkit-box-direction: normal; -ms-flex-direction: column; flex-direction: column; -webkit-box-pack: center; -ms-flex-pack: center; justify-content: center; -webkit-box-align: center; -ms-flex-align: center; align-items: center; -webkit-filter: grayscale(1); filter: grayscale(1); ', 'aria-hidden' => true]);
+    return html::tag('span', ['class' => 'imageset__placeholder']);
   }
 
   public function __toString() {

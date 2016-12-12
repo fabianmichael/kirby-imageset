@@ -25,10 +25,16 @@ class Color extends Base {
   }
 
   public function html() {
-    return html::tag('span', [
+    
+    $attr =[
       'class'       => $this->option('class'),
-      'style'       => 'background-color: ' . utils::dominantColor($this->source) . ';',
       'aria-hidden' => 'true',
-    ]);
+    ];
+
+    if(strtolower($this->source->extension()) !== 'svg') {
+      $attr['style'] = 'background-color: ' . utils::dominantColor($this->source) . ';';
+    }
+
+    return html::tag('span', $attr);
   }
 }

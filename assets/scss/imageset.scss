@@ -139,7 +139,7 @@ $imageset--unveil-delay         : .05s                      !default;
        property beeing ignored when layer is rendered on
        the GPU during animation
        Tested in: Chrome 49, Safari 9.1 */
-    background-color: #fff;
+    background-color: #efefef;
   }
 
   &--placeholder--mosaic &__placeholder {

@@ -9,6 +9,7 @@
 namespace Kirby\Plugins\ImageSet;
 use Html;
 
+
 // This template is used to generate markup for an imageset.
 // If you want to make modifications to this file, place a copy
 // of this file into your `site/snippets` folder.
@@ -33,6 +34,7 @@ if($imageset->outputStyle() === 'plain'):
   else:
   ?><img src="<?= $imageset->src() ?>" srcset="<?= $imageset->srcset() ?>" alt="<?= $imageset->alt() ?>"<?= $imageset->sizesAttributes() ?> style="max-width: 100%; height: auto;" /><?php
   endif;
+
 else: ?>
 <span class="<?= $imageset->wrapperClass() ?>">
   <?php if($imageset->hasCssRules()): ?>
@@ -41,16 +43,16 @@ else: ?>
   <?php if($imageset->option('ratio') || $imageset->option('lazyload') || $imageset->option('placeholder')): ?>
   <span class="<?= $imageset->className('__ratio-fill') ?>"<?= (!$imageset->hasCssRules() || $imageset->option('noscript.priority') === 'compatibility') ? ' style="padding-top: ' . utils::formatFloat(1 / $imageset->ratio() * 100, 10) . '%;"' : '' ?>></span>
   <?php endif ?>
-  <?= $imageset->placeholder() ?>
+  <?= $imageset->placeholder()->html() ?>
   <?php if($imageset->outputStyle() === 'picture'): ?> 
   <picture>
     <?php foreach($imageset->sources() as $source):
       echo $source;
     endforeach; ?>
-    <img src="<?= utils::blankInlineImage() ?>" class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>"<?= (empty($imageset->sizes()) && $imageset->option('lazyload')) ? ' data-sizes="auto"' : '' ?>>
+    <img src="<?= utils::blankInlineImage() ?>" class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>"<?= (empty($imageset->sizes()) && $imageset->option('lazyload')) && $imageset->lastSource()->count() > 1 ? ' data-sizes="auto"' : '' ?>>
   </picture>
   <?php else: ?>
-  <img src="<?= utils::blankInlineImage() ?>" srcset="<?= utils::blankInlineImage() ?> 1w" <?= html::attr($imageset->option('lazyload') ? 'data-srcset' : 'srcset', $imageset->srcset()) ?><?= $imageset->sizesAttributes() ?><?= (empty($imageset->sizes()) && $imageset->option('lazyload')) ? ' data-sizes="auto"' : '' ?> class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>">
+    <img <?= $imageset->srcAttributes() . ' ' . $imageset->sizesAttributes() . ((empty($imageset->sizes()) && $imageset->option('lazyload') && $imageset->lastSource()->count() > 1) ? ' data-sizes="auto"' : '') ?> class="<?= $imageset->elementClass() ?>" alt="<?= $imageset->alt() ?>">
   <?php endif ?>  
   <?php if($imageset->option('noscript')): ?>
   <noscript><?php
@@ -64,11 +66,11 @@ else: ?>
         ?><img src="<?= $imageset->src() ?>" srcset="<?= $imageset->srcset() ?>" class="<?= $imageset->className('__fallback') ?>" alt="<?= $imageset->alt() ?>"<?= $imageset->sizesAttributes(false) ?>><?php
       ?></picture><?php
       else:
-      ?><img src="<?= $imageset->src() ?>" srcset="<?= $imageset->srcset() ?>" class="<?= $imageset->className('__fallback') ?>" alt="<?= $imageset->alt() ?>"<?= $imageset->sizesAttributes(false) ?>><?php
+      ?><img <?= $imageset->srcAttributes(false) ?> class="<?= $imageset->className('__fallback') ?>" alt="<?= $imageset->alt() ?>"<?= $imageset->sizesAttributes(false) ?>><?php
       endif;
     else:
-    ?><img src="<?= $imageset->src() ?>" srcset="<?= $imageset->srcset() ?>" alt="<?= $imageset->alt() ?>" class="<?= $imageset->className('__fallback') ?>"<?= $imageset->sizesAttributes(false) ?>><?php
+    ?><img <?= $imageset->srcAttributes(false) ?> alt="<?= $imageset->alt() ?>" class="<?= $imageset->className('__fallback') ?>"<?= $imageset->sizesAttributes(false) ?>><?php
     endif; ?></noscript><?php
   endif; ?>
 </span>
-<?php endif  ?>
+<?php endif ?>

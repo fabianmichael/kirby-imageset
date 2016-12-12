@@ -23,12 +23,19 @@ class Mosaic extends Base {
     
     $wasAlreadyThere = $this->isThere();
 
-    $this->thumb = $this->source->thumb([
+    $params = [
       'imagekit.lazy'            => false,
       'imagekit.gifsicle.colors' => 16,
-      'width'                    => 8,
       'destination'              => [$this, 'destination'],
-    ]);
+    ];
+
+    if($this->source->height() > $this->source->width()) {
+      $params['width'] = 8;
+    } else {
+      $params['height'] = 8;
+    }
+
+    $this->thumb = $this->source->thumb($params);
 
     if(!$wasAlreadyThere && !utils::optimizerAvailable('gifsicle')) {
       $this->applyMosaicEffect($this->destination->root);

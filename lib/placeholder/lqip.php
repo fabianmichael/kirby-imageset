@@ -13,7 +13,7 @@ use Kirby\Plugins\ImageSet\Utils;
 
 
 class Lqip extends Base {
-
+  
   protected function __construct($source, $options = [], $kirby = null) {
     $this->extension = 'jpg';
     parent::__construct($source, $options, $kirby);

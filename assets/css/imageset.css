@@ -103,7 +103,7 @@
        property beeing ignored when layer is rendered on
        the GPU during animation
        Tested in: Chrome 49, Safari 9.1 */
-  background-color: #fff;
+  background-color: #efefef;
 }
 
 .imageset--placeholder--mosaic .imageset__placeholder {

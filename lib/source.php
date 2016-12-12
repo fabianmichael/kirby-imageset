@@ -18,11 +18,16 @@ class Source {
   public $kirby;
   protected $thumb;
 
-  public function __construct($image, $options = [], $kirby = null) {
+  public function __construct($image, $options = null, $kirby = null) {
     $this->image   = $image;
     $this->options = is_array($options) ? $options : [];
     $this->kirby   = $kirby ?: kirby();
-    $this->thumb   = $this->image->thumb($this->options);
+
+    if(strtolower($this->image->extenstion()) === 'svg') {
+      $this->thumb = $this->image;
+    } else {
+      $this->thumb = $this->image->thumb($this->options);
+    }
   }
 
   public function density() {
@@ -51,7 +56,7 @@ class Source {
 
   public function __debugInfo() {
     return [
-      'image' => 'bla', // $this->image, // $this->image,
+      'image' => $this->image,
     ];
   }
 
