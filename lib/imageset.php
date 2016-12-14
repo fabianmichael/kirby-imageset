@@ -447,7 +447,6 @@ class ImageSet extends SourceSet {
     }
 
     if($cls = $this->option('class')) {
-      $className[] = '/';
       $className[] = $cls;
     }
 
