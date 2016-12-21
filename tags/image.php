@@ -26,7 +26,7 @@ kirbytext::$tags['image'] = [
     'target',
     'popup',
     'rel',
-    'site',
+    'size',
   ],
 
   'html' => function($tag) use ($kirby) {
