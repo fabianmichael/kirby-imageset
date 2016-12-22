@@ -48,7 +48,7 @@ class StylesConsolidatorResponse extends Response {
         $rules[]   = $matches[1][$i];
       }
 
-      $styles   = '<style>' . implode('', $rules) . '</style>' . PHP_EOL;
+      $styles   = '<style>' . implode(PHP_EOL, $rules) . '</style>' . PHP_EOL;
 
       $scriptPos      = strpos($response, '<script');
       $headClosingPos = strpos($response, '</head>');
