@@ -27,6 +27,21 @@ use ColorThief\ColorThief;
 class ImageSet extends SourceSet {
 
   /**
+   * @const string The attribute used by the Styles
+   *               Consolidator component to identify style
+   *               block that belong to ImageSet.
+   */
+  const STYLES_IDENTIFIER_ATTRIBUTE = 'data-imagekit-styles';
+
+  /**
+   * @const string CSS selector to match CSS rules that only
+   *               apply after ImageSet’s JavaScript has
+   *               been executed and the corresponding class
+   *               has been added to the `<html>` element.
+   */
+  const JS_CSS_SELECTOR = '.imageset-js';
+
+  /**
    * @var array An associative array holding the default
    *            options ImageSets.
    */
@@ -54,7 +69,14 @@ class ImageSet extends SourceSet {
 
     // Output style
     'output'              => 'auto',
-    
+
+    // If set to true, will add a trailing slash to all
+    // void element’s in the plugin’s HTML output to make
+    // it XHTMl compatible. Special chars in the `alt`
+    // attribute will also be treated differently to be also
+    // XML compatible.
+    'output.xhtml'        => false,
+
     // Alternative text
     'alt'                 => '',
 
@@ -65,8 +87,23 @@ class ImageSet extends SourceSet {
     'lazyload.attr'       => 'data-{attr}',
   ];
 
+  /**
+   * @var int Used internally to generate the ImageSet’s
+   *          hash value.
+   */
   protected static $instanceCount = 0;
+
+  /**
+   * @var int ID of this instance of the ImageSet object.
+   */
   protected $id                   = 0;
+
+  /**
+   * @var array Used to store things like the placeholder or
+   *            the unique has value of this ImageSet, so
+   *            these value don’t have to be re-calculated
+   *            every time they are needed.
+   */
   protected $cache = [];
   
   /**
@@ -75,7 +112,7 @@ class ImageSet extends SourceSet {
    * @param Media|File $image
    * @param string|array|int $sizes;
    * @param array $options
-   * @param Kirby $paramname
+   * @param Kirby $kirby
    */
   public function __construct(Media $image = null, $sizes = 'default', $options = null, Kirby $kirby = null) {
     parent::__construct($image, array_merge(static::$defaults, is_array($options) ? $options : []));
@@ -102,9 +139,12 @@ class ImageSet extends SourceSet {
   }
 
   /**
-   * Takes a sizes parameter and transforms it into an array of SourceSet instances.
-   * @param  array|string|int $sizes Sizes to use on this SourceSet.
-   * @return array An array of SourcSets
+   * Takes a sizes parameter and transforms it into an array 
+   * of SourceSet instances.
+   * 
+   * @param  array|string|int $sizes Sizes to use on this
+   *                                 SourceSet.
+   * @return array                   An array of SourcSets
    */
   public function setupSources($sizes) {
 
@@ -139,7 +179,8 @@ class ImageSet extends SourceSet {
         continue;
       }
       
-      $sourceSet = new SourceSet($this->image, array_intersect_key($subSizes[0], SourceSet::$defaults), $this->kirby);
+      $options = array_intersect_key(array_merge($this->options, $subSizes[0]), SourceSet::$defaults);
+      $sourceSet = new SourceSet($this->image, $options, $this->kirby);
       
       foreach($subSizes as $subSize) {
 
@@ -174,15 +215,6 @@ class ImageSet extends SourceSet {
   }
 
   /**
-   * @return int The id of the imageset, where id is
-   *             increased by 1 for each instance of
-   *             this class created.
-   */
-  public function id() {
-    return $this->id;
-  }
-
-  /**
    * Transforms a Single Sizes descriptor into an array of
    * thumbnail creation instructions.
    *
@@ -190,6 +222,7 @@ class ImageSet extends SourceSet {
    * @return array An array of Thumb creation params.
    */
   public static function parseSizesDescriptor($sizes) {
+
     $values = [];
 
     if(utils::isArraySequential($sizes) && sizeof($sizes) === 1 && is_string($sizes[0])) {
@@ -330,6 +363,17 @@ class ImageSet extends SourceSet {
   }
 
   /**
+   * Returns the ID of the current ImageSet.
+   * 
+   * @return int The id of the imageset, where id is
+   *             increased by 1 for each instance of
+   *             this class created.
+   */
+  public function id() {
+    return $this->id;
+  }
+
+  /**
    * Generates and returns a hash based on the page of
    * imageset’s main image, image filename and instance id.
    * 
@@ -344,22 +388,21 @@ class ImageSet extends SourceSet {
       $hash  = [];
 
       if(is_a($image, 'File')) {
-        $hash[] = $image->page->hash();
+        $hash = (int) sprintf('%u', crc32($image->page->uri()));
       } else {
-        $hash[] = base_convert(sprintf('%u', crc32(url::path())));
+        $hash = (int) sprintf('%u', crc32(url::path()));
       }
-      
-      $hash[] = base_convert(sprintf('%u', crc32($image->root())) + $this->id(), 10, 36);
 
-      $this->cache['hash'] = implode('', $hash);
+      $hash += (int) sprintf('%u', crc32($image->root())) + $this->id();
+
+      $this->cache['hash'] = utils::base62($hash);
     }
 
     return $this->cache['hash'];
   }
 
-
   /**
-   * Returns the main image of this ImageSet
+   * Returns the source image of this ImageSet.
    * 
    * @return File|Media
    */
@@ -394,6 +437,158 @@ class ImageSet extends SourceSet {
     return $this->cache['color'];
   }
 
+  public function alpha() {
+    return utils::hasTransparency($this->image());
+  }
+
+  /**
+   * Returns `true`, if this ImageSet has sizes with at
+   * least 2 different aspect-ratios, otherwise `false`.
+   * 
+   * @return bool Returns `true`, if this imageset has
+   *              multiple aspect ratios, otherwise `false`.
+   */
+  public function hasMultipleRatios() {
+    $ratios = [];
+    foreach($this->sources as $source) {
+      $ratios[] = (string) utils::formatFloat($source->ratio(), 8);
+    }
+
+    return (sizeof(array_unique($ratios)) !== 1);
+  }
+
+  /**
+   * Returns the alternative Text of this ImageSet. Can be
+   * set via `alt` option.
+   * 
+   * @return string Alternative text of this ImageSet
+   */
+  public function alt() {
+    return $this->option('alt');
+  }
+
+  /**
+   * Returns the corresponding placeholder of this ImageSet,
+   * if it has one.
+   * 
+   * @return Kirby\Plugins\ImageSet\Placeholder\Base Returns the placeholder, if activated in options.
+   */
+  public function placeholder() {
+    if(!$this->option('placeholder') && !$this->option('ratio')) {
+      return null;
+    }
+
+    if(!array_key_exists('placeholder', $this->cache)) {
+      $placeholderStyle = $this->option('placeholder');
+
+      if($placeholderStyle !== false) {
+        $settings = [
+          'style'        => $placeholderStyle,
+          'class'        => $this->className('__placeholder'),
+          'output.xhtml' => $this->options['output.xhtml'],
+        ];
+
+        $this->cache['placeholder'] = Placeholder::create($this->image, $settings, $this->kirby);
+      } else {
+        $this->cache['placeholder'] = null;
+      }
+    }
+
+    return $this->cache['placeholder'];
+  }
+
+  /**
+   * Returns the aspect-ratio of the fallback size.
+   * 
+   * @return float The aspect-ratio of the fallback size.
+   */
+  public function ratio() {
+    return $this->lastSource()->ratio();
+  }
+
+  /**
+   * Returns the srcset of the fallback sizes.
+   * 
+   * @return string A string of comma-separated source
+   *                candidates to be used in the `srcset`
+   *                attribute.
+   */
+  public function srcset() {
+    return $this->lastSource()->srcset();
+  }
+
+  /**
+   * Returns the url of the largest image of the fallback size.
+   * 
+   * @return string The URL of the fallback-image’s largest thumbnail.
+   */
+  public function src() {
+    return $this->lastSource()->src();
+  }
+
+  /**
+   * Returns all sizes but the the last one. If this ImageSet
+   * only has one size, this method will just return an empty
+   * array.
+   * 
+   * @return array An array containg all alternative sizes.
+   */
+  public function alternativeSources() {
+    return ($this->count() > 1) ? array_slice($this->sources, 0, sizeof($this->sources) - 1) : [];
+  }
+
+  
+  // =====  Output Methods  ================================================= //
+
+
+  /**
+   * Returns the HTML representation of this Imageset
+   *
+   * @return string The HTML represenation of this ImageSet.
+   */
+  public function html() {
+
+    $sources = [];
+    $image   = null;    
+
+    $data = [
+      'imageset' => $this,
+    ];
+
+    $html = $this->kirby->component('snippet')->render('imageset', $data, true);
+    
+    // Compress all HTML output from snippet into one line
+    return utils::compressHTML($html);
+  }
+
+  /**
+   * Returns the HTML representation of this Imageset
+   *
+   * @return string The HTML represenation of this ImageSet.
+   */
+  public function __toString() {
+    return $this->html();
+  }
+ 
+  /**
+   * Returns the output style of this ImageSet.
+   * If `output` option was not set to `plain`, this method
+   * will return `img`, if the ImageSet has only one size or
+   * `picture`, if this ImageSet has multiple different
+   * sizes.
+   * 
+   * @return string Either 'picture', 'img' or 'plain'
+   */
+  public function outputStyle() {
+    $style = $this->option('output');
+
+    if($style !== 'auto') {
+      // forced style
+      return $style;
+    }
+
+    return 'normal';
+  }
 
   /**
    * Returns the full classname for a partial of this
@@ -417,9 +612,26 @@ class ImageSet extends SourceSet {
   }
 
   /**
+   * Returns the class name of this ImageSet’s main `<img>` tag.
+   * 
+   * @return string The class string of this ImageSet’s main image.
+   */
+  public function elementClass() {
+    $className = [];
+
+    $className[] = $this->className('__element');
+
+    if($this->option('lazyload')) {
+      $className[] = '/ lazyload';
+    }
+
+    return implode(' ', $className);
+  }
+
+  /**
    * Returns the wrapper class.
    * 
-   * @return string
+   * @return string The wrapping `<span>`’s class attribute value.
    */
   public function wrapperClass() {
     $className = [];
@@ -434,16 +646,21 @@ class ImageSet extends SourceSet {
       $className[] = $this->className('--ratio');
     }
 
+    if($placeholder = $this->option('placeholder')) {
+      $className[] = $this->className('--placeholder');
+      $className[] = $this->className('--placeholder--' . $placeholder);
+    }
+
     if($this->hasMultipleRatios()) {
       $className[] = $this->className('--multiple-ratios');
     }
 
-    if($this->option('lazyload')) {
-      $className[] = $this->className('--lazyload');
+    if($this->alpha()) {
+      $className[] = $this->className('--alpha');
     }
 
-    if($placeholder = $this->option('placeholder')) {
-      $className[] = $this->className('--placeholder--' . $this->placeholder()->style());
+    if($this->option('lazyload')) {
+      $className[] = $this->className('--lazyload');
     }
 
     if($cls = $this->option('class')) {
@@ -453,27 +670,29 @@ class ImageSet extends SourceSet {
     return implode(' ', $className);
   }
 
-  /**
-   * Returns the class name of this ImageSet’s main `<img>` tag.
-   */
-  public function elementClass() {
-    $className = [];
-
-    $className[] = $this->className('__element');
-
-    if($this->option('lazyload')) {
-      $className[] = '/';
-      $className[] = 'lazyload';
+  public function placeholderAttribute() {
+    if($placeholder = $this->option('placeholder')) {
+      return html::attr(['data-placeholder' => $placeholder]);
+    } else {
+      return '';
     }
+  }
 
-    return implode(' ', $className);
+  /**
+   * Returns a class attribute for the main `<img>` element
+   * in plain output mode.
+   * 
+   * @return string The class html attribute.
+   */
+  public function imgClassAttribute() {
+    return !empty($this->option('class')) ? html::attr(['class' => $this->option('class')]) : '';
   }
 
   /**
    * Returns CSS rules, if ImageSet has multiple ratios and
    * ratio placeholders enabled.
    * 
-   * @return string A multip
+   * @return string ImageSet’s CSS rules, if there are any.
    */
   public function cssRules() {
     
@@ -487,17 +706,38 @@ class ImageSet extends SourceSet {
         
         $rules = [];
 
-        $compatMode = ($this->option('noscript.priority') === 'compatibility');
-        $jsSelector = ($compatMode ? '.js ' : '');
-        $important  = ($compatMode ? ' !important' : '');
+        $compatMode   = ($this->option('noscript.priority') === 'compatibility');
+        $jsSelector   = ($compatMode ? static::JS_CSS_SELECTOR . ' ' : '');
+        $important    = ($compatMode ? ' !important' : '');
+        $multiple     = $this->hasMultipleRatios();
+        $placeholder  = ($this->placeholder() && $this->option('placeholder') !== 'color');
+
+        if($multiple) {
+          $imageRatio   = $this->image->ratio();
+        }
+
 
         foreach(array_reverse($this->sources) as $source) {
           // !important is used to override the fallback ratio set on the `.ratio__fill` element.
           $property   = "padding-top: " . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%{$important};";
+          $media      = $source->media();
           
           $rule = "{$jsSelector}.{$this->uniqueClassName()} .{$this->className('__ratio-fill')} { {$property} }";
 
-          if($media = $source->media()) {
+          if($placeholder && $multiple) {
+            $sourceRatio = $source->ratio();
+            if(!utils::compareFloats($imageRatio, $sourceRatio)) {
+              $selector = "{$jsSelector}.{$this->uniqueClassName()} .{$this->className('__placeholder')}";
+              if($sourceRatio > $imageRatio) {
+                $rule .= " $selector { width: 100%; height: auto; }";
+              } else {
+                $rule .= " $selector { height: 100%; width: auto; }";
+              }
+            }
+          }
+          //$rule .= "/* " . $source->ratio() . " */";
+
+          if($media) {
             $rule = '@media ' . $media . ' { ' . $rule . ' }';
           } else if ($compatMode) {
             $rule = '';
@@ -515,174 +755,171 @@ class ImageSet extends SourceSet {
     return $this->cache['cssRules'];
   }
 
+  /**
+   * Checks whether this ImageSet has extra CSS rules that have to be included
+   * within a `<style>` element.
+   * 
+   * @return boolean `true`, if the ImageSet has some CSS rules, otherwise `false`.
+   */
+
   public function hasCssRules() {
     return !empty($this->cssRules());
   }
 
   /**
-   * Returns the HTML representation of this Imageset
-   *
-   * @return string The HTML represenation of this ImageSet.
+   * Returns the styles identifier attribute needed by the
+   * Styles Consolidator Component, if
+   * `imageset.styles.consolidate` was activated in the 
+   * `config.php` file.
+   * 
+   * @return string The styles identifier attribute preceded
+   *                by a space, if style consolidation if
+   *                enabled. Otherwise an empty string.
    */
-  public function html() {
-
-    $sources = [];
-    $image   = null;    
-
-    $data = [
-      'imageset' => $this,
-    ];
-
-    return trim($this->kirby->component('snippet')->render('imageset', $data, true));
-  }
-
-  /**
-   * Returns the HTML representation of this Imageset
-   *
-   * @return string The HTML represenation of this ImageSet.
-   */
-  public function __toString() {
-    return $this->html();
-  }
-
-  /**
-   * @return bool Returns `true`, if this imageset has
-   *              multiple aspect ratios, otherwise `false`.
-   */
-  public function hasMultipleRatios() {
-    $ratios = [];
-    foreach($this->sources as $source) {
-      $ratios[] = (string) utils::formatFloat($source->ratio(), 8);
-    }
-
-    return (sizeof(array_unique($ratios)) !== 1);
-  }
-
-  /**
-   * @return string Alternative text of this ImageSet
-   */
-  public function alt() {
-    return $this->option('alt');
-  }
-
   public function styleIdentifierAttribute() {
     if($this->kirby->option('imageset.styles.consolidate')) {
-      return ' data-imagekit-styles';
+      return ' ' . static::STYLES_IDENTIFIER_ATTRIBUTE;
     } else {
       return '';
     }
   }
 
   /**
-   * @return Kirby\Plugins\ImageSet\Placeholder\Base Returns the placeholder, if activated in options.
+   * The neccessary `sizes` and `data-sizes` attributes for
+   * the main `<img>` element of this ImageSet.
+   * 
+   * @return string A string of HTML attributes.
    */
-  public function placeholder() {
-    if(!$this->option('placeholder') && !$this->option('ratio')) {
-      return null;
-    }
+  public function sizesAttributes($options = null, $noscript = false) {
 
-    if(!array_key_exists('placeholder', $this->cache)) {
-      $placeholderStyle = $this->option('placeholder');
-
-      if($placeholderStyle !== false) {
-        $settings = [
-          'style' => $placeholderStyle,
-          'class' => $this->className('__placeholder')
-        ];
-
-        $this->cache['placeholder'] = Placeholder::create($this->image, $settings, $this->kirby);
+    $options     = array_merge($this->options, is_array($options) ? $options : []);
+    $attr        = [];
+    $multiple    = ($this->lastSource()->count() > 1);
+  
+    if($this->outputStyle() === 'plain') {
+      // Plain output style
+      if($multiple) {
+        if(!empty($this->sizes())) {
+          $attr['sizes'] = $this->sizes();
+        } else {
+          $attr['sizes'] = '100vw';
+        }
       } else {
-        $this->cache['placeholder'] = null;
-      }
-    }
-
-    return $this->cache['placeholder'];
-  }
-
-  /**
-   * @return string Either 'picture', 'img' or 'plain'
-   */
-  public function outputStyle() {
-    $style = $this->option('output');
-
-    if($style !== 'auto') {
-      // forced style
-      return $style;
-    }
-
-    // calculate output style
-    if(sizeof($this->sources) > 1) {
-      return 'picture';
-    } else {
-      return 'img';
-    }
-  }
-
-  public function ratio() {
-    return $this->lastSource()->ratio();
-  }
-
-  public function srcset() {
-    return $this->lastSource()->srcset();
-  }
-
-  public function src() {
-    return $this->lastSource()->src();
-  }
-
-  public function sizesAttributes($lazyload = null) {
-    return $this->lastSource()->sizesAttributes($lazyload);
-  }
-
-  public function srcAttributes($lazyload = null) {
-
-    $attr = [];
-
-    $lazyload = !is_null($lazyload) ? $lazyload : $this->option('lazyload');
-
-    // if($this->hasMultipleRatios()) {
-
-    // }
-    // 
-
-    $attr['src']    = utils::blankInlineImage();
-      
-      
-    $lastSource = $this->lastSource();
-
-    // echo "|||||||";
-    // print_r($lastSource->count());
-    // echo "|||||||";
-
-    if($lazyload) {
-      // foreach($this->sources as $s) {
-      //   echo "(((";
-      //   echo $s->srcset();
-      //   echo ")))";
-      // }
-      if($lastSource->count() > 1) {
-        $attr['srcset']      = utils::blankInlineImage() . ' 1w';
-        $attr['data-srcset'] = $this->srcset();
-      } else {
-        $attr['src']         = utils::blankInlineImage();
-        $attr['data-src']    = $this->src();
+        // ImageSets with only one size can rely can use the
+        // `src` attribute instead of `srcset` and thus
+        // don’t need and may not have a sizes attribute.
       }
     } else {
-      if($lastSource->count() > 1) {
-        $attr['srcset']      = $this->srcset();
-      } else {
-        $attr['src']         = $this->src();
+      // Normal output style
+      
+      if($noscript) {
+        if($multiple) {
+          $attr['sizes'] = $this->sizes() ?: '100vw';
+        }
+      } else if($this->count() > 1) {       
+        if($options['lazyload']) {
+          $attr['data-sizes'] = 'auto';
+        }
+      } else {       
+        if(!empty($this->sizes())) {
+          $attr['sizes'] = $this->sizes();
+        } else {
+          if($options['lazyload']) {
+            if($multiple) {
+              $attr['sizes']      = '100vw';
+              $attr['data-sizes'] = 'auto';
+            }
+          }
+        }
+
       }
     }
 
     return html::attr($attr);
-
-   // src="<?= utils::blankInlineImage()"
-         //srcset="<?= utils::blankInlineImage() 1w"
-         //<?= html::attr($imageset->option('lazyload') ? 'data-srcset' : 'srcset', $imageset->srcset())
   }
 
+  /**
+   * The neccessary `src`, `data-src`, 'srcset` and
+   * `data-srcset` attributes for the main `<img>`
+   * element of this ImageSet.
+   * 
+   * @return string A string of HTML attributes.
+   */
+  public function srcAttributes($options = null, $noscript = false) {
+
+    $options     = array_merge($this->options, is_array($options) ? $options : []);
+    $attr        = [];
+    $multiple    = ($this->lastSource()->count() > 1);
+    $outputStyle = $this->outputStyle();
+
+    if($this->outputStyle() === 'plain') {
+      // Plain output style
+      $attr['src']    = $this->src();
+      if($multiple) {
+        $attr['srcset'] = $this->srcset();
+      }
+    } else {
+      // Full-featured output style
+      
+      $attr['src'] = utils::blankInlineImage();
+
+      if($this->count() > 1 && !$noscript) {
+        $attr['src'] = utils::blankInlineImage();
+      } else {
+        if($noscript) {
+          $attr['src'] = $this->src();
+          if($multiple) {
+            $attr['srcset'] = $this->srcset();
+          }
+        } else {
+          if($options['lazyload']) {
+            $attr['src']           = utils::blankInlineImage();
+            if($multiple) {
+              $attr['srcset']      = utils::blankInlineImage() . ' 1w';
+              $attr['data-srcset'] = $this->srcset();
+            } else {
+              $attr['src']         = utils::blankInlineImage();
+              $attr['data-src']    = $this->src();
+            }
+          } else {       
+            $attr['src']           = $this->src();
+            if($multiple) {
+              $attr['srcset']      = $this->srcset();
+            }
+          }
+        }
+      }
+    }
+
+    return html::attr($attr);
+  }
+
+  /**
+   * Return the alt attribute, escaping all HTML inside the
+   * given alternative text. If XHTML output is enabled,
+   * entities will be transformed into XML-compatible markup.
+   * Otherwise, only HTML special chars will be escaped.
+   * 
+   * @return string The alt attribute as string.
+   */
+  public function altAttribute($options = null) {
+    $options   = array_merge($this->options, is_array($options) ? $options : []);
+    $alt       = $options['alt'];
+
+    if(empty($alt)) {
+      return 'alt=""';
+    } else {
+      if($options['output.xhtml']) {
+        return html::attr('alt', html::encode($alt, false));
+      } else {
+        return html::attr('alt', htmlspecialchars($alt));
+      }
+    }
+  }
+
+
   // =====  Debugging Helper  =============================================== //
+
 
   public function __debugInfo() {
     return [

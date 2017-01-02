@@ -10,6 +10,8 @@ namespace Kirby\Plugins\ImageSet;
 
 
 load([
+
+  // ImageSet Core
   'kirby\\plugins\\imageset\\plugin'                                 => 'lib' . DS . 'plugin.php',
   'kirby\\plugins\\imageset\\imageset'                               => 'lib' . DS . 'imageset.php',
   'kirby\\plugins\\imageset\\presets'                                => 'lib' . DS . 'presets.php',
@@ -18,6 +20,7 @@ load([
   'kirby\\plugins\\imageset\\utils'                                  => 'lib' . DS . 'utils.php',
   'kirby\\plugins\\imageset\\component\\stylesconsolidatorresponse'  => 'lib' . DS . 'component' . DS . 'stylesconsolidatorresponse.php',
 
+  // Placeholder Styles
   'kirby\\plugins\\imageset\\placeholder\\base'                      => 'lib' . DS . 'placeholder' . DS . 'base.php',
   'kirby\\plugins\\imageset\\placeholder\\mosaic'                    => 'lib' . DS . 'placeholder' . DS . 'mosaic.php',
   'kirby\\plugins\\imageset\\placeholder\\lqip'                      => 'lib' . DS . 'placeholder' . DS . 'lqip.php',

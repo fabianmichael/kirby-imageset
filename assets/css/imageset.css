@@ -40,13 +40,6 @@
   zoom: 1;
 }
 
-.imageset--multiple-ratios .imageset__element {
-  /* Prevent flash of a skewed image after ratio has
-       changed, but new image was not loaded yet.
-       Not supported in IE & EDGE <= 14 */
-  object-fit: cover;
-}
-
 .imageset__ratio-fill {
   display: block;
   overflow: hidden;
@@ -58,7 +51,11 @@
   width: 100%;
 }
 
-.js .imageset--ratio.imageset--lazyload .imageset__element {
+.imageset--ratio .imageset__element {
+  z-index: 2;
+}
+
+.imageset-js .imageset--ratio.imageset--lazyload .imageset__element {
   /* The actual image is kept behind the placeholder.
        Rather than fading in the image, the placeholder is
        faded out instead. This prevents the image layer to
@@ -70,21 +67,35 @@
   z-index: 1;
 }
 
+.imageset-js .imageset--alpha.imageset--lazyload .imageset__element {
+  /* Images with transparency require a different fading
+       technique, as the placeholder would shine through,
+       after the final image was loaded. */
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 0.5s;
+}
+
+.imageset-js .imageset--alpha.imageset--lazyload.imageset--loaded .imageset__element {
+  opacity: 1;
+  will-change: auto;
+}
+
 .imageset__placeholder {
   display: block;
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 101%;
+  height: 101%;
   max-width: none !important;
+  transform: translate(-50%, -50%);
   overflow: hidden;
   contain: strict;
-  object-fit: cover;
-  object-position: 50% 50%;
 }
 
-.js .imageset--lazyload .imageset__placeholder {
+.imageset-js .imageset--lazyload .imageset__placeholder {
   /* Placeholder will be placed on top of the actual
        image element. This will only be applied, when
        JavaScript is enabled. */
@@ -106,6 +117,19 @@
   background-color: #efefef;
 }
 
+.imageset--alpha .imageset__placeholder {
+  visibility: hidden;
+}
+
+.imageset-js .imageset--alpha .imageset__placeholder {
+  visibility: visible;
+  transition: opacity 0.5s 0.05s, visibility 0s 0.8s;
+}
+
+.imageset-js .imageset--alpha:not(.imageset--placeholder--color) .imageset__placeholder {
+  background-color: transparent;
+}
+
 .imageset--placeholder--mosaic .imageset__placeholder {
   /* autoprefixer: off */
   /* Mosaic placeholders should render crisp! */
@@ -123,7 +147,7 @@
   /* Opera 26+, Chrome */
 }
 
-.js .imageset--loaded .imageset__placeholder {
+.imageset-js .imageset--loaded .imageset__placeholder {
   /* After image is loaded, the placeholder will fade out
        and then change visibility to allow mouse interation
        with the loaded image in browsers, where the

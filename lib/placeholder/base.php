@@ -30,6 +30,7 @@ class Base {
   public static $defaults = [
     'style'        => null,
     'class'        => 'placeholder',
+    'output.xhtml' => false,
 
     // Support for focus plugin
     'focus'        => null,
@@ -142,5 +143,9 @@ class Base {
     if(file_exists($this->destination->root) && f::modified($this->destination->root) >= $this->source->modified()) return true;
 
     return false;
+  }
+
+  public function trailingSlash() {
+    return $this->options['output.xhtml'] ? ' /' : '';
   }
 }

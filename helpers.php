@@ -5,11 +5,6 @@ use Kirby\Plugins\ImageSet\Presets;
 
 /**
  * Helper function for using imageset in templates.
- * 
- * @param  [type] $image  [description]
- * @param  [type] $sizes  [description]
- * @param  [type] $params [description]
- * @return [type]         [description]
  */
 function imageset($image, $sizes = 'default', $options = null) {
   return (new ImageSetClass($image, $sizes, $options));

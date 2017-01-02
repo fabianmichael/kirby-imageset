@@ -15,7 +15,7 @@ use Kirby\Plugins\ImageSet\Utils;
 class Mosaic extends Base {
 
   protected function __construct($source, $options = [], $kirby = null) {
-    $this->extension = 'gif';
+    $this->extension = utils::hasTransparency($source) ? 'png' : 'gif';
     parent::__construct($source, $options, $kirby);
   }
 
@@ -29,27 +29,29 @@ class Mosaic extends Base {
       'destination'              => [$this, 'destination'],
     ];
 
-    if($this->source->height() > $this->source->width()) {
-      $params['width'] = 8;
-    } else {
-      $params['height'] = 8;
-    }
+    // if($this->source->height() > $this->source->width()) {
+    //   $params['width'] = 8;
+    // } else {
+    //   $params['height'] = 8;
+    // }
+    $params['width'] = 8;
 
     $this->thumb = $this->source->thumb($params);
 
-    if(!$wasAlreadyThere && !utils::optimizerAvailable('gifsicle')) {
-      $this->applyMosaicEffect($this->destination->root);
-    }
+    // if(!$wasAlreadyThere && !utils::optimizerAvailable('gifsicle')) {
+    //   $this->applyMosaicEffect($this->destination->root);
+    // }
   }
 
   public function html() {
     $attr = [
+      'src'          => $this->thumb->dataUri(),
       'class'        => $this->option('class'),
       'alt'          => ' ', // one space generates creates empty alt attribute 
       'aria-hidden'  => 'true',
     ];
 
-    return html::img($this->thumb->dataUri(), $attr);
+    return '<img ' . html::attr($attr) . $this->trailingSlash() . '>';
   }
  
   // http://php.net/manual/de/function.imagetruecolortopalette.php#44803

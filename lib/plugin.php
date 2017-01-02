@@ -18,8 +18,7 @@ use Str;
  */
 class Plugin {
   
-  protected $version = '1.0.0-alpha1';
-  
+  protected $version = '1.0.0-beta1';
   
   protected function __construct() {
     // Only declared to prevent direct instantiation of this

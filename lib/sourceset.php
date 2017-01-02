@@ -21,10 +21,12 @@ class SourceSet {
   public $options = [];
 
   public static $defaults  = [
-    'media'      => '',
-    'sizes'      => '',   
-    'descriptor' => 'width',
-    'lazyload'   => true,
+    'media'        => '',
+    'sizes'        => '',
+    'attr'         => [],
+    'descriptor'   => 'width',
+    'lazyload'     => true,
+    'output.xhtml' => false,
   ];
 
   public function __construct($image = null, $options = [], $kirby = null) {
@@ -90,10 +92,6 @@ class SourceSet {
   public function srcset() {
     $srcset = [];
 
-    if(!is_array($this->sources)) {
-      return '';
-    }
-
     foreach($this->sources as $source) {
       
       if($source instanceof SourceSet) {
@@ -106,15 +104,17 @@ class SourceSet {
     return implode(', ', $srcset);
   }
 
-  public function tag($attributes = null, $lazyload = null) {
-    
-    $attributes = !is_null($attributes) ? $attributes : [];
-    $lazyload   = !is_null($lazyload) ? $lazyload : $this->option('lazyload');
-    
-    $attr      = [];
 
-    if($lazyload) {
-      $attr['srcset']      = Utils::blankInlineImage() . ' 1w';
+  // =====  Output Methods  ================================================= //
+
+
+  public function tag($options = null) {
+
+    $options = array_merge($this->options, is_array($options) ? $options : []);
+    $attr    = [];
+
+    if($options['lazyload']) {
+      $attr['srcset']      = utils::blankInlineImage() . ' 1w';
       $attr['data-srcset'] = $this->srcset();
     } else {
       $attr['srcset'] = $this->srcset();
@@ -126,51 +126,54 @@ class SourceSet {
 
     $attr = array_merge(
       $attr,
-      $attributes,
-      $this->getSizesAttributes($lazyload)
+      $options['attr'],
+      $this->getSizesAttributes($options)
     );
 
-    return html::tag('source', $attr);
+    $tag = html::tag('source', $attr);
+    
+    if($options['output.xhtml']) {
+      $tag = substr_replace($tag, ' /', strlen($tag) - 1, 0);
+    }
+
+    return $tag;
   }
 
-  public function getSizesAttributes($lazyload = null) {
+  public function getSizesAttributes($options = null) {
     
-    $attr = [];
-    
-    if($this->count() > 1) {
+    $options  = array_merge($this->options, is_array($options) ? $options : []);
+    $attr     = [];
+    $multiple = ($this->count() > 1);
+
+    if($multiple) {
       if(!empty($this->sizes())) {
         $attr['sizes'] = $this->sizes();
       } else {
         $attr['sizes'] = '100vw';
+        if($options['lazyload']) {
+          $attr['data-sizes'] = 'auto';
+        }
       }
     }
 
     return $attr;
   }
 
-  public function sizesAttributes($lazyload = null) {
-    return ' ' . html::attr($this->getSizesAttributes($lazyload));
+  public function sizesAttributes($options = null) {
+    return html::attr($this->getSizesAttributes($options));
   }
 
-  // public function img($attributes = null, $xhtml = false) {
-
-  //   $attr = [];
-
-  //   // src
-  //   if($this->option()) {
-
-  //   }
-
-  //   $attr = array_merge($attr, is_array($attributes) ? $attributes : []);
-
-  //   return '<img ' . html::attr($attr) . ($xhtml ? ' />' : '>');
-  // }
+  public function trailingSlash() {
+    return $this->option('output.xhtml') ? ' /' : '';
+  }
 
   public function __toString() {
     return $this->tag();
   }
 
+
   // =====  Debugging Helper  =============================================== //
+
 
   public function __debugInfo() {
     return [

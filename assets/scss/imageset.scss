@@ -11,7 +11,7 @@ $imageset--namespace            : imageset                  !default;
 
 // Enable Noscript fallback selector?
 $imageset--noscript-fallback    : true                      !default;
-$imageset--js-enabled-selector  : ".js"                     !default;
+$imageset--js-enabled-selector  : ".imageset-js"            !default;
 
 // Duration of the unveil animation for loaded images
 $imageset--unveil-duration      : .5s                       !default;
@@ -67,10 +67,11 @@ $imageset--unveil-delay         : .05s                      !default;
   }
 
   &--multiple-ratios &__element {
-    /* Prevent flash of a skewed image after ratio has
-       changed, but new image was not loaded yet.
-       Not supported in IE & EDGE <= 14 */
-    object-fit: cover;
+    // Prevent flash of a skewed image after ratio has
+    // changed, but new image was not loaded yet.
+    // Not supported in IE & EDGE <= 14
+    // DEACTIVATED DUE TO PERFORMANCE ISSUES!
+    // object-fit: cover;
   }
 
   &__ratio-fill {
@@ -82,6 +83,10 @@ $imageset--unveil-delay         : .05s                      !default;
        adding `overflow: hidden` prevents rendering bugs
        in IE 11. */
     width: 100%;
+  }
+
+  &--ratio &__element {
+    z-index: 2;
   }
 
   #{$imageset--js-enabled-selector} &--ratio#{&}--lazyload &__element {
@@ -96,18 +101,35 @@ $imageset--unveil-delay         : .05s                      !default;
     z-index: 1;
   }
 
+  #{$imageset--js-enabled-selector} &--alpha#{&}--lazyload &__element {
+    /* Images with transparency require a different fading
+       technique, as the placeholder would shine through,
+       after the final image was loaded. */
+    opacity: 0;
+    will-change: opacity;
+    transition: opacity $imageset--unveil-duration;
+  }
+
+  #{$imageset--js-enabled-selector} &--alpha#{&}--lazyload#{&}--loaded &__element {
+    opacity: 1;
+    will-change: auto;
+  }
+
   &__placeholder {
     display: block;
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    z-index: 1;
+    top: 50%;
+    left: 50%;
+    width: 101%;
+    height: 101%;
     max-width: none !important;
+    //max-height: none !important;
+    transform: translate(-50%, -50%);
     overflow: hidden;
     contain: strict;
-    object-fit: cover;
-    object-position: 50% 50%;
+    //object-fit: cover;
+    //object-position: 50% 50%;
   }
 
   #{$imageset--js-enabled-selector} #{&}--lazyload &__placeholder {
@@ -118,6 +140,7 @@ $imageset--unveil-delay         : .05s                      !default;
     // A nice addition here would be:
     // `will-change: opacity;`, but it causes
     // subpixel-rendering issues in Safari 10 :-(
+    //will-change: opacity;
     
     /* Visibility of placeholder is changed to hidden after
        the transition. */
@@ -142,6 +165,22 @@ $imageset--unveil-delay         : .05s                      !default;
     background-color: #efefef;
   }
 
+  &--alpha &__placeholder {
+    visibility: hidden;
+
+    #{$imageset--js-enabled-selector} & {
+      visibility: visible;
+
+      transition:
+        opacity $imageset--unveil-duration $imageset--unveil-delay,
+        visibility 0s ($imageset--unveil-duration + $imageset--unveil-delay + .25s);
+    }
+  }
+
+  #{$imageset--js-enabled-selector} &--alpha:not(&--placeholder--color) &__placeholder {
+    background-color: transparent;
+  }
+
   &--placeholder--mosaic &__placeholder {
     /* autoprefixer: off */
     /* Mosaic placeholders should render crisp! */
@@ -153,7 +192,7 @@ $imageset--unveil-delay         : .05s                      !default;
     image-rendering: pixelated;                 /* Opera 26+, Chrome */
   }
 
-  #{$imageset--js-enabled-selector} .#{$imageset--namespace}--loaded &__placeholder {
+  #{$imageset--js-enabled-selector} &--loaded &__placeholder {
     /* After image is loaded, the placeholder will fade out
        and then change visibility to allow mouse interation
        with the loaded image in browsers, where the

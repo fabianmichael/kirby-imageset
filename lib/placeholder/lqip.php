@@ -14,8 +14,11 @@ use Kirby\Plugins\ImageSet\Utils;
 
 class Lqip extends Base {
   
+  protected $alpha;
+
   protected function __construct($source, $options = [], $kirby = null) {
-    $this->extension = 'jpg';
+    $this->alpha     = utils::hasTransparency($source);
+    $this->extension = $this->alpha ? 'png' : 'jpg';
     parent::__construct($source, $options, $kirby);
   }
 
@@ -30,30 +33,42 @@ class Lqip extends Base {
     ]);
   }
 
-  public function html() {
-    
-    $width  = $this->thumb->width();
-    $height = $this->thumb->height();
-    $id     = 'imageset-filter-' . uniqid();
+   public function html() {
 
-    $html = [
-      '<svg color-interpolation-filters="sRGB" viewbox="0 0 ' . $width . ' ' . $height . '" preserveAspectRatio="xMidYMid slice" class="imageset__placeholder" aria-hidden="true">',
-      '<filter id="' . $id . '"><feGaussianBlur in="SourceGraphic" stdDeviation="0.75" /></filter>',
-      '<image width="' . $width . '" height="' . $height . '" xlink:href="' . $this->thumb->dataUri() . '" filter="url(#' . $id . ')" />',
-      '</svg>',
+    $attr = [
+      'src'          => $this->thumb->url(),
+      'class'        => $this->option('class'),
+      'alt'          => ' ', // one space generates creates empty alt attribute 
+      'aria-hidden'  => 'true',
     ];
 
-    return implode('', $html);
+    return '<img ' . html::attr($attr) . $this->trailingSlash() . '>';
+  } 
 
-    // $color = utils::dominantColor($this->source);
+  // public function html() {
     
-    // $img = html::tag('span', [
-    //   'style' => 'background-image: url(' . $this->thumb->dataUri() . ');',
-    // ]);
+  //   $width  = $this->thumb->width();
+  //   $height = $this->thumb->height();
+  //   $id     = 'imageset-filter-' . uniqid();
 
-    // return html::tag('span', $img, [
-    //   'class' => $this->option('class'),
-    //   'style' => 'background-color: ' . $color . ';',
-    // ]);
-  }
+  //   $html = [
+  //     '<svg color-interpolation-filters="sRGB" viewbox="0 0 ' . $width . ' ' . $height . '" preserveAspectRatio="xMidYMid slice" class="imageset__placeholder" aria-hidden="true">',
+  //     '<filter id="' . $id . '"><feGaussianBlur in="SourceGraphic" stdDeviation="0.75" /></filter>',
+  //     '<image width="' . $width . '" height="' . $height . '" xlink:href="' . $this->thumb->dataUri() . '" filter="url(#' . $id . ')" />',
+  //     '</svg>',
+  //   ];
+
+  //   return implode('', $html);
+
+  //   // $color = utils::dominantColor($this->source);
+    
+  //   // $img = html::tag('span', [
+  //   //   'style' => 'background-image: url(' . $this->thumb->dataUri() . ');',
+  //   // ]);
+
+  //   // return html::tag('span', $img, [
+  //   //   'class' => $this->option('class'),
+  //   //   'style' => 'background-color: ' . $color . ';',
+  //   // ]);
+  // }
 }

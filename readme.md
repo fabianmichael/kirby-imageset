@@ -8,7 +8,7 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 
 [<img src="https://img.shields.io/badge/%E2%80%BA-See%20the%20Demo-555555.svg?style=flat" alt="Download mozjpeg">](http://imagesetdemo.fabianmichael.de/)
 
-**NOTE:** This is not a free plugin. In order to use it on a production server, you need to buy a license. For details on ImageSet’s license model, scroll down to the [License](#license) section of this document.
+**NOTE:** This is a commercial plugin. In order to use it on a production server, you need to buy a license. For details on ImageSet’s license model, scroll down to the [License](#9-license) section of this document.
 
 <table><tr><td>🚧 <em>The plugin is currently available as a pre-release. Licenses will be evailable, once version 1.0.0 final has been released.</em></td></tr></table>
 
@@ -47,9 +47,10 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 - [6 Plain Output for RSS Feeds](#6-plain-output-for-rss-feeds)
 - [7 Generating Customized Markup](#7-generating-customized-markup)
 - [8 FAQ & Troubleshooting](#8-faq-&-troubleshooting)
-- [9 License](#9-license)
-- [10 Technical Support](#10-technical-support)
-- [11 Credits](#11-credits)
+- [9 Known Bugs](#9-known-bugs)
+- [10 License](#10-license)
+- [11 Technical Support](#11-technical-support)
+- [12 Credits](#12-credits)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -65,7 +66,7 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 -  **Progressive Enhancement** In case of doubt, the plugin works without JavaScript or native support for responsive images as a conditionally loaded polyfill is included for older browsers.
 -  **Web Standards** ImageSet produces HTML5-based markup (using the `<picture>` element and `srcset`-attribute).
 -  **Works with AJAX** ImageSet works with dynamic content, as new imagesets are automatically detected and handled.
--  **Small Footprint** Frontend code has been designed for performance and comes with a minimal footprint. Only 0,6 kB CSS + 4,8 kB JavaScript + 5,7 kB Polyfill for older browsers (minified & gzipped).
+-  **Small Footprint** Frontend code has been designed for performance and comes with a minimal footprint. Only ~0,7 kB CSS + ~16 kB JavaScript (+ 5,7 kB Polyfill for older browsers), when minified & gzipped.
 
 *) Lazy loading uses the very performant [lazysizes](https://github.com/aFarkas/lazysizes) script and requires JavaScript to be activated on the client. However, the plugin provides a `<noscript>`-fallback which is enabled by default.
 
@@ -316,7 +317,8 @@ c::set('imageset.noscript', false);
 | `lazyload` | `true` | `true`, `false` |  Enables lazy loading of image sets.<br>*Remember to include the corresponding JavaScript file into your markup as described in [2.3 Template Setup](#23-template-setup).*  |
 | `noscript` | `true` | `true`, `false` | Includes a fallback for clients without JavaScript support or disabled JavaScript. |
 | `noscript.priority` | `'ratio'` | `'ratio'`, `'compatibility'` | `ratio` = The image set will always use the same screen-estate when JavaScript is disabled. Use this option, when a change of an image’s aspect-ratio would destroy your layout. In browsers that neither provide native support for [`object-fit`](http://caniuse.com/#search=object-fit) nor the [`<picture>`](http://caniuse.com/#feat=picture) element *(i.e IE10-11, Edge)*,  this will lead to distorted images when the image set has multiple aspect-ratios defined.<br>`compatibility` = image sets will always show their fallback-size when JavaScript is disabled. Sizes with different aspect-ratios are ignored. This works in any browser . |
-| `output` | `'auto'` | `'auto'`, `'plain'` | `'auto'` = Image set will produce full-featured HTML according to your options.<br>`'plain'` = HTML output will be plain HTML without any classes, placeholders etc. `img` and `source` tags are also rendered in XHTML-compatible syntax.
+| `output` | `'auto'` | `'auto'`, `'plain'` | `'auto'` = Image set will produce full-featured HTML according to your options.<br>`'plain'` = HTML output will be plain HTML without any classes, placeholders etc. `img` and `source` tags are also rendered in XHTML-compatible syntax. |
+| `output.xhtml` | `false` | `true`, `false` | When enabled, ImageSet will generate XHTML/XML-compatible markup for all image sets. This means that a trailing slash is added to void elements and a different handling of special chars. |
 
 ### 4.4 Working with Size Presets
 
@@ -460,7 +462,7 @@ If you do so, every image tag without the size attribute will be resized accordi
 
 ## 6 Plain Output for RSS Feeds
 
-If your site generates RSS-feeds, including full-blown image sets into the markup might not work with most RSS readers due to their lack of JavaScript and CSS support. You can force ImageKit to generate plain, RSS/XHTML-compatible markup by setting the `output` option:
+If your site generates RSS-feeds, including full-blown image sets into the markup might not work with most RSS readers due to their lack of JavaScript and CSS support. You can force ImageKit to generate plain, RSS/XHTML-compatible markup by setting the `output` option.
 
 ```php
 # site/templates/feed.rss.php
@@ -512,7 +514,18 @@ So much markup for a single image?
 Will ImageSet slow down my site?
 : ImageSet has been designed for performance. But as it uses Kirby’s built-in thumbs API, the plugin needs check the existence of every thumb on every page load. On pages with dozens of image sets and hundreds of corresponding thumbs, you may notice a performance impact. In these cases, it is recommended to enable Kirby’s page cache or to switch to a web hosting plan that comes with fast SSD storage. When a page has to generate hundreds of thumbnails on load, this may also exceed your maximum script execution time. In the latter case, consider to use the [ImageKit](https://github.com/fabianmichael/kirby-imagekit) plugin for asynchronous thumbnail creation or cloud-based service.
 
-## 9 License
+Does ist support SVG images?
+: There is only basic support for SVG images. That means, if you supply an SVG image as source file for your image set, the plugin will generate markup for the SVG image, using the `<img>` tag. But at SVG is a very complex document format, there is no simple way in PHP to generate placeholder thumbnails (imagemagick does not work reliably with every SVG file), so placeholder style will be ignored and the SVG file will be shown in its original aspect-ratio. Everything set in the `$sizes` parameter will be ignored.
+
+What does a user on IE 10 or an other outdated browser with JavaScript disabled see?
+: The results are depending on the `noscript.priority` setting. When this is set to `'ratio'`, the user will see a distorted image if an image set has different aspect-ratios among its sizes at certain media conditions. If you change this to `'compatibility'` instead, the user will always see the fallback size of your image set. The noscript fallback always has the largest size of its `srcset` attribute defined as fallback, so browsers without native support for `srcset` element will always load the largest available size, if JavaScript is disabled.
+
+## 9 Known Bugs
+
+Safari 10
+: When an image set appears within an element that uses CSS multi-colum layout (`column-count > 1`), the fade-in animation for lazy-loaded image sets does not work. However, the loaded image is displayed correctly. Currently, there is no way do fix this as far as I know.
+
+## 10 License
 
 ImageKit can be evaluated as long as you want on how many private servers you want. To deploy ImageKit on any public server, you need to buy a license. See `license.md` for terms and conditions.
 
@@ -520,15 +533,19 @@ ImageKit can be evaluated as long as you want on how many private servers you wa
 
 However, even with a valid license code, it is discouraged to use it in any project, that promotes racism, sexism, homophobia, animal abuse or any other form of hate-speech.
 
-## 10 Technical Support
+## 11 Technical Support
 
 Technical support is provided via Email and on GitHub. If you’re facing any problems with running or setting up ImageSet, please send your request to [support@fabianmichael.de](mailto:support@fabianmichael.de) or [create a new issue](https://github.com/fabianmichael/kirby-imageset/issues/new) in this GitHub repository. No representations or guarantees are made regarding the response time in which support questions are answered.
 
-## 11 Credits
+## 12 Credits
 
 ImageSet is developed and maintained by [Fabian Michael](https://fabianmichael.de), a graphic designer & web developer from Germany.
 
 The plugin includes the following third-party components:
 
-- [lazysizes](https://github.com/aFarkas/lazysizes) and [respimage](https://github.com/aFarkas/respimage) by [Alexander Farkas](https://github.com/aFarkas). Both projects are licensed under the The MIT License (MIT).
-- [Color Thief PHP](https://github.com/ksubileau/color-thief-php) by [Kevin Subileau](https://github.com/ksubileau) Licensed under the [Creative Commons Attribution 2.5 License](http://creativecommons.org/licenses/by/2.5/).
+- [lazysizes](https://github.com/aFarkas/lazysizes) and [respimage](https://github.com/aFarkas/respimage) by [Alexander Farkas](https://github.com/aFarkas).  
+  Both projects are licensed under the MIT License (MIT).
+- [Color Thief PHP](https://github.com/ksubileau/color-thief-php) by [Kevin Subileau](https://github.com/ksubileau).
+  Licensed under the [Creative Commons Attribution 2.5 License](http://creativecommons.org/licenses/by/2.5/).
+- [StackBlur for Canvas](https://github.com/Quasimondo/QuasimondoJS) by [Mario Klingemann](http://mario@quasimondo.com).  
+  Licensed under an MIT-style License (MIT).
