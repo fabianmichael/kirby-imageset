@@ -79,7 +79,8 @@ class Utils {
       $cacheFile = kirby()->roots()->thumbs() . DS . str_replace('/', DS, $cacheFile) . DS . $image->filename() . '-color.cache';
 
       if(!f::exists($cacheFile) || (f::modified($cacheFile) < $media->modified())) {
-        $color = utils::rgb2hex(ColorThief::getColor($media->root(), 40));
+        $q = max(50, min(10, round($media->width() / 100)));
+        $color = utils::rgb2hex(ColorThief::getColor($media->root(), $q));
         $cache[$media->root()] = $color;
         f::write($cacheFile, $cache[$media->root()]); 
       } else {
@@ -150,7 +151,7 @@ class Utils {
 
       } else if($driver === 'gd') {
         // Walk through all pixels using GD library.
-
+        
         if($extension === 'png') {
           $img    = imagecreatefrompng($root);
         } else if($extension === 'gif') {
@@ -192,9 +193,9 @@ class Utils {
             if($hasAlpha) break;
           }
         }
-      }
 
-      imagedestroy($img);
+        imagedestroy($img);
+      }
 
       // Save to cache file
       file_put_contents($cacheFile, (string) $hasAlpha ? 1 : 0);
