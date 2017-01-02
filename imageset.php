@@ -31,7 +31,7 @@ load([
   'colorthief\\cmap'                                                 => 'vendors' . DS . 'ColorThief' . DS . 'CMap.php',
   'colorthief\\colorthief'                                           => 'vendors' . DS . 'ColorThief' . DS . 'ColorThief.php',
   'colorthief\\pqueue'                                               => 'vendors' . DS . 'ColorThief' . DS . 'PQueue.php',
-  'colorthief\\vbox'                                                 => 'vendors' . DS . 'ColorThief' . DS . 'vbox.php',
+  'colorthief\\vbox'                                                 => 'vendors' . DS . 'ColorThief' . DS . 'VBox.php',
   'colorthief\\image\\imageloader'                                   => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'ImageLoader.php',
   'colorthief\\image\\adapter\\gdimageadapter'                       => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'Adapter' . DS . 'GDImageAdapter.php',
   'colorthief\\image\\adapter\\gmagickimageadapter'                  => 'vendors' . DS . 'ColorThief' . DS . 'Image' . DS . 'Adapter' . DS . 'GmagickImageAdapter.php',
