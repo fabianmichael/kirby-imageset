@@ -36,4 +36,15 @@ class UtilsTest extends ImageSetTestCase {
     $this->assertTrue(Utils::compareFloats(0.12345, 0.12346, 4));
     $this->assertFalse(Utils::compareFloats(0.12345, 0.12346, 5));
   }
+
+  public function testTransparency() {
+
+    $home = $this->siteInstance()->page('home');
+
+    $this->assertTrue(Utils::hasTransparency($home->image('transparency-1bit.gif'), false));
+    $this->assertTrue(Utils::hasTransparency($home->image('transparency-1bit.png'), false));
+    $this->assertTrue(Utils::hasTransparency($home->image('transparency-4bit.png'), false));
+    $this->assertTrue(Utils::hasTransparency($home->image('transparency-8bit.png'), false));
+
+  }
 }

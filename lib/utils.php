@@ -91,7 +91,7 @@ class Utils {
     return $cache[$media->root()];
   }
 
-  public static function hasTransparency($media) {
+  public static function hasTransparency($media, $useCache = true) {
     static $cache = [];
 
     $root      = $media->root();
@@ -103,17 +103,20 @@ class Utils {
     } else {
 
       $kirby     = kirby();
-      $cacheFile = static::thumbDestinationDir($media);
-      $cacheFile = $kirby->roots()->thumbs() . DS . str_replace('/', DS, $cacheFile) . DS . $media->filename() . '-alpha.cache';
 
-      // Try to get alpha value from cache
-      if(array_key_exists($root, $cache)) {
-        // Cache is already in memory
-        return $cache[$root];
-      } else if(f::exists($cacheFile) && (f::modified($cacheFile) >= $media->modified())) {
-        // Try to load cache from disk
-        $cache[$root] = (bool) file_get_contents($cacheFile);
-        return $cache[$root];
+      if($useCache) {
+        $cacheFile = static::thumbDestinationDir($media);
+        $cacheFile = $kirby->roots()->thumbs() . DS . str_replace('/', DS, $cacheFile) . DS . $media->filename() . '-alpha.cache';
+
+        // Try to get alpha value from cache
+        if(array_key_exists($root, $cache)) {
+          // Cache is already in memory
+          return $cache[$root];
+        } else if(f::exists($cacheFile) && (f::modified($cacheFile) >= $media->modified())) {
+          // Try to load cache from disk
+          $cache[$root] = (bool) f::read($cacheFile);
+          return $cache[$root];
+        }
       }
 
       $hasAlpha = false;
@@ -122,7 +125,7 @@ class Utils {
       $bin      = $kirby->option('thumbs.bin', 'convert');
       $identify = dirname($bin) . DS . 'identify';
 
-      if(!file_exists($identify)) {
+      if(!f::exists($identify)) {
         // Falling back to GD driver, if `identify` executable
         // does not exist in same directory, as `convert`.
         $driver = 'gd';
@@ -133,7 +136,6 @@ class Utils {
         // advantage is, that is will not interfere with
         // PHP’s memory limit.
         $command = implode(" ", [$identify, '-verbose', '"' . $root . '"']);
-        
         $output = [];
         
         @exec($command, $output);
@@ -160,48 +162,94 @@ class Utils {
           throw new Exception('Unsupported image format.');
         }
         
-        $width    = imagesx($img);
-        $height   = imagesy($img);
-        $hasAlpha = false;
+        $width     = imagesx($img);
+        $height    = imagesy($img);
+        $trueColor = imageistruecolor($img);
+        $hasAlpha  = false;
 
-        if($width >= 100 && $height>= 100) {
-          // Try to get samples from the image first as a
-          // very coarse resolution.
-          for($y = 0, $yStep = floor($height / 10); $y < $height; $y += 10) {
-            for($x = 0, $xStep = floor($width / 10); $x < $width; $x += 10) {
-              if(((imagecolorat($img, $x, $y) & 0x7F000000) >> 24) > 0) {
-                $hasAlpha = true;
-                // As soon as the first transparent pixel was found, there is no reason to continue.
-                break;
+
+        if($trueColor) {
+
+          if($width >= 100 && $height>= 100) {
+            // Try to get samples from the image first as a
+            // very coarse resolution.
+            for($y = 0, $yStep = floor($height / 10); $y < $height; $y += 10) {
+              for($x = 0, $xStep = floor($width / 10); $x < $width; $x += 10) {
+                if(((imagecolorat($img, $x, $y) & 0x7F000000) >> 24) > 0) {
+                  $hasAlpha = true;
+                  // As soon as the first transparent pixel was found, there is no reason to continue.
+                  break;
+                }
               }
             }
           }
-        }
 
-        if(!$hasAlpha) {
-          // If no transparent pixels where found yet, scan
-          // every single pixel to look for a transparent
-          // one.
-          for($y = 0; $y < $height; $y++) {
-            for($x = 0; $x < $width; $x++) {
-              if(((imagecolorat($img, $x, $y) & 0x7F000000) >> 24) > 0) {
-                $hasAlpha = true;
-                // As soon as the first transparent pixel was found, there is no reason to continue.
-                break;
+          if(!$hasAlpha) {
+            // If no transparent pixels where found yet, scan
+            // every single pixel to look for a transparent
+            // one.
+            for($y = 0; $y < $height; $y++) {
+              for($x = 0; $x < $width; $x++) {
+                if(((imagecolorat($img, $x, $y) & 0x7F000000) >> 24) > 0) {
+                  $hasAlpha = true;
+                  // As soon as the first transparent pixel was found, there is no reason to continue.
+                  break;
+                }
+              }
+              if($hasAlpha) break;
+            }
+          }
+
+        } else {
+          // Indexed Images
+          $transparentColor = imagecolortransparent($img);
+
+          if($transparentColor !== -1) {
+
+            if($width >= 100 && $height>= 100) {
+              // Try to get samples from the image first as a
+              // very coarse resolution.
+              for($y = 0, $yStep = floor($height / 10); $y < $height; $y += 10) {
+                for($x = 0, $xStep = floor($width / 10); $x < $width; $x += 10) {
+                  if(imagecolorat($img, $x, $y) === $transparentColor) {
+                    $hasAlpha = true;
+                    // As soon as the first transparent pixel was found, there is no reason to continue.
+                    break;
+                  }
+                }
               }
             }
-            if($hasAlpha) break;
+
+            if(!$hasAlpha) {
+              // If no transparent pixels where found yet, scan
+              // every single pixel to look for a transparent
+              // one.
+              for($y = 0; $y < $height; $y++) {
+                for($x = 0; $x < $width; $x++) {
+                  if(imagecolorat($img, $x, $y) === $transparentColor) {
+                    $hasAlpha = true;
+                    // As soon as the first transparent pixel was found, there is no reason to continue.
+                    break;
+                  }
+                }
+                if($hasAlpha) break;
+              }
+            }
+
+
           }
         }
 
         imagedestroy($img);
       }
 
-      // Save to cache file
-      file_put_contents($cacheFile, (string) $hasAlpha ? 1 : 0);
-      
-      // Store in memory for current script execution
-      $cache[$root] = $hasAlpha;
+      if($useCache) {
+        // Save to cache file      
+        f::write($cacheFile, (string) $hasAlpha ? 1 : 0);
+        
+        // Store in memory for current script execution
+        $cache[$root] = $hasAlpha;
+      }
 
       return $hasAlpha;
     }
