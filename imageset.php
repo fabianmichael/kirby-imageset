@@ -12,6 +12,7 @@ namespace Kirby\Plugins\ImageSet;
 load([
 
   // ImageSet Core
+  'kirby\\plugins\\imageset\\cache'                                  => 'lib' . DS . 'cache.php',
   'kirby\\plugins\\imageset\\plugin'                                 => 'lib' . DS . 'plugin.php',
   'kirby\\plugins\\imageset\\imageset'                               => 'lib' . DS . 'imageset.php',
   'kirby\\plugins\\imageset\\presets'                                => 'lib' . DS . 'presets.php',

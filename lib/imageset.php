@@ -10,6 +10,7 @@ namespace Kirby\Plugins\ImageSet;
 
 use Exception;
 use F;
+use File;
 use Html;
 use Media;
 use Str;
@@ -85,18 +86,9 @@ class ImageSet extends SourceSet {
     // configuration.
     'css.namespace'       => 'imageset',
     'lazyload.attr'       => 'data-{attr}',
+
+    'cache'               => true,
   ];
-
-  /**
-   * @var int Used internally to generate the ImageSet’s
-   *          hash value.
-   */
-  protected static $instanceCount = 0;
-
-  /**
-   * @var int ID of this instance of the ImageSet object.
-   */
-  protected $id                   = 0;
 
   /**
    * @var array Used to store things like the placeholder or
@@ -105,7 +97,12 @@ class ImageSet extends SourceSet {
    *            every time they are needed.
    */
   protected $cache = [];
+
+  protected $sizes;
   
+  protected static $fileCache;
+  protected static $plugin;
+ 
   /**
    * Creates a new ImageSet.
    * 
@@ -116,9 +113,22 @@ class ImageSet extends SourceSet {
    */
   public function __construct(Media $image = null, $sizes = 'default', $options = null, Kirby $kirby = null) {
     parent::__construct($image, array_merge(static::$defaults, is_array($options) ? $options : []));
-    $this->sources = $this->setupSources($sizes);
-    $this->id      = ++static::$instanceCount;
     $this->kirby   = $kirby ?: kirby();
+
+    if(is_null(static::$fileCache)) {
+      static::$fileCache = Cache::instance();
+      static::$plugin    = Plugin::instance();
+    }
+
+    $this->sizes = (is_string($sizes) && presets::exists($sizes)) ? presets::get($sizes) : $sizes;
+
+    // Try to load ImageSet from cache
+    $cacheValue = $this->option('cache', false) ? static::$fileCache->get($this->image, $this->hash()) : null;
+    if(!is_null($cacheValue) && $cacheValue['imageset.version'] === static::$plugin->version()) {
+      $this->cache['html'] = $cacheValue['html'];
+    } else {
+      $this->sources = $this->setupSources($this->sizes);
+    }
   }
 
   /**
@@ -161,11 +171,6 @@ class ImageSet extends SourceSet {
 
     $sourceWidth  = $this->image->width();
     $sourceHeight = $this->image->height();
-
-    if(is_string($sizes) && presets::exists($sizes)) {
-      // Load preset if set
-      $sizes = presets::get($sizes);
-    }
 
     if(!is_array($sizes) || utils::isArrayAssoc($sizes)) {
        // Single size given, wrap in array
@@ -363,17 +368,6 @@ class ImageSet extends SourceSet {
   }
 
   /**
-   * Returns the ID of the current ImageSet.
-   * 
-   * @return int The id of the imageset, where id is
-   *             increased by 1 for each instance of
-   *             this class created.
-   */
-  public function id() {
-    return $this->id;
-  }
-
-  /**
    * Generates and returns a hash based on the page of
    * imageset’s main image, image filename and instance id.
    * 
@@ -385,15 +379,19 @@ class ImageSet extends SourceSet {
     if(!isset($this->cache['hash'])) {
 
       $image = $this->image();
-      $hash  = [];
+      $hash  = '';
 
-      if(is_a($image, 'File')) {
-        $hash = (int) sprintf('%u', crc32($image->page->uri()));
+      if($image instanceof File) {
+        $hash .= $image->page->uri();
       } else {
-        $hash = (int) sprintf('%u', crc32(url::path()));
+        $hash .= url::path();
       }
 
-      $hash += (int) sprintf('%u', crc32($image->root())) + $this->id();
+      $hash .= $image->filename();
+      $hash .= serialize($this->sizes);
+      $hash .= serialize($this->options);
+
+      $hash = hexdec(substr(md5($hash), 0, 15)); // (int) sprintf('%u', crc32($hash));
 
       $this->cache['hash'] = utils::base62($hash);
     }
@@ -418,27 +416,18 @@ class ImageSet extends SourceSet {
    *  @return string An HTML hes representation of the color (e.g. #cccccc)
    */
   public function color() {
-
-    if(!array_key_exists('color', $this->cache)) {
-      $image     = $this->image();
-      $cacheFile = utils::thumbDestinationDir($image);
-      $cacheFile = $this->kirby->roots()->thumbs() . DS . str_replace('/', DS, $cacheFile) . DS . $image->filename() . '-color.cache';
-
-      if(!f::exists($cacheFile) || (f::modified($cacheFile) < $image->modified())) {
-        $color = ColorThief::getColor($this->image()->root(), max(20, round($image->width() / 50)));
-        $color = utils::rgb2hex($color);
-        f::write($cacheFile, $color); 
-        $this->cache['color'] = $color;
-      } else {
-        $this->cache['color'] = f::read($cacheFile);
-      }
-    }
-
-    return $this->cache['color'];
+    return utils::dominantColor($this->image);
   }
 
+  /**
+   * Test if source image has an alpha channel and
+   * that contains at least one non-opaque pixel.
+   * 
+   * @return bool `true` is the image has transparent pixels,
+   *               otherwise `false`.
+   */
   public function alpha() {
-    return utils::hasTransparency($this->image());
+    return utils::hasTransparency($this->image);
   }
 
   /**
@@ -548,6 +537,12 @@ class ImageSet extends SourceSet {
    */
   public function html() {
 
+    if(isset($this->cache['html'])) {
+      // If cached ImageSet is available, return the cached
+      // HTML.
+      return $this->cache['html'];
+    }
+
     $sources = [];
     $image   = null;    
 
@@ -555,10 +550,24 @@ class ImageSet extends SourceSet {
       'imageset' => $this,
     ];
 
-    $html = $this->kirby->component('snippet')->render('imageset', $data, true);
+    $html = utils::compressHTML($this->kirby->component('snippet')->render('imageset', $data, true));
+
+    if(!$this->kirby->option('imageset.styles.consolidate')) {
+      $html = str_replace(' ' . static::STYLES_IDENTIFIER_ATTRIBUTE . '>', '>', $html);
+    }
+
+    // Store in cache
+    if($this->option('cache')) {
+      static::$fileCache->set($this->image, $this->hash(), [
+        'imageset.version' => static::$plugin->version(),
+        'html'             => $html,
+      ]);
+    }
+
+    $this->cache['html'] = $html;
     
     // Compress all HTML output from snippet into one line
-    return utils::compressHTML($html);
+    return $html;
   }
 
   /**
@@ -581,13 +590,7 @@ class ImageSet extends SourceSet {
    */
   public function outputStyle() {
     $style = $this->option('output');
-
-    if($style !== 'auto') {
-      // forced style
-      return $style;
-    }
-
-    return 'normal';
+    return ($style !== 'auto' ? $style : 'normal');
   }
 
   /**
@@ -713,9 +716,8 @@ class ImageSet extends SourceSet {
         $placeholder  = ($this->placeholder() && $this->option('placeholder') !== 'color');
 
         if($multiple) {
-          $imageRatio   = $this->image->ratio();
+          $imageRatio = $this->image->ratio();
         }
-
 
         foreach(array_reverse($this->sources) as $source) {
           // !important is used to override the fallback ratio set on the `.ratio__fill` element.
@@ -735,7 +737,6 @@ class ImageSet extends SourceSet {
               }
             }
           }
-          //$rule .= "/* " . $source->ratio() . " */";
 
           if($media) {
             $rule = '@media ' . $media . ' { ' . $rule . ' }';
@@ -777,11 +778,7 @@ class ImageSet extends SourceSet {
    *                enabled. Otherwise an empty string.
    */
   public function styleIdentifierAttribute() {
-    if($this->kirby->option('imageset.styles.consolidate')) {
-      return ' ' . static::STYLES_IDENTIFIER_ATTRIBUTE;
-    } else {
-      return '';
-    }
+    return ' ' . static::STYLES_IDENTIFIER_ATTRIBUTE;
   }
 
   /**

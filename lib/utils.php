@@ -13,11 +13,12 @@ use F;
 use ColorThief\ColorThief;
 
 class Utils {
+
+  static $fileCache;
   
   public static function isArrayAssoc($arr) {
     return (is_array($arr) && array_keys($arr) !== range(0, sizeof($arr) - 1));
   }
-
 
   public static function isArraySequential($arr) {
     return (is_array($arr) && array_keys($arr) === range(0, sizeof($arr) - 1));
@@ -70,29 +71,32 @@ class Utils {
   }
 
 
-  public static function dominantColor($media) {
-    static $cache = [];
+  public static function dominantColor($media, $useCache = true) {
+    static $cache     = [];
 
-    if(!isset($cache[$media->root()])) {
-      $image     = $media;
-      $cacheFile = static::thumbDestinationDir($image);
-      $cacheFile = kirby()->roots()->thumbs() . DS . str_replace('/', DS, $cacheFile) . DS . $image->filename() . '-color.cache';
+    if(is_null(static::$fileCache)) static::$fileCache = Cache::instance();
 
-      if(!f::exists($cacheFile) || (f::modified($cacheFile) < $media->modified())) {
-        $q = max(50, min(10, round($media->width() / 100)));
-        $color = utils::rgb2hex(ColorThief::getColor($media->root(), $q));
-        $cache[$media->root()] = $color;
-        f::write($cacheFile, $cache[$media->root()]); 
+    $root = $media->root();
+
+    if(!array_key_exists($root, $cache)) {
+      $cacheValue = $useCache ? static::$fileCache->get($media, 'color') : null;
+      if(!is_null($cacheValue)) {
+        $cache[$root] = (string) $cacheValue;
       } else {
-        $cache[$media->root()] = f::read($cacheFile);
+        $q = max(50, min(10, round($media->width() / 100)));
+        $color = utils::rgb2hex(ColorThief::getColor($root, $q));
+        static::$fileCache->set($media, 'color', $color);
+        $cache[$root] = $color;
       }
     }
 
-    return $cache[$media->root()];
+    return $cache[$root];
   }
 
   public static function hasTransparency($media, $useCache = true) {
     static $cache = [];
+
+    if(is_null(static::$fileCache)) static::$fileCache = Cache::instance();
 
     $root      = $media->root();
     $extension = strtolower($media->extension());
@@ -102,19 +106,19 @@ class Utils {
       return false;
     } else {
 
-      $kirby     = kirby();
+      $kirby = kirby();
 
       if($useCache) {
-        $cacheFile = static::thumbDestinationDir($media);
-        $cacheFile = $kirby->roots()->thumbs() . DS . str_replace('/', DS, $cacheFile) . DS . $media->filename() . '-alpha.cache';
+        
+        $cacheValue = $useCache ? static::$fileCache->get($media, 'alpha') : null;
 
         // Try to get alpha value from cache
         if(array_key_exists($root, $cache)) {
           // Cache is already in memory
           return $cache[$root];
-        } else if(f::exists($cacheFile) && (f::modified($cacheFile) >= $media->modified())) {
+        } else if(!is_null($cacheValue)) {
           // Try to load cache from disk
-          $cache[$root] = (bool) f::read($cacheFile);
+          $cache[$root] = $cacheValue;
           return $cache[$root];
         }
       }
@@ -245,7 +249,7 @@ class Utils {
 
       if($useCache) {
         // Save to cache file      
-        f::write($cacheFile, (string) $hasAlpha ? 1 : 0);
+        static::$fileCache->set($media, 'alpha', $hasAlpha);
         
         // Store in memory for current script execution
         $cache[$root] = $hasAlpha;

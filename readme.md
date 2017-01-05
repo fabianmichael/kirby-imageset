@@ -319,6 +319,7 @@ c::set('imageset.noscript', false);
 | `noscript.priority` | `'ratio'` | `'ratio'`, `'compatibility'` | `ratio` = The image set will always use the same screen-estate when JavaScript is disabled. Use this option, when a change of an image’s aspect-ratio would destroy your layout. In browsers that neither provide native support for [`object-fit`](http://caniuse.com/#search=object-fit) nor the [`<picture>`](http://caniuse.com/#feat=picture) element *(i.e IE10-11, Edge)*,  this will lead to distorted images when the image set has multiple aspect-ratios defined.<br>`compatibility` = image sets will always show their fallback-size when JavaScript is disabled. Sizes with different aspect-ratios are ignored. This works in any browser . |
 | `output` | `'auto'` | `'auto'`, `'plain'` | `'auto'` = Image set will produce full-featured HTML according to your options.<br>`'plain'` = HTML output will be plain HTML without any classes, placeholders etc. `img` and `source` tags are also rendered in XHTML-compatible syntax. |
 | `output.xhtml` | `false` | `true`, `false` | When enabled, ImageSet will generate XHTML/XML-compatible markup for all image sets. This means that a trailing slash is added to void elements and a different handling of special chars. |
+| `cache`  | `true` | `true`, `false` | When enabled, the HTML output of image sets is always cached, resulting for major speed improvements. |
 
 ### 4.4 Working with Size Presets
 

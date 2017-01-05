@@ -2,6 +2,7 @@
 
 use Kirby\Plugins\ImageSet\ImageSet as ImageSetClass;
 use Kirby\Plugins\ImageSet\Presets;
+use Kirby\Plugins\ImageSet\Utils;
 
 /**
  * Helper function for using imageset in templates.
@@ -11,9 +12,17 @@ function imageset($image, $sizes = 'default', $options = null) {
 }
 
 // Register file helper method.
-kirby()->set('file::method', 'imageset', function($file, $sizes = 'default', $options = null) {
+file::$methods['imageset'] = function($file, $sizes = 'default', $options = null) {
   return (new ImageSetClass($file, $sizes, $options));
-});
+};
+
+file::$methods['alpha'] = function($file) {
+  return utils::hasTransparency($file);
+};
+
+file::$methods['dominantColor'] = function($file) {
+  return utils::dominantColor($file);
+};
 
 class imageset {
   
