@@ -40,7 +40,7 @@ class Cache {
     if($image instanceof File) {
       $path = $image->page->id();
       $file = $image->filename();
-    } else if($image instanceof Media) {
+    } else {
       $path  = dirname($media->root());
       $file  = $media->filename();
       $index = $this->kirby->roots()->index();
