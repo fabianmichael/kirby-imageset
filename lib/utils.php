@@ -39,7 +39,6 @@ class Utils {
     return 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
   }
 
-
   public static function rgb2hex($rgb) {
     return '#' . sprintf('%02x', $rgb[0]) . sprintf('%02x', $rgb[1]) . sprintf('%02x', $rgb[2]);
   }
@@ -78,15 +77,20 @@ class Utils {
 
     $root = $media->root();
 
-    if(!array_key_exists($root, $cache)) {
+    if(!$useCache || !array_key_exists($root, $cache)) {
+      
       $cacheValue = $useCache ? static::$fileCache->get($media, 'color') : null;
+      
       if(!is_null($cacheValue)) {
         $cache[$root] = (string) $cacheValue;
       } else {
         $q = max(50, min(10, round($media->width() / 100)));
         $color = utils::rgb2hex(ColorThief::getColor($root, $q));
-        static::$fileCache->set($media, 'color', $color);
-        $cache[$root] = $color;
+        
+        if($useCache) {
+          static::$fileCache->set($media, 'color', $color);
+          $cache[$root] = $color;
+        }
       }
     }
 
