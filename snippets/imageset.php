@@ -57,7 +57,7 @@ use Html;
       <span class="<?= $imageset->className('__ratio-fill') ?>"<?= (!$imageset->hasCssRules() || $imageset->option('noscript.priority') === 'compatibility') ? ' style="padding-top: ' . utils::formatFloat(1 / $imageset->ratio() * 100, 10) . '%;"' : '' ?>></span>
     <?php endif ?>
   
-    <?= $imageset->placeholder() ?>
+    <?php if($placeholder = $imageset->placeholder()) echo $placeholder->html(); ?>
   
     <?php if($imageset->count() > 1): /* image set with multiple ratios */ ?> 
     
@@ -89,6 +89,7 @@ use Html;
         <?php if($imageset->option('noscript.priority') === 'ratio'): ?>
           
           <?php if($imageset->count() > 1): ?>
+            
             <picture>
               <?php foreach($imageset->alternativeSources() as $source): ?>
                 <?= $source->tag(['lazyload' => false]) ?>
