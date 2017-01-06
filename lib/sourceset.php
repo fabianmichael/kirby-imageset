@@ -9,7 +9,6 @@
 namespace Kirby\Plugins\ImageSet;
 
 use A;
-use ArrayAccess;
 use Exception;
 use Html;
 
