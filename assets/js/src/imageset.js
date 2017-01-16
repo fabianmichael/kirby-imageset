@@ -20,8 +20,9 @@
  * 
  */
 
-//=require includes/stackblur.js
-;(function(window, document) {
+//=include includes/stackblur.js
+
+;(function(window, document, Math, Date, undefined) {
   'use strict';
 
   var _getElementsByClassName = 'getElementsByClassName';
@@ -43,29 +44,25 @@
       __placeholderElementClass         = prefix + '__placeholder',
       __imagesetHasJSClass              = prefix + '-js';
 
-      // __blurredPlaceholderRadius     = 15,
-      // __lqipPlaceholderRadius        = 7;
-
   /* =====  Variable Shortcuts  ============================================= */
 
   var docElement               = document.documentElement;
 
   var ua                       = navigator.userAgent;
 
-  var requestAnimationFrame    = window.requestAnimationFrame || setTimeout;
-
-  var Date                     = window.Date;
-
   var _addEventListener        = 'addEventListener',
       _getAttribute            = 'getAttribute',
-      _removeAttribute         = 'removeAttribute',
       _MutationObserver        = 'MutationObserver',
       _classList               = 'classList',
       _className               = 'className',
       _hasAttribute            = 'hasAttribute',
 
       _dataSrc                 = 'data-src',
-      _dataSrcset              = 'data-srcset'; 
+      _dataSrcset              = 'data-srcset',
+
+      _devicePixelRatio        = 'devicePixelRatio',
+      _naturalWidth            = 'naturalWidth',
+      _naturalHeight           = 'naturalHeight'; 
 
   /* =====  Utilities & Helper Functions  =================================== */
   
@@ -84,7 +81,7 @@
   // Shim layer with setTimeout fallback. Look only for unprefixed
   // requestAnimationFrame, because all modern browsern already removed the
   // prefix.
-  var rAF = window.requestAnimationFrame || function(callback) { setTimeout(callback, 1000/60); };
+  var rAF = window.requestAnimationFrame || function(fn) { setTimeout(fn, 1000/60); };
 
   // var supportsObjectFit,
   //     supportsObjectPosition;
@@ -106,31 +103,23 @@
 
   /* -----  Utilities  ------------------------------------------------------ */
 
-  var ready = function(fn) {
+  function ready(fn) {
     if(document.readyState != 'loading') {
       fn();
     } else {
       document[_addEventListener]('DOMContentLoaded', fn);
     }
-  };
+  }
 
   // Extend an object with another one
-  var extend = function(base, obj) {
+  function extend(base, obj) {
     for(var i in obj) {
       if(obj.hasOwnProperty(i)) {
         base[i] = obj[i];
       }
     }
     return base;
-  };
-
-  var imageLoaded = function(img, fn) {
-    if(!img.complete || (typeof img.naturalWidth === "undefined") || img.naturalWidth === 0) {
-      img[_addEventListener]("load", fn);
-    } else {
-      fn();
-    }
-  };
+  }
 
   function debounce(fn, delay) {
     var timer = null;
@@ -143,10 +132,18 @@
     };
   }
 
-  var AnimationQueue = (function() {
+  function imageLoaded(img, fn) {
+    if(!img.complete || (typeof img[_naturalWidth] === "undefined") || img[_naturalWidth] === 0) {
+      img[_addEventListener]("load", fn);
+    } else {
+      fn();
+    }
+  }
 
+
+  var RenderQueue = (function() {
     var queue       = [],
-        _inProgress = false;
+        inProgress  = false;
 
     function add(callback) {
       queue.push(callback);
@@ -158,15 +155,15 @@
       callback();
 
       if(!queue.length) {
-        _inProgress = false;
+        inProgress = false;
       } else {
         rAF(loop);
       }
     }
 
     function run() {
-      if(_inProgress) return;
-      _inProgress = true;
+      if(inProgress) return;
+      inProgress = true;
       rAF(loop);
     }
 
@@ -178,13 +175,13 @@
   // Class utilities using `classList` API if available.
   // Fallbacks inspired by: https://gist.github.com/devongovett/1381839
   var hasClass = (function() {
-    return document.documentElement[_classList] ?
+    return docElement[_classList] ?
       function(el, cls) { return el[_classList].contains(cls); } :
       function(el, cls) { return !!~el[_className].split(/\s+/).indexOf(cls); };
   })();
 
   var addClass = (function() {
-    return document.documentElement[_classList] ?
+    return docElement[_classList] ?
       function(el, cls) { el[_classList].add(cls); } :
       function(el, cls) {
         var classes = el[_className].split(/\s+/);
@@ -196,7 +193,7 @@
   })();
 
   var removeClass = (function() {
-    return document.documentElement[_classList] ?
+    return docElement[_classList] ?
       function(el, cls) { return el[_classList].remove(cls); } :
       function(el, cls) {
         var tokens = el[_className].split(/\s+/),
@@ -208,20 +205,33 @@
       };
   })();
 
+  function fixCanvasResolution(canvas, ctx) {
+    // Adjustments for HiDPI/Retina screens
+    var devicePixelRatio  = window.devicePixelRatio          || 1,
+        backingStoreRatio = ctx.webkitBackingStorePixelRatio || 1, // Compatibility with (older?) Safari
+        pixelRatio        = devicePixelRatio / backingStoreRatio;
+
+    if(devicePixelRatio !== backingStoreRatio) {
+      var oldWidth        = canvas.width,
+          oldHeight       = canvas.height;
+      canvas.width        = oldWidth  * pixelRatio;
+      canvas.height       = oldHeight * pixelRatio;
+      //canvas.style.width  = oldWidth  + 'px';
+      //canvas.style.height = oldHeight + 'px';
+      ctx.scale(pixelRatio, pixelRatio);
+    }
+
+    return pixelRatio;
+  }
+
 
   /* =====  ImageSets & Placeholders  ======================================= */
 
-  var placeholderRenderStack = [];
-
-  function render() {
-
-  }
-
-  /* ----- Special Initialization for Opera Mini  --------------------------- */
+  /* -----  Special Initialization for Opera Mini  -------------------------- */
 
   // Make sure to add JS class to document element, if
   // it has not been done by any other script.
-  addClass(document.documentElement, __imagesetHasJSClass);
+  addClass(docElement, __imagesetHasJSClass);
 
   if(isOperaMini) {
     // Opera Mini has limited DOM Event support and does not
@@ -245,31 +255,19 @@
         // here for possible implementations in the future.
         for(var i = 0, l = sources.length; i < l; i++) {
           var s = sources[i];
-          if(s[_hasAttribute](_dataSrcset)) {
-            s.srcset = s[_getAttribute](_dataSrcset);
-            s[_removeAttribute](_dataSrcset);
-          }
-          if(s[_hasAttribute](_dataSrc)) {
-            s.src = s[_getAttribute](_dataSrc);
-            s[_removeAttribute](_dataSrc);
-          }
+          if(s[_hasAttribute](_dataSrcset)) s.srcset = s[_getAttribute](_dataSrcset);
+          if(s[_hasAttribute](_dataSrc))    s.src    = s[_getAttribute](_dataSrc);
         }
 
-        if(img[_hasAttribute](_dataSrcset)) {
-          img.srcset = img[_getAttribute](_dataSrcset);
-          img[_removeAttribute](_dataSrcset);
-        }
-        if(img[_hasAttribute](_dataSrc)) {
-          img.src = img[_getAttribute](_dataSrc);
-          img[_removeAttribute](_dataSrc);
-        }
+        if(img[_hasAttribute](_dataSrcset)) img.srcset = img[_getAttribute](_dataSrcset);
+        if(img[_hasAttribute](_dataSrc))    img.src    = img[_getAttribute](_dataSrc);
 
       } else {
         
         var fallbackSource = sources.length > 0 ? sources[sources.length - 1] : img,
             candidates     = fallbackSource[_getAttribute](_dataSrcset).split(/,\s+/);
 
-        for(var n = sources.length; n--;) {
+        for(var n = sources.length; n >= 0; n--) {
           // Delete sources elements 
           sources[n].parentNode.removeChild(sources[n]);
         }
@@ -293,7 +291,7 @@
 
   /* ----- Global Variables Setup  ------------------------------------------ */
  
-  /* ·····  ImageSet-specific Helper functions  ······························*/
+  /* ·····  ImageSet-specific Helper functions  ····························· */
 
   var placeholderRegexp = new RegExp(__wrapperPlaceholderStyleClass + '([a-z0-9_-]+)\\s*', 'i');
 
@@ -304,63 +302,59 @@
 
   var placeholderRenderer = {};
 
-
-  if(!supportsPixelatedImages || isSafari) {
-
-    var pixelRatio = (function() {
-      // To account for zoom, change to use deviceXDPI instead of systemXDPI
-      if (window.screen.systemXDPI !== undefined && window.screen.logicalXDPI !== undefined &&
-          window.screen.systemXDPI > window.screen.logicalXDPI) {
-        // Only allow for values > 1
-        return window.screen.systemXDPI / window.screen.logicalXDPI;
-      } else if (window.devicePixelRatio !== undefined) {
-        return window.devicePixelRatio;
-      }
-      return 1;
-    })();
-
-    placeholderRenderer.mosaic = function(el) {
-
-      var canvas      = document.createElement("canvas"),
-          ctx         = canvas.getContext("2d"),
-          source      = el[_getElementsByClassName](__placeholderElementClass)[0];
-
-      var process = function() {
-        var width        = source.naturalWidth,
-            height       = source.naturalHeight,
-            scaledWidth  = Math.round(el.offsetWidth * pixelRatio),
-            scaledHeight = Math.round(el.offsetWidth / width * height * pixelRatio);
-
-        canvas.width  = scaledWidth;
-        canvas.height = scaledHeight;
-
-        ctx.mozImageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
-        ctx.msImageSmoothingEnabled = false;
-        ctx.imageSmoothingEnabled = false;
-        
-        canvas.setAttribute("aria-hidden", true);
-        canvas[_className] = source[_className];
-        
-        AnimationQueue.add(function(){
-          ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
-          source.parentNode.replaceChild(canvas, source);
-        });
-      };
-
-      imageLoaded(source, process);
-    };
-  }
+  /* -----  Placeholder Render Functions  ----------------------------------- */
 
   if(supportsCanvas) {
+
+  /* ·····  Mosaic  ························································· */
+
+    if(!supportsPixelatedImages || isSafari) {
+
+      placeholderRenderer.mosaic = function(el) {
+
+        var canvas      = document.createElement("canvas"),
+            ctx         = canvas.getContext("2d"),
+            source      = el[_getElementsByClassName](__placeholderElementClass)[0];
+
+        var process = function() {
+
+          fixCanvasResolution(canvas, ctx);
+
+          var width        = source[_naturalWidth],
+              height       = source[_naturalHeight],
+              scaledWidth  = Math.round(el.offsetWidth),
+              scaledHeight = Math.round(el.offsetWidth / width * height);
+
+          canvas.width  = scaledWidth;
+          canvas.height = scaledHeight;
+
+          ctx.mozImageSmoothingEnabled = false;
+          ctx.webkitImageSmoothingEnabled = false;
+          ctx.msImageSmoothingEnabled = false;
+          ctx.imageSmoothingEnabled = false;
+          
+          canvas.setAttribute("aria-hidden", true);
+          canvas[_className] = source[_className];
+          
+          RenderQueue.add(function(){
+            ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
+            source.parentNode.replaceChild(canvas, source);
+          });
+        };
+
+        imageLoaded(source, process);
+      };
+    }
+
+  /* ·····  Blurred & LQIP  ················································· */
 
     var applyPlaceholderBlur = function(el, radius, mul_sum, shg_sum) {
 
       var source = el[_getElementsByClassName](__placeholderElementClass)[0];
 
       var process = function() {
-        var width        = source.naturalWidth,
-            height       = source.naturalHeight,
+        var width        = source[_naturalWidth],
+            height       = source[_naturalHeight],
             scaledWidth  = el.offsetWidth,
             scaledHeight = Math.round(el.offsetWidth / width * height),
             
@@ -374,7 +368,7 @@
         canvas.setAttribute("aria-hidden", true);
         canvas[_className] = source[_className];
         
-        AnimationQueue.add(function(){
+        RenderQueue.add(function(){
           ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
           stackBlur[alpha ? 'canvasRGBA' : 'canvasRGB'](canvas, 0, 0, scaledWidth, scaledHeight, radius, mul_sum, shg_sum);
           source.parentNode.replaceChild(canvas, source);
@@ -386,8 +380,223 @@
 
     placeholderRenderer.blurred = function(el) { applyPlaceholderBlur(el, 15, 512, 17); };
     placeholderRenderer.lqip    = function(el) { applyPlaceholderBlur(el,  7, 512, 15); };
+
+  /* ·····  Triangles  ······················································ */
+
+  var triangleMosaicFilter = function(canvas, side, alpha) {
+      
+    alpha = !!alpha;
+
+    // Canvas Properties
+    var ctx             = canvas.getContext('2d'),
+        imageData       = ctx.getImageData(0, 0, canvas.width, canvas.height),
+        pixels          = imageData.data,
+        imageDataWidth  = imageData.width,
+        imageDataHeight = imageData.height,
+        xMax            = imageDataWidth  - 1,
+        yMax            = imageDataHeight - 1;
+        
+    // Triangle Properties
+    var height         = Math.round(side * (Math.sqrt(3)/2)), // Triangle height.
+        halfHeight     = height / 2,
+        halfSide       = side   / 2;   
+
+    //Update canvas if needed (HiDPI/Retina screens)
+    var pixelRatio     = fixCanvasResolution(canvas, ctx);
+    
+    // Utility functions
+    var drawTriangle  = function(x, y, stroke, directionRight) {
+      directionRight = directionRight || false;
+      var xTip  = directionRight ? height : 0,
+          xBase = directionRight ? 0 : height;
+      ctx.translate(x, y);
+      ctx.beginPath();
+      ctx.moveTo(xBase, 0);
+      ctx.lineTo(xTip, halfSide);
+      ctx.lineTo(xBase, side);
+      ctx.fill();
+      ctx.closePath();
+      ctx.translate(-x, -y);
+    };
+
+    // Utility functions
+    var getColor = function(x, y) {
+      var colorOffset = y * imageDataWidth * 4 + x * 4;
+      return pixels.slice(colorOffset, colorOffset + 4);
+    };
+
+    var getAlpha = function(x, y) { return pixels[y * imageDataWidth * 4 + x * 4 + 3]; };
+
+    var getAverageAlphaFromPoints = function(points) {
+      var alpha = 0, i = 0, len = points.length;
+      for(; i < len; i++) {
+        alpha += pixels[points[i][1] * imageDataWidth * 4 + points[i][0] * 4 + 3];
+      }
+      return alpha / len;
+    };
+
+    var rgb  = function(color) { return "rgb(" + color.slice(0, 3).join(",") + ")"; };
+    var rgba = function(color) { color[3] /= 255; return "rgba(" + color.join(",") + ")"; };
+    
+    var sanitizeX = function(x) { return Math.max(0, Math.min(Math.round(x), xMax)); };
+    var sanitizeY = function(y) { return Math.max(0, Math.min(Math.round(y), yMax)); };
+
+    var stepX, xSteps = Math.ceil(imageDataWidth  / height) + 1, // make sure, that canvas is
+        stepY, ySteps = Math.ceil(imageDataHeight / side)   + 1, // completely filled.
+        posX, posY, sanitizedPosX, sanitizedPosY,
+        rectColor,
+        rectColorPosY,
+        trianglePosY,
+        triangleBaseX,
+        triangleTipX,
+        triangleColor,
+        triangleColorPosY,
+        triangleColorPosX,
+        sanitizedTriangleCenterX,
+        sanitizedTriangleCenterY,
+        trianglePointsRight,
+        points,
+        averageAlpha,
+        i;
+
+
+    if(alpha) {
+      // Generate Alpha Mask
+      for(stepY = 0; stepY < ySteps; stepY++) {
+        posY               = stepY * side;
+        rectColorPosY      = sanitizeY(posY + halfSide);
+        trianglePosY       = posY - halfSide;
+        triangleColorPosY  = sanitizeY(posY);   
+        
+        for(stepX = 0; stepX < xSteps; stepX++) {
+          posX = stepX * height;
+          trianglePointsRight = stepX % 2 !== 0;
+          sanitizedPosX       = sanitizeX(posX);
+          sanitizedPosY       = sanitizeY(posY);
+          
+          // Get average alpha for rect and draw it
+          triangleTipX             = sanitizeX(trianglePointsRight ? posX + height - 1 : posX);
+          triangleBaseX            = sanitizeX(trianglePointsRight ? posX : posX + height - 1);
+          sanitizedTriangleCenterX = sanitizeX(posX + halfHeight);
+          sanitizedTriangleCenterY = sanitizeY(posY + halfSide);
+
+          // For calculating alpha transparency, we’re using
+          // the average color of the area covered by
+          // triangles and rects. Although it’s slower than
+          // picking the color value of a single pixel,
+          // results are way better.
+          points = [
+            [ triangleBaseX            , sanitizedPosY              ],
+            [ triangleTipX             , sanitizedTriangleCenterY   ],
+            [ triangleBaseX            , sanitizeY(posY + side - 1) ],
+            [ sanitizedTriangleCenterX , sanitizedTriangleCenterY   ],
+            [ sanitizedTriangleCenterX , sanitizedTriangleCenterY   ],
+          ];
+
+          averageAlpha  = Math.round(getAverageAlphaFromPoints(points));
+          ctx.fillStyle = rgba([averageAlpha, 0, 0, 255]);
+          ctx.fillRect(posX, posY, height, side);
+
+          // Get average alpha for triangle and draw it
+          points = [
+            [ triangleBaseX            , sanitizeY(posY - halfSide)     ],
+            [ triangleTipX             , sanitizedPosY                  ],
+            [ triangleBaseX            , sanitizeY(posY + halfSide - 1) ],
+            [ sanitizedTriangleCenterX , sanitizedPosY                  ],
+            [ sanitizedTriangleCenterX , sanitizedPosY                  ],
+          ];
+
+          averageAlpha  = Math.round(getAverageAlphaFromPoints(points));
+          ctx.fillStyle = rgba([averageAlpha, 0, 0, 255]);
+          drawTriangle(posX, trianglePosY, false, trianglePointsRight);
+        }
+      }
+
+      // Move red channel to alpha channel
+      var alphaImageData  = ctx.getImageData(0, 0, canvas.width, canvas.height),
+          alphaData       = alphaImageData.data,
+          alphaDataLength = alphaData.length;
+
+      for(i = 0; i < alphaDataLength; i += 4) {
+        alphaData[i + 3] = alphaData[i];
+      }
+
+      ctx.putImageData(alphaImageData, 0, 0);
+
+      // Following instructions will use alpha mask
+      ctx.globalCompositeOperation = "source-atop";
+    }
+
+    // Draw the final triangle mosaic
+    for(stepY = 0; stepY < ySteps; stepY++) {
+      posY               = stepY * side;
+      rectColorPosY      = sanitizeY(posY + halfSide);
+      trianglePosY       = posY - halfSide;
+      triangleColorPosY  = sanitizeY(posY);   
+      for(stepX = 0; stepX < xSteps; stepX++) {
+        // It’s faster and produces better looking results,
+        // i.e. eliminates artifacts at the edges of triangles
+        // when drawing a rect first and then draw a
+        // triangle that if shifted upwards by half of it’s
+        // height.
+        posX                = stepX * height;
+        triangleColorPosX   = sanitizeX(posX + halfHeight);
+        trianglePointsRight = (stepX % 2 !== 0);
+
+        // For the final layer, only one color is picked
+        // for the rect and the triangle. This is way faster
+        // than the method used to calculate the alpha mask,
+        // but results are sufficient for a decent quality
+        // of the result.
+        ctx.fillStyle = rgb(getColor(triangleColorPosX, rectColorPosY));
+        ctx.fillRect(posX, posY, height, side);
+        
+        ctx.fillStyle = rgb(getColor(triangleColorPosX, triangleColorPosY));
+        drawTriangle(posX, trianglePosY, false, trianglePointsRight);
+      }
+    }
+
+    if(alpha) {
+      // Reset composite operation, in case that other
+      // scripts want to manipulate the canvas further.
+      ctx.globalCompositeOperation = "source-over";
+    }
+  };
+
+  placeholderRenderer.triangles = function(el) {
+
+      var source   = el[_getElementsByClassName](__placeholderElementClass)[0],
+          hasAlpha = hasClass(el, __wrapperAlphaClass);
+
+      var process = function() {
+        var width        = source[_naturalWidth],
+            height       = source[_naturalHeight],
+            scaledWidth  = el.offsetWidth,
+            scaledHeight = Math.round(el.offsetWidth / width * height),
+            
+            canvas       = document.createElement("canvas"),
+            ctx          = canvas.getContext("2d"),
+            alpha        = hasClass(el, __wrapperAlphaClass);
+
+        canvas.width  = scaledWidth;
+        canvas.height = scaledHeight;
+        
+        canvas.setAttribute("aria-hidden", true);
+        canvas[_className] = source[_className];
+        
+        RenderQueue.add(function(){
+          ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
+          triangleMosaicFilter(canvas, 40, hasAlpha);
+          source.parentNode.replaceChild(canvas, source);
+        });
+      };
+
+      imageLoaded(source, function() { process(); });
+    };
+
   }
 
+  /* =====  ImageSet  ======================================================= */
 
   var imageset = (function() {
     
@@ -406,6 +615,8 @@
         style = getPlaceholderStyle(wrapper);
         
         if(style && placeholderRenderer[style]) {
+          // Render placeholder, if a renderer for given
+          // imageset exists.
           addClass(wrapper, __wrapperPlaceholderRenderedClass);
           placeholderRenderer[style](wrapper);
         }
@@ -465,7 +676,7 @@
 
   ready(imageset.init);
 
-})(window, document);
+})(window, document, Math, Date);
 
 //=require includes/lazysizes.js
 //=require includes/ls.static-gecko-picture.js
