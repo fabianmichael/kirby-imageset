@@ -43,32 +43,6 @@ class Lqip extends Base {
     ];
 
     return '<img ' . html::attr($attr) . $this->trailingSlash() . '>';
-  } 
-
-  // public function html() {
-    
-  //   $width  = $this->thumb->width();
-  //   $height = $this->thumb->height();
-  //   $id     = 'imageset-filter-' . uniqid();
-
-  //   $html = [
-  //     '<svg color-interpolation-filters="sRGB" viewbox="0 0 ' . $width . ' ' . $height . '" preserveAspectRatio="xMidYMid slice" class="imageset__placeholder" aria-hidden="true">',
-  //     '<filter id="' . $id . '"><feGaussianBlur in="SourceGraphic" stdDeviation="0.75" /></filter>',
-  //     '<image width="' . $width . '" height="' . $height . '" xlink:href="' . $this->thumb->dataUri() . '" filter="url(#' . $id . ')" />',
-  //     '</svg>',
-  //   ];
-
-  //   return implode('', $html);
-
-  //   // $color = utils::dominantColor($this->source);
-    
-  //   // $img = html::tag('span', [
-  //   //   'style' => 'background-image: url(' . $this->thumb->dataUri() . ');',
-  //   // ]);
-
-  //   // return html::tag('span', $img, [
-  //   //   'class' => $this->option('class'),
-  //   //   'style' => 'background-color: ' . $color . ';',
-  //   // ]);
-  // }
+  }
+  
 }

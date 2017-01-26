@@ -148,4 +148,5 @@ class Base {
   public function trailingSlash() {
     return $this->options['output.xhtml'] ? ' /' : '';
   }
+  
 }

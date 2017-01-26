@@ -37,4 +37,5 @@ class Color extends Base {
 
     return html::tag('span', $attr);
   }
+  
 }
