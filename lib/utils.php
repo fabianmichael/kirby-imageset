@@ -8,9 +8,11 @@
 
 namespace Kirby\Plugins\ImageSet;
 
+use ColorThief\ColorThief;
 use Exception;
 use F;
-use ColorThief\ColorThief;
+use File;
+use Thumb;
 
 class Utils {
 
@@ -84,13 +86,42 @@ class Utils {
       if(!is_null($cacheValue)) {
         $cache[$root] = (string) $cacheValue;
       } else {
-        $q = max(50, min(10, round($media->width() / 100)));
-        $color = utils::rgb2hex(ColorThief::getColor($root, $q));
-        
+        $width    = $media->width();
+        $height   = $media->height();
+        $pixels   = $width * $height;
+        $useThumb = ($pixels > 250000);
+  
+        if($useThumb) {
+
+          $hash   = md5(microtime(true));
+          $params = [
+            'imagekit.lazy' => false,
+            'quality'       => 100,
+            'filename'      => "{safeName}-{$hash}-tmp.{extension}",
+          ];
+
+          if($width > $height) {
+            $params['width'] = 500;
+          } else {
+            $params['height'] = 500;
+          }
+
+          // Do color caclulation in thumb file and delete
+          // it after done.
+          $thumb = ($media instanceof File) ? $media->thumb($params) : new Thumb($media, $params);
+          $color = ColorThief::getColor($thumb->root());
+          f::remove($thumb->root());
+        } else {
+          $color = ColorThief::getColor($file, 10);
+        }
+
+        $color = utils::rgb2hex($color);
+          
         if($useCache) {
           static::$fileCache->set($media, 'color', $color);
           $cache[$root] = $color;
         }
+
       }
     }
 
