@@ -71,4 +71,5 @@ class Mosaic extends Base {
     
     imagegif($image, $root);
   }
+  
 }

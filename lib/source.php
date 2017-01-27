@@ -23,7 +23,7 @@ class Source {
     $this->options = is_array($options) ? $options : [];
     $this->kirby   = $kirby ?: kirby();
 
-    if(strtolower($this->image->extenstion()) === 'svg') {
+    if(strtolower($this->image->extension()) === 'svg') {
       $this->thumb = $this->image;
     } else {
       $this->thumb = $this->image->thumb($this->options);

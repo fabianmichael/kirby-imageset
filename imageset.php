@@ -27,6 +27,7 @@ load([
   'kirby\\plugins\\imageset\\placeholder\\lqip'                      => 'lib' . DS . 'placeholder' . DS . 'lqip.php',
   'kirby\\plugins\\imageset\\placeholder\\blurred'                   => 'lib' . DS . 'placeholder' . DS . 'blurred.php',
   'kirby\\plugins\\imageset\\placeholder\\color'                     => 'lib' . DS . 'placeholder' . DS . 'color.php',
+  'kirby\\plugins\\imageset\\placeholder\\triangles'                 => 'lib' . DS . 'placeholder' . DS . 'triangles.php',
 
   // ColorThief
   'colorthief\\cmap'                                                 => 'vendors' . DS . 'ColorThief' . DS . 'CMap.php',

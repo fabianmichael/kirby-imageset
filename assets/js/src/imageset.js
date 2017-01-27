@@ -41,8 +41,7 @@
       __wrapperAlphaClass               = prefix + '--alpha',
       __wrapperPlaceholderRenderedClass = prefix + '--placeholder--rendered',
       __imageElementClass               = prefix + '__element',
-      __placeholderElementClass         = prefix + '__placeholder',
-      __imagesetHasJSClass              = prefix + '-js';
+      __placeholderElementClass         = prefix + '__placeholder';
 
   /* =====  Variable Shortcuts  ============================================= */
 
@@ -62,7 +61,8 @@
 
       _devicePixelRatio        = 'devicePixelRatio',
       _naturalWidth            = 'naturalWidth',
-      _naturalHeight           = 'naturalHeight'; 
+      _naturalHeight           = 'naturalHeight',
+      _mozOpaque               = 'mozOpaque'; 
 
   /* =====  Utilities & Helper Functions  =================================== */
   
@@ -179,7 +179,7 @@
 
   function fixCanvasResolution(canvas, ctx) {
     // Adjustments for HiDPI/Retina screens
-    var devicePixelRatio  = window.devicePixelRatio          || 1,
+    var devicePixelRatio  = window[_devicePixelRatio] || 1,
         backingStoreRatio = ctx.webkitBackingStorePixelRatio || 1, // Compatibility with (older?) Safari
         pixelRatio        = devicePixelRatio / backingStoreRatio;
 
@@ -200,10 +200,6 @@
   /* =====  ImageSets & Placeholders  ======================================= */
 
   /* -----  Special Initialization for Opera Mini  -------------------------- */
-
-  // Make sure to add JS class to document element, if
-  // it has not been done by any other script.
-  addClass(docElement, __imagesetHasJSClass);
 
   var isOperaMini = (Object.prototype.toString.call(window.operamini) === "[object OperaMini]");
 
@@ -284,7 +280,6 @@
 
     /* ···  Mosaic  ························································· */
 
-
     var isSafari                    = (ua.indexOf("Safari") !== -1 && ua.indexOf("Chrome") === -1);
     var supportsPixelatedImages     = ('imageRendering' in docElement.style || 'msInterpolationMode' in docElement.style);
 
@@ -302,8 +297,8 @@
 
           var width        = source[_naturalWidth],
               height       = source[_naturalHeight],
-              scaledWidth  = Math.round(el.offsetWidth),
-              scaledHeight = Math.round(el.offsetWidth / width * height);
+              scaledWidth  = el.offsetWidth,
+              scaledHeight = (el.offsetWidth / width * height + 0.5) | 0;
 
           canvas.width  = scaledWidth;
           canvas.height = scaledHeight;
@@ -336,7 +331,7 @@
         var width        = source[_naturalWidth],
             height       = source[_naturalHeight],
             scaledWidth  = el.offsetWidth,
-            scaledHeight = Math.round(el.offsetWidth / width * height),
+            scaledHeight = (el.offsetWidth / width * height + 0.5) | 0,
             
             canvas       = document.createElement("canvas"),
             ctx          = canvas.getContext("2d"),
@@ -344,6 +339,10 @@
 
         canvas.width  = scaledWidth;
         canvas.height = scaledHeight;
+
+        if(!alpha && _mozOpaque in canvas) {
+          canvas[_mozOpaque] = true;
+        }
         
         canvas.setAttribute("aria-hidden", true);
         canvas[_className] = source[_className];
@@ -378,49 +377,66 @@
           yMax            = imageDataHeight - 1;
           
       // Triangle Properties
-      var height         = Math.round(side * (Math.sqrt(3)/2)), // Triangle height.
+      var height         = Math.round(side * (Math.sqrt(3)/2)), // Triangle height ((side * Math.sqrt(3) / 2) + 0.5) | 0, // 
           halfHeight     = height / 2,
           halfSide       = side   / 2;   
 
       //Update canvas if needed (HiDPI/Retina screens)
-      var pixelRatio     = fixCanvasResolution(canvas, ctx);
+      fixCanvasResolution(canvas, ctx);
       
       // Utility functions
       var drawTriangle  = function(x, y, stroke, directionRight) {
         directionRight = directionRight || false;
-        var xTip  = directionRight ? height : 0,
-            xBase = directionRight ? 0 : height;
-        ctx.translate(x, y);
+        var xBase = x + (directionRight ? 0 : height);
         ctx.beginPath();
-        ctx.moveTo(xBase, 0);
-        ctx.lineTo(xTip, halfSide);
-        ctx.lineTo(xBase, side);
+        ctx.moveTo(xBase, y + 0);
+        ctx.lineTo(x + (directionRight ? height : 0),  y + halfSide);
+        ctx.lineTo(xBase, y + side);
         ctx.fill();
         ctx.closePath();
-        ctx.translate(-x, -y);
       };
 
       // Utility functions
-      var getColor = function(x, y) {
+      var pickColor = function(x, y) {
         var colorOffset = y * imageDataWidth * 4 + x * 4;
-        return pixels.slice(colorOffset, colorOffset + 4);
+        return [
+          // Our dear friend IE does not support `slice()` on typed arrays,
+          // falling back to doing it the hard way 🙄
+          pixels[colorOffset],
+          pixels[colorOffset + 1],
+          pixels[colorOffset + 2],
+          pixels[colorOffset + 3],
+        ];
       };
 
-      var getAlpha = function(x, y) { return pixels[y * imageDataWidth * 4 + x * 4 + 3]; };
+      var getAlpha = function(x, y) {
+        return pixels[y * imageDataWidth * 4 + x * 4 + 3];
+      };
 
       var getAverageAlphaFromPoints = function(points) {
         var alpha = 0, i = 0, len = points.length;
-        for(; i < len; i++) {
-          alpha += pixels[points[i][1] * imageDataWidth * 4 + points[i][0] * 4 + 3];
-        }
+        for(; i < len; i++) alpha += getAlpha(points[i][0], points[i][1]);
         return alpha / len;
       };
 
-      var rgb  = function(color) { return "rgb(" + color.slice(0, 3).join(",") + ")"; };
-      var rgba = function(color) { color[3] /= 255; return "rgba(" + color.join(",") + ")"; };
+      var rgb = function(color) {
+        return "rgb(" + color.slice(0, 3).join(",") + ")";
+      };
       
-      var sanitizeX = function(x) { return Math.max(0, Math.min(Math.round(x), xMax)); };
-      var sanitizeY = function(y) { return Math.max(0, Math.min(Math.round(y), yMax)); };
+      var rgba = function(color) {
+        color[3] /= 255;
+        return "rgba(" + color.join(",") + ")";
+      };
+      
+      var sanitizeX = function(x) {
+        return Math.max(0, Math.min(Math.round(x), xMax));
+        // return Math.max(0, Math.min((x + 0.5) | 0, xMax));
+      };
+      
+      var sanitizeY = function(y) {
+        return Math.max(0, Math.min(Math.round(y), yMax));
+        // return Math.max(0, Math.min((y + 0.5) | 0, yMax));
+      };
 
       var stepX, xSteps = Math.ceil(imageDataWidth  / height) + 1, // make sure, that canvas is
           stepY, ySteps = Math.ceil(imageDataHeight / side)   + 1, // completely filled.
@@ -439,7 +455,6 @@
           points,
           averageAlpha,
           i;
-
 
       if(alpha) {
         // Generate Alpha Mask
@@ -474,7 +489,7 @@
               [ sanitizedTriangleCenterX , sanitizedTriangleCenterY   ],
             ];
 
-            averageAlpha  = Math.round(getAverageAlphaFromPoints(points));
+            averageAlpha  = (getAverageAlphaFromPoints(points) + 0.5) | 0;
             ctx.fillStyle = rgba([averageAlpha, 0, 0, 255]);
             ctx.fillRect(posX, posY, height, side);
 
@@ -487,7 +502,7 @@
               [ sanitizedTriangleCenterX , sanitizedPosY                  ],
             ];
 
-            averageAlpha  = Math.round(getAverageAlphaFromPoints(points));
+            averageAlpha  = (getAverageAlphaFromPoints(points) + 0.5) | 0;
             ctx.fillStyle = rgba([averageAlpha, 0, 0, 255]);
             drawTriangle(posX, trianglePosY, false, trianglePointsRight);
           }
@@ -504,7 +519,8 @@
 
         ctx.putImageData(alphaImageData, 0, 0);
 
-        // Following instructions will use alpha mask
+        // Causes new pixels to be drawn only where the
+        // 
         ctx.globalCompositeOperation = "source-atop";
       }
 
@@ -529,10 +545,10 @@
           // than the method used to calculate the alpha mask,
           // but results are sufficient for a decent quality
           // of the result.
-          ctx.fillStyle = rgb(getColor(triangleColorPosX, rectColorPosY));
+          ctx.fillStyle = rgb(pickColor(triangleColorPosX, rectColorPosY));
           ctx.fillRect(posX, posY, height, side);
           
-          ctx.fillStyle = rgb(getColor(triangleColorPosX, triangleColorPosY));
+          ctx.fillStyle = rgb(pickColor(triangleColorPosX, triangleColorPosY));
           drawTriangle(posX, trianglePosY, false, trianglePointsRight);
         }
       }
@@ -546,28 +562,30 @@
 
     placeholderRenderer.triangles = function(el) {
 
-      var source   = el[_getElementsByClassName](__placeholderElementClass)[0],
-          hasAlpha = hasClass(el, __wrapperAlphaClass);
+      var source   = el[_getElementsByClassName](__placeholderElementClass)[0];
 
       var process = function() {
         var width        = source[_naturalWidth],
             height       = source[_naturalHeight],
             scaledWidth  = el.offsetWidth,
-            scaledHeight = Math.round(el.offsetWidth / width * height),
-            
+            scaledHeight = Math.round(el.offsetWidth / width * height), // (scaledWidth / width * height + 0.5) | 0, // faster Math.round() hack // same as: 
             canvas       = document.createElement("canvas"),
             ctx          = canvas.getContext("2d"),
             alpha        = hasClass(el, __wrapperAlphaClass);
 
         canvas.width  = scaledWidth;
         canvas.height = scaledHeight;
+
+        if(!alpha && _mozOpaque in canvas) {
+          canvas[_mozOpaque] = true;
+        }
         
         canvas.setAttribute("aria-hidden", true);
         canvas[_className] = source[_className];
         
         RenderQueue.add(function(){
           ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
-          triangleMosaicFilter(canvas, 40, hasAlpha);
+          triangleMosaicFilter(canvas, 40, alpha);
           source.parentNode.replaceChild(canvas, source);
         });
       };
@@ -663,6 +681,6 @@
 
 })(window, document, Math, Date);
 
-//=require includes/lazysizes.js
 //=require includes/ls.static-gecko-picture.js
 //=require includes/ls.print.js
+//=require includes/lazysizes.js

@@ -6,12 +6,13 @@ use Cache\Driver\File as FileCache;
 use Dir;
 use F;
 use File;
+use Folder;
 use Media;
 
 
 class Cache {
 
-  const CACHE_EXTENSION = '.imagesetcache';
+  const CACHE_EXTENSION = 'imagesetcache';
   
   protected $cacheRoot;
   protected $driver;
@@ -41,16 +42,16 @@ class Cache {
       $path = $image->page->id();
       $file = $image->filename();
     } else {
-      $path  = dirname($media->root());
-      $file  = $media->filename();
+      $path  = dirname($image->root());
+      $file  = $image->filename();
       $index = $this->kirby->roots()->index();
-      $pos   = strpos($root, $index);
+      $pos   = strpos($path, $index);
       if($pos === 0) {
         $path = ltrim(substr($path, strlen($index)), DS);
       }
     }
 
-    return $path . DS . $file . '-' . $key . static::CACHE_EXTENSION;
+    return $path . DS . $file . '-' . $key . '.' . static::CACHE_EXTENSION;
   }
 
   public function created(Media $image, $key) {
@@ -71,5 +72,47 @@ class Cache {
   
   public function __call($name, $arguments) {
     return call_user_func_array([$this->driver, $name], $arguments);
+  }
+
+  public function flush() {
+    $cacheFiles = $this->inventory();
+
+    foreach($cacheFiles as $file) {
+      f::remove($file);
+    }
+
+    return true;
+  }
+
+  public function inventory($root = null) {
+    $folder = !is_null($root) ? $root : $this->root();
+    $files  = [];
+    $dir    = opendir($folder);
+
+    while($file = readdir($dir)) {
+      if($file === '.' || $file === '..') {
+        continue;
+      } else if(is_dir($folder . DS . $file)) {
+        $files = array_merge($files, $this->inventory($folder . DS . $file));
+      } else if(pathinfo($file, PATHINFO_EXTENSION) === static::CACHE_EXTENSION) {
+        $files[] = $folder . DS . $file;
+      }
+    }
+
+    return $files;
+  }
+
+  public function status() {
+    $cacheFiles = $this->inventory();
+
+    $size = 0;
+    foreach($cacheFiles as $file) {
+      $size += f::size($file);
+    }
+
+    return [
+      'size'  => $size,
+      'files' => sizeof($cacheFiles),
+    ];
   }
 }

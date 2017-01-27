@@ -11,7 +11,7 @@ $imageset--namespace            : imageset                  !default;
 
 // Enable Noscript fallback selector?
 $imageset--noscript-fallback    : true                      !default;
-$imageset--js-enabled-selector  : ".imageset-js"            !default;
+$imageset--js-enabled-selector  : ".js"                     !default;
 
 // Duration of the unveil animation for loaded images
 $imageset--unveil-duration      : .5s                       !default;
@@ -107,7 +107,10 @@ $imageset--unveil-delay         : .05s                      !default;
        after the final image was loaded. */
     opacity: 0;
     will-change: opacity;
-    transition: opacity $imageset--unveil-duration;
+
+    @media screen {
+      transition: opacity $imageset--unveil-duration;
+    }
   }
 
   #{$imageset--js-enabled-selector} &--alpha#{&}--lazyload#{&}--loaded &__element {
@@ -144,9 +147,11 @@ $imageset--unveil-delay         : .05s                      !default;
     
     /* Visibility of placeholder is changed to hidden after
        the transition. */
-    transition:
-      opacity $imageset--unveil-duration $imageset--unveil-delay,
-      visibility 0s ($imageset--unveil-duration + $imageset--unveil-delay + .25s);
+    @media screen {
+      transition:
+        opacity $imageset--unveil-duration $imageset--unveil-delay,
+        visibility 0s ($imageset--unveil-duration + $imageset--unveil-delay + .25s);
+    }
     
     /* The actual placeholder is in front of the actual
        image, so we don’t have to fade in the image, which
@@ -171,9 +176,11 @@ $imageset--unveil-delay         : .05s                      !default;
     #{$imageset--js-enabled-selector} & {
       visibility: visible;
 
-      transition:
-        opacity $imageset--unveil-duration $imageset--unveil-delay,
-        visibility 0s ($imageset--unveil-duration + $imageset--unveil-delay + .25s);
+      @media screen {
+        transition:
+          opacity $imageset--unveil-duration $imageset--unveil-delay,
+          visibility 0s ($imageset--unveil-duration + $imageset--unveil-delay + .25s);
+      }
     }
   }
 

@@ -98,6 +98,8 @@ class Utils {
             'imagekit.lazy' => false,
             'quality'       => 100,
             'filename'      => "{safeName}-{$hash}-tmp.{extension}",
+            'overwrite'     => true,
+            'upscale'       => true,
           ];
 
           if($width > $height) {
@@ -108,9 +110,14 @@ class Utils {
 
           // Do color caclulation in thumb file and delete
           // it after done.
-          $thumb = ($media instanceof File) ? $media->thumb($params) : new Thumb($media, $params);
-          $color = ColorThief::getColor($thumb->root());
-          f::remove($thumb->root());
+          if($media instanceof File) {
+            $destinationRoot = $media->thumb($params)->root();
+          } else {
+            $destinationRoot = new Thumb($media, $params);
+          }
+
+          $color = ColorThief::getColor($destinationRoot);
+          f::remove($destinationRoot);
         } else {
           $color = ColorThief::getColor($file, 10);
         }

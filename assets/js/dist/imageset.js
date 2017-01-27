@@ -23,44 +23,44 @@
 ;(function(window, document, undefined){
 	'use strict';
 
-	var mul_table = [
-	        512,512,456,512,328,456,335,512,405,328,271,456,388,335,292,512,
-	        454,405,364,328,298,271,496,456,420,388,360,335,312,292,273,512,
-	        482,454,428,405,383,364,345,328,312,298,284,271,259,496,475,456,
-	        437,420,404,388,374,360,347,335,323,312,302,292,282,273,265,512,
-	        497,482,468,454,441,428,417,405,394,383,373,364,354,345,337,328,
-	        320,312,305,298,291,284,278,271,265,259,507,496,485,475,465,456,
-	        446,437,428,420,412,404,396,388,381,374,367,360,354,347,341,335,
-	        329,323,318,312,307,302,297,292,287,282,278,273,269,265,261,512,
-	        505,497,489,482,475,468,461,454,447,441,435,428,422,417,411,405,
-	        399,394,389,383,378,373,368,364,359,354,350,345,341,337,332,328,
-	        324,320,316,312,309,305,301,298,294,291,287,284,281,278,274,271,
-	        268,265,262,259,257,507,501,496,491,485,480,475,470,465,460,456,
-	        451,446,442,437,433,428,424,420,416,412,408,404,400,396,392,388,
-	        385,381,377,374,370,367,363,360,357,354,350,347,344,341,338,335,
-	        332,329,326,323,320,318,315,312,310,307,304,302,299,297,294,292,
-	        289,287,285,282,280,278,275,273,271,269,267,265,263,261,259];
+	// var mul_table = [
+	//         512,512,456,512,328,456,335,512,405,328,271,456,388,335,292,512,
+	//         454,405,364,328,298,271,496,456,420,388,360,335,312,292,273,512,
+	//         482,454,428,405,383,364,345,328,312,298,284,271,259,496,475,456,
+	//         437,420,404,388,374,360,347,335,323,312,302,292,282,273,265,512,
+	//         497,482,468,454,441,428,417,405,394,383,373,364,354,345,337,328,
+	//         320,312,305,298,291,284,278,271,265,259,507,496,485,475,465,456,
+	//         446,437,428,420,412,404,396,388,381,374,367,360,354,347,341,335,
+	//         329,323,318,312,307,302,297,292,287,282,278,273,269,265,261,512,
+	//         505,497,489,482,475,468,461,454,447,441,435,428,422,417,411,405,
+	//         399,394,389,383,378,373,368,364,359,354,350,345,341,337,332,328,
+	//         324,320,316,312,309,305,301,298,294,291,287,284,281,278,274,271,
+	//         268,265,262,259,257,507,501,496,491,485,480,475,470,465,460,456,
+	//         451,446,442,437,433,428,424,420,416,412,408,404,400,396,392,388,
+	//         385,381,377,374,370,367,363,360,357,354,350,347,344,341,338,335,
+	//         332,329,326,323,320,318,315,312,310,307,304,302,299,297,294,292,
+	//         289,287,285,282,280,278,275,273,271,269,267,265,263,261,259];
 	        //'light' => 512, (7) / 15
 	        // 'strong' => 512, / 17
 	        
 	   
-	var shg_table = [
-		     9, 11, 12, 13, 13, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 17, 
-			17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 
-			19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 20, 20, 20,
-			20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21,
-			21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-			21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 
-			22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22,
-			22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 23, 
-			23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
-			23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
-			23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 
-			23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 
-			24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-			24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-			24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-			24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24 ];
+	// var shg_table = [
+	// 	     9, 11, 12, 13, 13, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 17, 
+	// 		17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 
+	// 		19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 20, 20, 20,
+	// 		20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21,
+	// 		21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
+	// 		21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 
+	// 		22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22,
+	// 		22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 23, 
+	// 		23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
+	// 		23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
+	// 		23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 
+	// 		23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 
+	// 		24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
+	// 		24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
+	// 		24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
+	// 		24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24 ];
 
 	// function stackBlurImage( imageIDOrElement, canvasIDOrElement, radius, blurAlphaChannel )
 	// {
@@ -127,21 +127,21 @@
 		// if ( isNaN(radius) || radius < 1 ) return;
 		// radius |= 0;
 				
-		var pixels = imageData.data;
-		var width = imageData.width;
-		var height = imageData.height;
+		var pixels = imageData.data,
+				width  = imageData.width,
+				height = imageData.height;
 				
 		var x, y, i, p, yp, yi, yw, r_sum, g_sum, b_sum, a_sum, 
-		r_out_sum, g_out_sum, b_out_sum, a_out_sum,
-		r_in_sum, g_in_sum, b_in_sum, a_in_sum, 
-		pr, pg, pb, pa, rbs;
+				r_out_sum, g_out_sum, b_out_sum, a_out_sum,
+				r_in_sum, g_in_sum, b_in_sum, a_in_sum, 
+				pr, pg, pb, pa, rbs;
 				
-		var div = radius + radius + 1;
-		var w4 = width << 2;
-		var widthMinus1  = width - 1;
-		var heightMinus1 = height - 1;
-		var radiusPlus1  = radius + 1;
-		var sumFactor = radiusPlus1 * ( radiusPlus1 + 1 ) / 2;
+		var div 				 = radius + radius + 1,
+				w4  				 = width << 2,
+				widthMinus1  = width - 1,
+				heightMinus1 = height - 1,
+				radiusPlus1  = radius + 1,
+				sumFactor    = radiusPlus1 * (radiusPlus1 + 1) / 2;
 		
 		var stackStart = new BlurStack();
 		var stackEnd;
@@ -617,7 +617,8 @@
 
 })(window, document);
 
-;(function(window, document) {
+
+;(function(window, document, Math, Date, undefined) {
   'use strict';
 
   var _getElementsByClassName = 'getElementsByClassName';
@@ -636,11 +637,7 @@
       __wrapperAlphaClass               = prefix + '--alpha',
       __wrapperPlaceholderRenderedClass = prefix + '--placeholder--rendered',
       __imageElementClass               = prefix + '__element',
-      __placeholderElementClass         = prefix + '__placeholder',
-      __imagesetHasJSClass              = prefix + '-js';
-
-      // __blurredPlaceholderRadius     = 15,
-      // __lqipPlaceholderRadius        = 7;
+      __placeholderElementClass         = prefix + '__placeholder';
 
   /* =====  Variable Shortcuts  ============================================= */
 
@@ -648,85 +645,49 @@
 
   var ua                       = navigator.userAgent;
 
-  var requestAnimationFrame    = window.requestAnimationFrame || setTimeout;
-
-  var Date                     = window.Date;
-
   var _addEventListener        = 'addEventListener',
       _getAttribute            = 'getAttribute',
-      _removeAttribute         = 'removeAttribute',
       _MutationObserver        = 'MutationObserver',
       _classList               = 'classList',
       _className               = 'className',
       _hasAttribute            = 'hasAttribute',
 
       _dataSrc                 = 'data-src',
-      _dataSrcset              = 'data-srcset'; 
+      _dataSrcset              = 'data-srcset',
+
+      _devicePixelRatio        = 'devicePixelRatio',
+      _naturalWidth            = 'naturalWidth',
+      _naturalHeight           = 'naturalHeight',
+      _mozOpaque               = 'mozOpaque'; 
 
   /* =====  Utilities & Helper Functions  =================================== */
   
-  /* -----  Feature Tests  -------------------------------------------------- */
-
-  var isOperaMini                 = (Object.prototype.toString.call(window.operamini) === "[object OperaMini]");
+  /* -----  Polyfills &  ---------------------------------------------------- */
       
-  var isSafari                    = (ua.indexOf("Safari") !== -1 && ua.indexOf("Chrome") === -1);
-
-  var supportsMutationObserver    = !!window[_MutationObserver];
-
-  var supportsCanvas              = !!window.CanvasRenderingContext2D;
-
-  var supportsPixelatedImages     = ('imageRendering' in docElement.style || 'msInterpolationMode' in docElement.style);
-
   // Shim layer with setTimeout fallback. Look only for unprefixed
   // requestAnimationFrame, because all modern browsern already removed the
   // prefix.
-  var rAF = window.requestAnimationFrame || function(callback) { setTimeout(callback, 1000/60); };
-
-  // var supportsObjectFit,
-  //     supportsObjectPosition;
-
-  // (function() {
-  //   var test = function(props, style) {
-  //     for(var i = 0, l = props.length; i < l; i++) {
-  //       var prop = props[i];
-  //       if(prop in style) return true;
-  //     }
-  //     return false;
-  //   };
-
-  //   var style = window.getComputedStyle(document.createElement('img'), null);
-    
-  //   supportsObjectFit      = test(['-o-object-fit', 'object-fit'], style);
-  //   supportsObjectPosition = supportsObjectFit ? test(['-o-object-position', 'object-position'], style) : false; 
-  // })();
+  var rAF = window.requestAnimationFrame || function(fn) { setTimeout(fn, 1000/60); };
 
   /* -----  Utilities  ------------------------------------------------------ */
 
-  var ready = function(fn) {
+  function ready(fn) {
     if(document.readyState != 'loading') {
       fn();
     } else {
       document[_addEventListener]('DOMContentLoaded', fn);
     }
-  };
+  }
 
   // Extend an object with another one
-  var extend = function(base, obj) {
+  function extend(base, obj) {
     for(var i in obj) {
       if(obj.hasOwnProperty(i)) {
         base[i] = obj[i];
       }
     }
     return base;
-  };
-
-  var imageLoaded = function(img, fn) {
-    if(!img.complete || (typeof img.naturalWidth === "undefined") || img.naturalWidth === 0) {
-      img[_addEventListener]("load", fn);
-    } else {
-      fn();
-    }
-  };
+  }
 
   function debounce(fn, delay) {
     var timer = null;
@@ -739,10 +700,18 @@
     };
   }
 
-  var AnimationQueue = (function() {
+  function imageLoaded(img, fn) {
+    if(!img.complete || (typeof img[_naturalWidth] === "undefined") || img[_naturalWidth] === 0) {
+      img[_addEventListener]("load", fn);
+    } else {
+      fn();
+    }
+  }
 
+
+  var RenderQueue = (function() {
     var queue       = [],
-        _inProgress = false;
+        inProgress  = false;
 
     function add(callback) {
       queue.push(callback);
@@ -754,15 +723,15 @@
       callback();
 
       if(!queue.length) {
-        _inProgress = false;
+        inProgress = false;
       } else {
         rAF(loop);
       }
     }
 
     function run() {
-      if(_inProgress) return;
-      _inProgress = true;
+      if(inProgress) return;
+      inProgress = true;
       rAF(loop);
     }
 
@@ -774,13 +743,13 @@
   // Class utilities using `classList` API if available.
   // Fallbacks inspired by: https://gist.github.com/devongovett/1381839
   var hasClass = (function() {
-    return document.documentElement[_classList] ?
+    return docElement[_classList] ?
       function(el, cls) { return el[_classList].contains(cls); } :
       function(el, cls) { return !!~el[_className].split(/\s+/).indexOf(cls); };
   })();
 
   var addClass = (function() {
-    return document.documentElement[_classList] ?
+    return docElement[_classList] ?
       function(el, cls) { el[_classList].add(cls); } :
       function(el, cls) {
         var classes = el[_className].split(/\s+/);
@@ -792,7 +761,7 @@
   })();
 
   var removeClass = (function() {
-    return document.documentElement[_classList] ?
+    return docElement[_classList] ?
       function(el, cls) { return el[_classList].remove(cls); } :
       function(el, cls) {
         var tokens = el[_className].split(/\s+/),
@@ -804,20 +773,31 @@
       };
   })();
 
+  function fixCanvasResolution(canvas, ctx) {
+    // Adjustments for HiDPI/Retina screens
+    var devicePixelRatio  = window[_devicePixelRatio] || 1,
+        backingStoreRatio = ctx.webkitBackingStorePixelRatio || 1, // Compatibility with (older?) Safari
+        pixelRatio        = devicePixelRatio / backingStoreRatio;
+
+    if(devicePixelRatio !== backingStoreRatio) {
+      var oldWidth        = canvas.width,
+          oldHeight       = canvas.height;
+      canvas.width        = oldWidth  * pixelRatio;
+      canvas.height       = oldHeight * pixelRatio;
+      //canvas.style.width  = oldWidth  + 'px';
+      //canvas.style.height = oldHeight + 'px';
+      ctx.scale(pixelRatio, pixelRatio);
+    }
+
+    return pixelRatio;
+  }
+
 
   /* =====  ImageSets & Placeholders  ======================================= */
 
-  var placeholderRenderStack = [];
+  /* -----  Special Initialization for Opera Mini  -------------------------- */
 
-  function render() {
-
-  }
-
-  /* ----- Special Initialization for Opera Mini  --------------------------- */
-
-  // Make sure to add JS class to document element, if
-  // it has not been done by any other script.
-  addClass(document.documentElement, __imagesetHasJSClass);
+  var isOperaMini = (Object.prototype.toString.call(window.operamini) === "[object OperaMini]");
 
   if(isOperaMini) {
     // Opera Mini has limited DOM Event support and does not
@@ -841,31 +821,19 @@
         // here for possible implementations in the future.
         for(var i = 0, l = sources.length; i < l; i++) {
           var s = sources[i];
-          if(s[_hasAttribute](_dataSrcset)) {
-            s.srcset = s[_getAttribute](_dataSrcset);
-            s[_removeAttribute](_dataSrcset);
-          }
-          if(s[_hasAttribute](_dataSrc)) {
-            s.src = s[_getAttribute](_dataSrc);
-            s[_removeAttribute](_dataSrc);
-          }
+          if(s[_hasAttribute](_dataSrcset)) s.srcset = s[_getAttribute](_dataSrcset);
+          if(s[_hasAttribute](_dataSrc))    s.src    = s[_getAttribute](_dataSrc);
         }
 
-        if(img[_hasAttribute](_dataSrcset)) {
-          img.srcset = img[_getAttribute](_dataSrcset);
-          img[_removeAttribute](_dataSrcset);
-        }
-        if(img[_hasAttribute](_dataSrc)) {
-          img.src = img[_getAttribute](_dataSrc);
-          img[_removeAttribute](_dataSrc);
-        }
+        if(img[_hasAttribute](_dataSrcset)) img.srcset = img[_getAttribute](_dataSrcset);
+        if(img[_hasAttribute](_dataSrc))    img.src    = img[_getAttribute](_dataSrc);
 
       } else {
         
         var fallbackSource = sources.length > 0 ? sources[sources.length - 1] : img,
             candidates     = fallbackSource[_getAttribute](_dataSrcset).split(/,\s+/);
 
-        for(var n = sources.length; n--;) {
+        for(var n = sources.length; n >= 0; n--) {
           // Delete sources elements 
           sources[n].parentNode.removeChild(sources[n]);
         }
@@ -889,7 +857,7 @@
 
   /* ----- Global Variables Setup  ------------------------------------------ */
  
-  /* ·····  ImageSet-specific Helper functions  ······························*/
+  /* ·····  ImageSet-specific Helper functions  ····························· */
 
   var placeholderRegexp = new RegExp(__wrapperPlaceholderStyleClass + '([a-z0-9_-]+)\\s*', 'i');
 
@@ -900,65 +868,66 @@
 
   var placeholderRenderer = {};
 
+  /* -----  Placeholder Render Functions  ----------------------------------- */
 
-  if(!supportsPixelatedImages || isSafari) {
+  if(!!window.CanvasRenderingContext2D) {
+    // only register placeholder rendering functions, if
+    // canvas is supported by the browser.
 
-    var pixelRatio = (function() {
-      // To account for zoom, change to use deviceXDPI instead of systemXDPI
-      if (window.screen.systemXDPI !== undefined && window.screen.logicalXDPI !== undefined &&
-          window.screen.systemXDPI > window.screen.logicalXDPI) {
-        // Only allow for values > 1
-        return window.screen.systemXDPI / window.screen.logicalXDPI;
-      } else if (window.devicePixelRatio !== undefined) {
-        return window.devicePixelRatio;
-      }
-      return 1;
-    })();
+    /* ···  Mosaic  ························································· */
 
-    placeholderRenderer.mosaic = function(el) {
+    var isSafari                    = (ua.indexOf("Safari") !== -1 && ua.indexOf("Chrome") === -1);
+    var supportsPixelatedImages     = ('imageRendering' in docElement.style || 'msInterpolationMode' in docElement.style);
 
-      var canvas      = document.createElement("canvas"),
-          ctx         = canvas.getContext("2d"),
-          source      = el[_getElementsByClassName](__placeholderElementClass)[0];
+    if(!supportsPixelatedImages || isSafari) {
 
-      var process = function() {
-        var width        = source.naturalWidth,
-            height       = source.naturalHeight,
-            scaledWidth  = Math.round(el.offsetWidth * pixelRatio),
-            scaledHeight = Math.round(el.offsetWidth / width * height * pixelRatio);
+      placeholderRenderer.mosaic = function(el) {
 
-        canvas.width  = scaledWidth;
-        canvas.height = scaledHeight;
+        var canvas      = document.createElement("canvas"),
+            ctx         = canvas.getContext("2d"),
+            source      = el[_getElementsByClassName](__placeholderElementClass)[0];
 
-        ctx.mozImageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
-        ctx.msImageSmoothingEnabled = false;
-        ctx.imageSmoothingEnabled = false;
-        
-        canvas.setAttribute("aria-hidden", true);
-        canvas[_className] = source[_className];
-        
-        AnimationQueue.add(function(){
-          ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
-          source.parentNode.replaceChild(canvas, source);
-        });
+        var process = function() {
+
+          fixCanvasResolution(canvas, ctx);
+
+          var width        = source[_naturalWidth],
+              height       = source[_naturalHeight],
+              scaledWidth  = el.offsetWidth,
+              scaledHeight = (el.offsetWidth / width * height + 0.5) | 0;
+
+          canvas.width  = scaledWidth;
+          canvas.height = scaledHeight;
+
+          ctx.mozImageSmoothingEnabled = false;
+          ctx.webkitImageSmoothingEnabled = false;
+          ctx.msImageSmoothingEnabled = false;
+          ctx.imageSmoothingEnabled = false;
+          
+          canvas.setAttribute("aria-hidden", true);
+          canvas[_className] = source[_className];
+          
+          RenderQueue.add(function(){
+            ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
+            source.parentNode.replaceChild(canvas, source);
+          });
+        };
+
+        imageLoaded(source, process);
       };
+    }
 
-      imageLoaded(source, process);
-    };
-  }
-
-  if(supportsCanvas) {
+    /* ···  Blurred & LQIP  ················································· */
 
     var applyPlaceholderBlur = function(el, radius, mul_sum, shg_sum) {
 
       var source = el[_getElementsByClassName](__placeholderElementClass)[0];
 
       var process = function() {
-        var width        = source.naturalWidth,
-            height       = source.naturalHeight,
+        var width        = source[_naturalWidth],
+            height       = source[_naturalHeight],
             scaledWidth  = el.offsetWidth,
-            scaledHeight = Math.round(el.offsetWidth / width * height),
+            scaledHeight = (el.offsetWidth / width * height + 0.5) | 0,
             
             canvas       = document.createElement("canvas"),
             ctx          = canvas.getContext("2d"),
@@ -966,11 +935,15 @@
 
         canvas.width  = scaledWidth;
         canvas.height = scaledHeight;
+
+        if(!alpha && _mozOpaque in canvas) {
+          canvas[_mozOpaque] = true;
+        }
         
         canvas.setAttribute("aria-hidden", true);
         canvas[_className] = source[_className];
         
-        AnimationQueue.add(function(){
+        RenderQueue.add(function(){
           ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
           stackBlur[alpha ? 'canvasRGBA' : 'canvasRGB'](canvas, 0, 0, scaledWidth, scaledHeight, radius, mul_sum, shg_sum);
           source.parentNode.replaceChild(canvas, source);
@@ -978,12 +951,247 @@
       };
 
       imageLoaded(source, function() { process(); });
+
     };
 
     placeholderRenderer.blurred = function(el) { applyPlaceholderBlur(el, 15, 512, 17); };
     placeholderRenderer.lqip    = function(el) { applyPlaceholderBlur(el,  7, 512, 15); };
+
+    /* ···  Triangles  ······················································ */
+
+    var triangleMosaicFilter = function(canvas, side, alpha) {
+        
+      alpha = !!alpha;
+
+      // Canvas Properties
+      var ctx             = canvas.getContext('2d'),
+          imageData       = ctx.getImageData(0, 0, canvas.width, canvas.height),
+          pixels          = imageData.data,
+          imageDataWidth  = imageData.width,
+          imageDataHeight = imageData.height,
+          xMax            = imageDataWidth  - 1,
+          yMax            = imageDataHeight - 1;
+          
+      // Triangle Properties
+      var height         = Math.round(side * (Math.sqrt(3)/2)), // Triangle height ((side * Math.sqrt(3) / 2) + 0.5) | 0, // 
+          halfHeight     = height / 2,
+          halfSide       = side   / 2;   
+
+      //Update canvas if needed (HiDPI/Retina screens)
+      fixCanvasResolution(canvas, ctx);
+      
+      // Utility functions
+      var drawTriangle  = function(x, y, stroke, directionRight) {
+        directionRight = directionRight || false;
+        var xBase = x + (directionRight ? 0 : height);
+        ctx.beginPath();
+        ctx.moveTo(xBase, y + 0);
+        ctx.lineTo(x + (directionRight ? height : 0),  y + halfSide);
+        ctx.lineTo(xBase, y + side);
+        ctx.fill();
+        ctx.closePath();
+      };
+
+      // Utility functions
+      var pickColor = function(x, y) {
+        var colorOffset = y * imageDataWidth * 4 + x * 4;
+        return [
+          // Our dear friend IE does not support `slice()` on typed arrays,
+          // falling back to doing it the hard way 🙄
+          pixels[colorOffset],
+          pixels[colorOffset + 1],
+          pixels[colorOffset + 2],
+          pixels[colorOffset + 3],
+        ];
+      };
+
+      var getAlpha = function(x, y) {
+        return pixels[y * imageDataWidth * 4 + x * 4 + 3];
+      };
+
+      var getAverageAlphaFromPoints = function(points) {
+        var alpha = 0, i = 0, len = points.length;
+        for(; i < len; i++) alpha += getAlpha(points[i][0], points[i][1]);
+        return alpha / len;
+      };
+
+      var rgb = function(color) {
+        return "rgb(" + color.slice(0, 3).join(",") + ")";
+      };
+      
+      var rgba = function(color) {
+        color[3] /= 255;
+        return "rgba(" + color.join(",") + ")";
+      };
+      
+      var sanitizeX = function(x) {
+        return Math.max(0, Math.min(Math.round(x), xMax));
+        // return Math.max(0, Math.min((x + 0.5) | 0, xMax));
+      };
+      
+      var sanitizeY = function(y) {
+        return Math.max(0, Math.min(Math.round(y), yMax));
+        // return Math.max(0, Math.min((y + 0.5) | 0, yMax));
+      };
+
+      var stepX, xSteps = Math.ceil(imageDataWidth  / height) + 1, // make sure, that canvas is
+          stepY, ySteps = Math.ceil(imageDataHeight / side)   + 1, // completely filled.
+          posX, posY, sanitizedPosX, sanitizedPosY,
+          rectColor,
+          rectColorPosY,
+          trianglePosY,
+          triangleBaseX,
+          triangleTipX,
+          triangleColor,
+          triangleColorPosY,
+          triangleColorPosX,
+          sanitizedTriangleCenterX,
+          sanitizedTriangleCenterY,
+          trianglePointsRight,
+          points,
+          averageAlpha,
+          i;
+
+      if(alpha) {
+        // Generate Alpha Mask
+        for(stepY = 0; stepY < ySteps; stepY++) {
+          posY               = stepY * side;
+          rectColorPosY      = sanitizeY(posY + halfSide);
+          trianglePosY       = posY - halfSide;
+          triangleColorPosY  = sanitizeY(posY);   
+          
+          for(stepX = 0; stepX < xSteps; stepX++) {
+            posX = stepX * height;
+            trianglePointsRight = stepX % 2 !== 0;
+            sanitizedPosX       = sanitizeX(posX);
+            sanitizedPosY       = sanitizeY(posY);
+            
+            // Get average alpha for rect and draw it
+            triangleTipX             = sanitizeX(trianglePointsRight ? posX + height - 1 : posX);
+            triangleBaseX            = sanitizeX(trianglePointsRight ? posX : posX + height - 1);
+            sanitizedTriangleCenterX = sanitizeX(posX + halfHeight);
+            sanitizedTriangleCenterY = sanitizeY(posY + halfSide);
+
+            // For calculating alpha transparency, we’re using
+            // the average color of the area covered by
+            // triangles and rects. Although it’s slower than
+            // picking the color value of a single pixel,
+            // results are way better.
+            points = [
+              [ triangleBaseX            , sanitizedPosY              ],
+              [ triangleTipX             , sanitizedTriangleCenterY   ],
+              [ triangleBaseX            , sanitizeY(posY + side - 1) ],
+              [ sanitizedTriangleCenterX , sanitizedTriangleCenterY   ],
+              [ sanitizedTriangleCenterX , sanitizedTriangleCenterY   ],
+            ];
+
+            averageAlpha  = (getAverageAlphaFromPoints(points) + 0.5) | 0;
+            ctx.fillStyle = rgba([averageAlpha, 0, 0, 255]);
+            ctx.fillRect(posX, posY, height, side);
+
+            // Get average alpha for triangle and draw it
+            points = [
+              [ triangleBaseX            , sanitizeY(posY - halfSide)     ],
+              [ triangleTipX             , sanitizedPosY                  ],
+              [ triangleBaseX            , sanitizeY(posY + halfSide - 1) ],
+              [ sanitizedTriangleCenterX , sanitizedPosY                  ],
+              [ sanitizedTriangleCenterX , sanitizedPosY                  ],
+            ];
+
+            averageAlpha  = (getAverageAlphaFromPoints(points) + 0.5) | 0;
+            ctx.fillStyle = rgba([averageAlpha, 0, 0, 255]);
+            drawTriangle(posX, trianglePosY, false, trianglePointsRight);
+          }
+        }
+
+        // Move red channel to alpha channel
+        var alphaImageData  = ctx.getImageData(0, 0, canvas.width, canvas.height),
+            alphaData       = alphaImageData.data,
+            alphaDataLength = alphaData.length;
+
+        for(i = 0; i < alphaDataLength; i += 4) {
+          alphaData[i + 3] = alphaData[i];
+        }
+
+        ctx.putImageData(alphaImageData, 0, 0);
+
+        // Causes new pixels to be drawn only where the
+        // 
+        ctx.globalCompositeOperation = "source-atop";
+      }
+
+      // Draw the final triangle mosaic
+      for(stepY = 0; stepY < ySteps; stepY++) {
+        posY               = stepY * side;
+        rectColorPosY      = sanitizeY(posY + halfSide);
+        trianglePosY       = posY - halfSide;
+        triangleColorPosY  = sanitizeY(posY);   
+        for(stepX = 0; stepX < xSteps; stepX++) {
+          // It’s faster and produces better looking results,
+          // i.e. eliminates artifacts at the edges of triangles
+          // when drawing a rect first and then draw a
+          // triangle that if shifted upwards by half of it’s
+          // height.
+          posX                = stepX * height;
+          triangleColorPosX   = sanitizeX(posX + halfHeight);
+          trianglePointsRight = (stepX % 2 !== 0);
+
+          // For the final layer, only one color is picked
+          // for the rect and the triangle. This is way faster
+          // than the method used to calculate the alpha mask,
+          // but results are sufficient for a decent quality
+          // of the result.
+          ctx.fillStyle = rgb(pickColor(triangleColorPosX, rectColorPosY));
+          ctx.fillRect(posX, posY, height, side);
+          
+          ctx.fillStyle = rgb(pickColor(triangleColorPosX, triangleColorPosY));
+          drawTriangle(posX, trianglePosY, false, trianglePointsRight);
+        }
+      }
+
+      if(alpha) {
+        // Reset composite operation, in case that other
+        // scripts want to manipulate the canvas further.
+        ctx.globalCompositeOperation = "source-over";
+      }
+    };
+
+    placeholderRenderer.triangles = function(el) {
+
+      var source   = el[_getElementsByClassName](__placeholderElementClass)[0];
+
+      var process = function() {
+        var width        = source[_naturalWidth],
+            height       = source[_naturalHeight],
+            scaledWidth  = el.offsetWidth,
+            scaledHeight = Math.round(el.offsetWidth / width * height), // (scaledWidth / width * height + 0.5) | 0, // faster Math.round() hack // same as: 
+            canvas       = document.createElement("canvas"),
+            ctx          = canvas.getContext("2d"),
+            alpha        = hasClass(el, __wrapperAlphaClass);
+
+        canvas.width  = scaledWidth;
+        canvas.height = scaledHeight;
+
+        if(!alpha && _mozOpaque in canvas) {
+          canvas[_mozOpaque] = true;
+        }
+        
+        canvas.setAttribute("aria-hidden", true);
+        canvas[_className] = source[_className];
+        
+        RenderQueue.add(function(){
+          ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
+          triangleMosaicFilter(canvas, 40, alpha);
+          source.parentNode.replaceChild(canvas, source);
+        });
+      };
+
+      imageLoaded(source, function() { process(); });
+    };
+
   }
 
+  /* =====  ImageSet  ======================================================= */
 
   var imageset = (function() {
     
@@ -1002,6 +1210,8 @@
         style = getPlaceholderStyle(wrapper);
         
         if(style && placeholderRenderer[style]) {
+          // Render placeholder, if a renderer for given
+          // imageset exists.
           addClass(wrapper, __wrapperPlaceholderRenderedClass);
           placeholderRenderer[style](wrapper);
         }
@@ -1039,9 +1249,13 @@
 
       imagesetElements = document[_getElementsByClassName](__wrapperPlaceholderClass);
 
-      if(supportsMutationObserver){
+      if(!!window[_MutationObserver]) {
+        // Use MutationObserver to check for new elements,
+        // if supported.
         new window[_MutationObserver]( debouncedCheckImagesets ).observe( docElement, {childList: true, subtree: true, attributes: false, characterData: false } );
       } else {
+        // Otherwise, fallback to Mutation Events and add
+        // a setInterval for as a safety fallback.
         docElement[_addEventListener]('DOMNodeInserted', debouncedCheckImagesets, true);
         docElement[_addEventListener]('DOMAttrModified', debouncedCheckImagesets, true);
         setInterval(debouncedCheckImagesets, 999);
@@ -1061,7 +1275,111 @@
 
   ready(imageset.init);
 
-})(window, document);
+})(window, document, Math, Date);
+
+/**
+ * FF's first picture implementation is static and does not react to viewport changes, this tiny script fixes this.
+ */
+(function(window) {
+	/*jshint eqnull:true */
+	var ua = navigator.userAgent;
+
+	if ( window.HTMLPictureElement && ((/ecko/).test(ua) && ua.match(/rv\:(\d+)/) && RegExp.$1 < 41) ) {
+		addEventListener("resize", (function() {
+			var timer;
+
+			var dummySrc = document.createElement("source");
+
+			var fixRespimg = function(img) {
+				var source, sizes;
+				var picture = img.parentNode;
+
+				if (picture.nodeName.toUpperCase() === "PICTURE") {
+					source = dummySrc.cloneNode();
+
+					picture.insertBefore(source, picture.firstElementChild);
+					setTimeout(function() {
+						picture.removeChild(source);
+					});
+				} else if (!img._pfLastSize || img.offsetWidth > img._pfLastSize) {
+					img._pfLastSize = img.offsetWidth;
+					sizes = img.sizes;
+					img.sizes += ",100vw";
+					setTimeout(function() {
+						img.sizes = sizes;
+					});
+				}
+			};
+
+			var findPictureImgs = function() {
+				var i;
+				var imgs = document.querySelectorAll("picture > img, img[srcset][sizes]");
+				for (i = 0; i < imgs.length; i++) {
+					fixRespimg(imgs[i]);
+				}
+			};
+			var onResize = function() {
+				clearTimeout(timer);
+				timer = setTimeout(findPictureImgs, 99);
+			};
+			var mq = window.matchMedia && matchMedia("(orientation: landscape)");
+			var init = function() {
+				onResize();
+
+				if (mq && mq.addListener) {
+					mq.addListener(onResize);
+				}
+			};
+
+			dummySrc.srcset = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+
+			if (/^[c|i]|d$/.test(document.readyState || "")) {
+				init();
+			} else {
+				document.addEventListener("DOMContentLoaded", init);
+			}
+
+			return onResize;
+		})());
+	}
+})(window);
+
+/*
+This lazySizes extension adds better support for print.
+In case the user starts to print lazysizes will load all images.
+*/
+(function(window){
+	/*jshint eqnull:true */
+	'use strict';
+	var config, elements, onprint, printMedia;
+	// see also: http://tjvantoll.com/2012/06/15/detecting-print-requests-with-javascript/
+	if(window.addEventListener){
+		config = (window.lazySizes && lazySizes.cfg) || window.lazySizesConfig || {};
+		elements = config.lazyClass || 'lazyload';
+		onprint = function(){
+			var i, len;
+			if(typeof elements == 'string'){
+				elements = document.getElementsByClassName(elements);
+			}
+
+			if(window.lazySizes){
+				for(i = 0, len = elements.length; i < len; i++){
+					lazySizes.loader.unveil(elements[i]);
+				}
+			}
+		};
+
+		addEventListener('beforeprint', onprint, false);
+
+		if(!('onbeforeprint' in window) && window.matchMedia && (printMedia = matchMedia('print')) && printMedia.addListener){
+			printMedia.addListener(function(){
+				if(printMedia.matches){
+					onprint();
+				}
+			});
+		}
+	}
+})(window);
 
 (function(window, factory) {
 	var lazySizes = factory(window, window.document);
@@ -1746,108 +2064,4 @@
 	};
 }
 ));
-
-/**
- * FF's first picture implementation is static and does not react to viewport changes, this tiny script fixes this.
- */
-(function(window) {
-	/*jshint eqnull:true */
-	var ua = navigator.userAgent;
-
-	if ( window.HTMLPictureElement && ((/ecko/).test(ua) && ua.match(/rv\:(\d+)/) && RegExp.$1 < 41) ) {
-		addEventListener("resize", (function() {
-			var timer;
-
-			var dummySrc = document.createElement("source");
-
-			var fixRespimg = function(img) {
-				var source, sizes;
-				var picture = img.parentNode;
-
-				if (picture.nodeName.toUpperCase() === "PICTURE") {
-					source = dummySrc.cloneNode();
-
-					picture.insertBefore(source, picture.firstElementChild);
-					setTimeout(function() {
-						picture.removeChild(source);
-					});
-				} else if (!img._pfLastSize || img.offsetWidth > img._pfLastSize) {
-					img._pfLastSize = img.offsetWidth;
-					sizes = img.sizes;
-					img.sizes += ",100vw";
-					setTimeout(function() {
-						img.sizes = sizes;
-					});
-				}
-			};
-
-			var findPictureImgs = function() {
-				var i;
-				var imgs = document.querySelectorAll("picture > img, img[srcset][sizes]");
-				for (i = 0; i < imgs.length; i++) {
-					fixRespimg(imgs[i]);
-				}
-			};
-			var onResize = function() {
-				clearTimeout(timer);
-				timer = setTimeout(findPictureImgs, 99);
-			};
-			var mq = window.matchMedia && matchMedia("(orientation: landscape)");
-			var init = function() {
-				onResize();
-
-				if (mq && mq.addListener) {
-					mq.addListener(onResize);
-				}
-			};
-
-			dummySrc.srcset = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-
-			if (/^[c|i]|d$/.test(document.readyState || "")) {
-				init();
-			} else {
-				document.addEventListener("DOMContentLoaded", init);
-			}
-
-			return onResize;
-		})());
-	}
-})(window);
-
-/*
-This lazySizes extension adds better support for print.
-In case the user starts to print lazysizes will load all images.
-*/
-(function(window){
-	/*jshint eqnull:true */
-	'use strict';
-	var config, elements, onprint, printMedia;
-	// see also: http://tjvantoll.com/2012/06/15/detecting-print-requests-with-javascript/
-	if(window.addEventListener){
-		config = (window.lazySizes && lazySizes.cfg) || window.lazySizesConfig || {};
-		elements = config.lazyClass || 'lazyload';
-		onprint = function(){
-			var i, len;
-			if(typeof elements == 'string'){
-				elements = document.getElementsByClassName(elements);
-			}
-
-			if(window.lazySizes){
-				for(i = 0, len = elements.length; i < len; i++){
-					lazySizes.loader.unveil(elements[i]);
-				}
-			}
-		};
-
-		addEventListener('beforeprint', onprint, false);
-
-		if(!('onbeforeprint' in window) && window.matchMedia && (printMedia = matchMedia('print')) && printMedia.addListener){
-			printMedia.addListener(function(){
-				if(printMedia.matches){
-					onprint();
-				}
-			});
-		}
-	}
-})(window);
 

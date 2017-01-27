@@ -111,7 +111,7 @@ use Html;
 
           <?php endif ?>
       
-        <? else: ?>
+        <?php else: ?>
 
         <img <?= $imageset->srcAttributes(['lazyload' => false], true) ?>
              <?= $imageset->sizesAttributes(['lazyload' => false], true) ?>

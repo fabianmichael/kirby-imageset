@@ -30,6 +30,7 @@ class Base {
   public static $defaults = [
     'style'        => null,
     'class'        => 'placeholder',
+    'alpha'        => false,
     'output.xhtml' => false,
 
     // Support for focus plugin

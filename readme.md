@@ -47,7 +47,7 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 - [6 Plain Output for RSS Feeds](#6-plain-output-for-rss-feeds)
 - [7 Generating Customized Markup](#7-generating-customized-markup)
 - [8 FAQ & Troubleshooting](#8-faq-&-troubleshooting)
-- [9 Known Bugs](#9-known-bugs)
+- [9 Known Bugs & Limitations](#9-known-bugs-&-limitations)
 - [10 License](#10-license)
 - [11 Technical Support](#11-technical-support)
 - [12 Credits](#12-credits)
@@ -66,7 +66,7 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 -  **Progressive Enhancement** In case of doubt, the plugin works without JavaScript or native support for responsive images as a conditionally loaded polyfill is included for older browsers.
 -  **Web Standards** ImageSet produces HTML5-based markup (using the `<picture>` element and `srcset`-attribute).
 -  **Works with AJAX** ImageSet works with dynamic content, as new imagesets are automatically detected and handled.
--  **Small Footprint** Frontend code has been designed for performance and comes with a minimal footprint. Only ~0,7 kB CSS + ~16 kB JavaScript (+ 5,7 kB Polyfill for older browsers), when minified & gzipped.
+-  **Small Footprint** Frontend code has been designed for performance and comes with a minimal footprint. Only ~0,7 kB CSS + ~7,5 kB JavaScript (+ 5,7 kB Polyfill for older browsers), when minified & gzipped.
 
 *) Lazy loading uses the very performant [lazysizes](https://github.com/aFarkas/lazysizes) script and requires JavaScript to be activated on the client. However, the plugin provides a `<noscript>`-fallback which is enabled by default.
 
@@ -126,10 +126,19 @@ git submodule add https://github.com/fabianmichael/kirby-imageset.git site/plugi
 
 ### 2.3 Template Setup
 
-In order to make ImageSet work properly, you have to include the corresponding CSS and JavaScript files to your templates. Add the following line to your header snippet:
+In order to make ImageSet work properly, you have to include the corresponding CSS and JavaScript files to your templates. Add the following lines to your header snippet:
 
 ```php
+<!-- replaces "no-js" class on html element with "js" -->
+<script>(function(d,c,r){d[c]=r.test(d[c])?d[c].replace(r,'$1js$2'):[d[c],'js'].join(' ')})(document.documentElement,'className',/(?:(^|\s)no-js(\s|$))/)</script>
+
 <?= css('assets/plugins/imageset/css/imageset.min.css') ?>
+```
+
+If you use lazy loading, also add the following line anywhere after the previous code in your template, it is recommended to include the file before the closing `</head>` tag to ensure that it loads as fast as possible.
+
+```php
+<?= js('assets/plugins/imageset/js/dist/imageset.js') ?>
 ```
 
 Not all browsers are providing [native support](http://caniuse.com/#feat=picture) for the `<picture>` element. If your site does not already include a polyfill for this, you might also want to add the following lines within the `<head>` of your site to load the *respimage* polyfill conditionally and as fast as possible.
@@ -146,11 +155,7 @@ Not all browsers are providing [native support](http://caniuse.com/#feat=picture
 </script>
 ```
 
-If you use lazy loading, also add the following line anywhere in your template, it is recommended to include the file before the closing `</body>` tag of your template.
 
-```php
-<?= js('assets/plugins/imageset/js/dist/imageset.js') ?>
-```
 
 Alright, your site should now be prepared for using ImageSet! :-D
 
@@ -313,7 +318,7 @@ c::set('imageset.noscript', false);
 | `class` | `''` | – | Additional classes added to the wrapper tag of the image set. |
 | `alt` | `''` | any string | Sets the alternative text for this image set. |
 | `ratio` | `true` | `true`, `false` | Adds a ratio-placeholder/intrinsic size to the image set. This reserves space for the images while the page is loading and avoids reflows *(aka “page-jumps”)*. This option is ignored, if `placeholder` has any other value than `false` or `lazyload` is enabled and always behaves like it had a value of `true` in these cases. |
-| `placeholder` | `'mosaic'` | `false`, `'mosaic'`, `'blurred'`, `'lqip'`, `'color'` | Sets the visual style of the placeholder shown while the main image is being loaded. Set to `false` if you don’t want to use a placeholder at all. |
+| `placeholder` | `'mosaic'` | `false`, `'triangles'`, `'mosaic'`, `'blurred'`, `'lqip'`, `'color'` | Sets the visual style of the placeholder shown while the main image is being loaded. Set to `false` if you don’t want to use a placeholder at all. Have a look at [the Demo page](http://imagesetdemo.fabianmichael.de/) to preview all available placeholder styles. |
 | `lazyload` | `true` | `true`, `false` |  Enables lazy loading of image sets.<br>*Remember to include the corresponding JavaScript file into your markup as described in [2.3 Template Setup](#23-template-setup).*  |
 | `noscript` | `true` | `true`, `false` | Includes a fallback for clients without JavaScript support or disabled JavaScript. |
 | `noscript.priority` | `'ratio'` | `'ratio'`, `'compatibility'` | `ratio` = The image set will always use the same screen-estate when JavaScript is disabled. Use this option, when a change of an image’s aspect-ratio would destroy your layout. In browsers that neither provide native support for [`object-fit`](http://caniuse.com/#search=object-fit) nor the [`<picture>`](http://caniuse.com/#feat=picture) element *(i.e IE10-11, Edge)*,  this will lead to distorted images when the image set has multiple aspect-ratios defined.<br>`compatibility` = image sets will always show their fallback-size when JavaScript is disabled. Sizes with different aspect-ratios are ignored. This works in any browser . |
@@ -515,16 +520,29 @@ So much markup for a single image?
 Will ImageSet slow down my site?
 : ImageSet has been designed for performance. But as it uses Kirby’s built-in thumbs API, the plugin needs check the existence of every thumb on every page load. On pages with dozens of image sets and hundreds of corresponding thumbs, you may notice a performance impact. In these cases, it is recommended to enable Kirby’s page cache or to switch to a web hosting plan that comes with fast SSD storage. When a page has to generate hundreds of thumbnails on load, this may also exceed your maximum script execution time. In the latter case, consider to use the [ImageKit](https://github.com/fabianmichael/kirby-imagekit) plugin for asynchronous thumbnail creation or cloud-based service.
 
+Fronend performance
+: ImageSet uses JavaScript based filters for most placeholder styles to ensure good cross-browser support and nice-looking placeholders. However, these filters need some CPU time and low-quality sources have to be loaded for every image set. This can noticeably slow down page load on slow devices and also increases the overall download size of a page. If your page holds a huge number of ImageSets, you should consider to disable placeholders or use the `color` placeholder style, which is very lightweight. Rendering of placeholders is also much faster for images without an alpha channel, so prefer JPEGs or non-transparent PNGs wherever possible.
+
 Does ist support SVG images?
 : There is only basic support for SVG images. That means, if you supply an SVG image as source file for your image set, the plugin will generate markup for the SVG image, using the `<img>` tag. But at SVG is a very complex document format, there is no simple way in PHP to generate placeholder thumbnails (imagemagick does not work reliably with every SVG file), so placeholder style will be ignored and the SVG file will be shown in its original aspect-ratio. Everything set in the `$sizes` parameter will be ignored.
 
-What does a user on IE 10 or an other outdated browser with JavaScript disabled see?
+What does a user on IE 10 or another outdated browser with JavaScript disabled see?
 : The results are depending on the `noscript.priority` setting. When this is set to `'ratio'`, the user will see a distorted image if an image set has different aspect-ratios among its sizes at certain media conditions. If you change this to `'compatibility'` instead, the user will always see the fallback size of your image set. The noscript fallback always has the largest size of its `srcset` attribute defined as fallback, so browsers without native support for `srcset` element will always load the largest available size, if JavaScript is disabled.
 
-## 9 Known Bugs
+Is it a good idea to apply custom CSS to my image sets?
+: In general, it is not recommended to apply any custom CSS to anything inside the wrapper tag, as the HTML & CSS structure may possibly change with an update of ImageSet. It is recommended to apply all styles regarding custom positioning or sizing to the wrapping `<span class="imageset […]">` tag. You can use the `class` option to add custom classes, if you need different styles for different image sets.
+
+## 9 Known Bugs & Limitations
 
 Safari 10
 : When an image set appears within an element that uses CSS multi-colum layout (`column-count > 1`), the fade-in animation for lazy-loaded image sets does not work. However, the loaded image is displayed correctly. Currently, there is no way do fix this as far as I know.
+
+Printing
+: Although it’s possible to trigger loading of images when a user hits the print button, that does not necessarily mean that images are generated before the browser generates its print preview or the user starts to print. A workaround for this is to preload all images after the page has been loaded. This ensures that image sets are loaded after other resources like JS and CSS files, but loads every image on the page and thus basically disables lazy-loading: <pre><code>&lt;script&gt;
+window.lazySizesConfig = window.lazySizesConfig || {};
+window.lazySizesConfig.preloadAfterLoad = true;
+&lt;/script&gt;
+</code></pre>
 
 ## 10 License
 

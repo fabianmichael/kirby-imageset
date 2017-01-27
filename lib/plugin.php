@@ -8,9 +8,9 @@
 
 namespace Kirby\Plugins\ImageSet;
 
+use F;
 use Obj;
 use Str;
-
 
 /**
  * Utility class for retrieving information about the plugin
@@ -18,7 +18,7 @@ use Str;
  */
 class Plugin {
   
-  protected $version = '1.0.0-beta1';
+  protected $version;
   
   protected function __construct() {
     // Only declared to prevent direct instantiation of this
@@ -31,6 +31,11 @@ class Plugin {
   }
   
   public function version() {
+    if(is_null($this->version)) {
+      $package = json_decode(f::read(dirname(__DIR__) . DS . 'package.json'));
+      $this->version = $package->version;
+    }
+
     return $this->version;
   }
 

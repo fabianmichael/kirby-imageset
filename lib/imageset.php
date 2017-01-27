@@ -124,7 +124,7 @@ class ImageSet extends SourceSet {
 
     // Try to load ImageSet from cache
     $cacheValue = $this->option('cache', false) ? static::$fileCache->get($this->image, $this->hash()) : null;
-    if(!is_null($cacheValue) && $cacheValue['imageset.version'] === static::$plugin->version()) {
+    if(!is_null($cacheValue) && $cacheValue['imageset.version'] === static::$plugin->version() && $cacheValue['site.url'] === $this->kirby->urls()->index()) {
       $this->cache['html'] = $cacheValue['html'];
     } else {
       $this->sources = $this->setupSources($this->sizes);
@@ -161,7 +161,8 @@ class ImageSet extends SourceSet {
     $sources = [];
 
     if(strtolower($this->image->extension()) === 'svg') {
-
+      // SVGs just get a fallback, but support features like
+      // lazy-loading and aspect-ratio placeholders.
       $sourceSet = new SourceSet($this->image);
       $sourceSet->push(new Source($this->image, null, $this->kirby));
       $sources[] = $sourceSet;
@@ -474,6 +475,7 @@ class ImageSet extends SourceSet {
         $settings = [
           'style'        => $placeholderStyle,
           'class'        => $this->className('__placeholder'),
+          'alpha'        => $this->alpha(),
           'output.xhtml' => $this->options['output.xhtml'],
         ];
 
@@ -561,6 +563,7 @@ class ImageSet extends SourceSet {
       static::$fileCache->set($this->image, $this->hash(), [
         'imageset.version' => static::$plugin->version(),
         'html'             => $html,
+        'site.url'         => $this->kirby->roots()->index(), // Store Kirby’s index URL to detect if the site was moved to another domain or server.
       ]);
     }
 
