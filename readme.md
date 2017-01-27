@@ -10,7 +10,7 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 
 **NOTE:** This is a commercial plugin. In order to use it on a production server, you need to buy a license. For details on ImageSet’s license model, scroll down to the [License](#9-license) section of this document.
 
-<table><tr><td>🚧 <em>The plugin is currently available as a pre-release. Licenses will be evailable, once version 1.0.0 final has been released.</em></td></tr></table>
+<table><tr><td>🚧 <em>The plugin is currently available as a pre-release. Licenses will be available, once version 1.0.0 final has been released. Feel free to test it on public servers, as long as this plugin is still in beta.</em></td></tr></table>
 
 ![Placeholder styles available in ImageSet](https://fabianmichael.de/shared/imageset-animation.gif)
 
