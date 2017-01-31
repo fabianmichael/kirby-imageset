@@ -8,12 +8,14 @@
 
 namespace Kirby\Plugins\ImageSet;
 
+use Asset;
 use Exception;
 use F;
 use File;
 use Html;
 use Media;
 use Str;
+use Url;
 
 use Kirby\Plugins\ImageSet\Placeholder\Base as Placeholder;
 use ColorThief\ColorThief;
@@ -112,6 +114,14 @@ class ImageSet extends SourceSet {
    * @param Kirby $kirby
    */
   public function __construct(Media $image = null, $sizes = 'default', $options = null, Kirby $kirby = null) {
+
+    if(get_class($image) === 'Media') {
+      // The "Media" class does not provide some methods like
+      // thumb(), so instances of Media need to be converted
+      // to "Assets" before using them.
+      $image = new Asset($image);
+    }
+
     parent::__construct($image, array_merge(static::$defaults, is_array($options) ? $options : []));
     $this->kirby   = $kirby ?: kirby();
 
