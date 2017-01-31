@@ -113,7 +113,7 @@ class Utils {
           if($media instanceof File) {
             $destinationRoot = $media->thumb($params)->root();
           } else {
-            $destinationRoot = new Thumb($media, $params);
+            $destinationRoot = (new Thumb($media, $params))->destination()->root;
           }
 
           $color = ColorThief::getColor($destinationRoot);
