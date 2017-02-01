@@ -399,10 +399,28 @@ class ImageSet extends SourceSet {
       }
 
       $hash .= $image->filename();
-      $hash .= serialize($this->sizes);
-      $hash .= serialize($this->options);
 
-      $hash = hexdec(substr(md5($hash), 0, 15)); // (int) sprintf('%u', crc32($hash));
+      $hash .= serialize($this->sizes);
+
+      // Prepare options for hash creation by converting 
+      // objects like Kirby’s internally used "Field",
+      // to strings, because closures cannot be serialized.
+      $safeOptions = [];
+      foreach($this->options as $key => $value) {
+        if((!is_string($value) && is_callable($value)) || is_object($value)) {
+          try {
+            $safeOptions[$key] = (string) $value;
+          } catch(Exception $e) {
+            // Just skip the variable, if it could not be
+            // converted to a string.
+          }
+        } else {
+          $safeOptions[$key] = $value;
+        }
+      }
+      $hash .= serialize($safeOptions);
+
+      $hash = hexdec(substr(md5($hash), 0, 15));
 
       $this->cache['hash'] = utils::base62($hash);
     }
