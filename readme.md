@@ -520,7 +520,7 @@ So much markup for a single image?
 Will ImageSet slow down my site?
 : ImageSet has been designed for performance. But as it uses Kirby’s built-in thumbs API, the plugin needs check the existence of every thumb on every page load. On pages with dozens of image sets and hundreds of corresponding thumbs, you may notice a performance impact. In these cases, it is recommended to enable Kirby’s page cache or to switch to a web hosting plan that comes with fast SSD storage. When a page has to generate hundreds of thumbnails on load, this may also exceed your maximum script execution time. In the latter case, consider to use the [ImageKit](https://github.com/fabianmichael/kirby-imagekit) plugin for asynchronous thumbnail creation or cloud-based service.
 
-Fronend performance
+Frontend performance
 : ImageSet uses JavaScript based filters for most placeholder styles to ensure good cross-browser support and nice-looking placeholders. However, these filters need some CPU time and low-quality sources have to be loaded for every image set. This can noticeably slow down page load on slow devices and also increases the overall download size of a page. If your page holds a huge number of ImageSets, you should consider to disable placeholders or use the `color` placeholder style, which is very lightweight. Rendering of placeholders is also much faster for images without an alpha channel, so prefer JPEGs or non-transparent PNGs wherever possible.
 
 Does ist support SVG images?
