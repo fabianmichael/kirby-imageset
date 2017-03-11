@@ -35,8 +35,8 @@ gulp.task("scripts", function () {
       extensions: "js",
       hardFail: true,
       includePaths: [
-        __dirname + "/node_modules",
-        __dirname + "/assets/js/src"
+        __dirname + "/assets/js/src",
+        __dirname,
       ]
     }))
 

@@ -37,14 +37,6 @@ class ImageSet extends SourceSet {
   const STYLES_IDENTIFIER_ATTRIBUTE = 'data-imagekit-styles';
 
   /**
-   * @const string CSS selector to match CSS rules that only
-   *               apply after ImageSet’s JavaScript has
-   *               been executed and the corresponding class
-   *               has been added to the `<html>` element.
-   */
-  const JS_CSS_SELECTOR = '.imageset-js';
-
-  /**
    * @var array An associative array holding the default
    *            options ImageSets.
    */
@@ -67,7 +59,6 @@ class ImageSet extends SourceSet {
     // for devices with disabled JavaScript/No JavaScript
     // support?
     'noscript'            => true,
-    'noscript.priority'   => 'ratio', // ratio | compatibility
     
 
     // Output style
@@ -502,7 +493,7 @@ class ImageSet extends SourceSet {
       if($placeholderStyle !== false) {
         $settings = [
           'style'        => $placeholderStyle,
-          'class'        => $this->className('__placeholder'),
+          'class'        => 'imageset-placeholder',
           'alpha'        => $this->alpha(),
           'output.xhtml' => $this->options['output.xhtml'],
         ];
@@ -625,27 +616,6 @@ class ImageSet extends SourceSet {
   }
 
   /**
-   * Returns the full classname for a partial of this
-   * imageset, with CSS namespace prepended.
-   * 
-   * @param  string The class name that should be prefixed.
-   * @return string Namespaced CSS class name.
-   */
-  public function className($className = '') {
-    return $this->option('css.namespace') . $className;
-  }
-
-  /**
-   * Returns the unique classname of this imageset, can
-   * be used for targeting it with CSS rules.
-   * 
-   * @return string Unique CSS class name of this imageset.
-   */
-  public function uniqueClassName() {
-    return $this->className('--' . $this->hash());
-  }
-
-  /**
    * Returns the class name of this ImageSet’s main `<img>` tag.
    * 
    * @return string The class string of this ImageSet’s main image.
@@ -653,7 +623,7 @@ class ImageSet extends SourceSet {
   public function elementClass() {
     $className = [];
 
-    $className[] = $this->className('__element');
+    $className[] = 'imageset-element';
 
     if($this->option('lazyload')) {
       $className[] = '/ lazyload';
@@ -670,31 +640,31 @@ class ImageSet extends SourceSet {
   public function wrapperClass() {
     $className = [];
 
-    $className[] = $this->className();
+    $className[] = 'imageset';
 
     if($this->hasMultipleRatios()) {
-      $className[] = $this->uniqueClassName();
+      $className[] = '-id:' . $this->hash();
     }
 
     if($this->option('ratio') || $this->option('placeholder') || $this->option('lazyload')) {
-      $className[] = $this->className('--ratio');
-    }
-
-    if($placeholder = $this->option('placeholder')) {
-      $className[] = $this->className('--placeholder');
-      $className[] = $this->className('--placeholder--' . $placeholder);
+      $className[] = '-ratio';
     }
 
     if($this->hasMultipleRatios()) {
-      $className[] = $this->className('--multiple-ratios');
+      $className[] = '-multiple-ratios';
+    }
+
+    if($placeholder = $this->option('placeholder')) {
+      $className[] = '-placeholder';
+      $className[] = '-placeholder:' . $placeholder;
     }
 
     if($this->alpha()) {
-      $className[] = $this->className('--alpha');
+      $className[] = '-alpha';
     }
 
     if($this->option('lazyload')) {
-      $className[] = $this->className('--lazyload');
+      $className[] = '-lazyload';
     }
 
     if($cls = $this->option('class')) {
@@ -702,14 +672,6 @@ class ImageSet extends SourceSet {
     }
 
     return implode(' ', $className);
-  }
-
-  public function placeholderAttribute() {
-    if($placeholder = $this->option('placeholder')) {
-      return html::attr(['data-placeholder' => $placeholder]);
-    } else {
-      return '';
-    }
   }
 
   /**
@@ -740,9 +702,6 @@ class ImageSet extends SourceSet {
         
         $rules = [];
 
-        $compatMode   = ($this->option('noscript.priority') === 'compatibility');
-        $jsSelector   = ($compatMode ? static::JS_CSS_SELECTOR . ' ' : '');
-        $important    = ($compatMode ? ' !important' : '');
         $multiple     = $this->hasMultipleRatios();
         $placeholder  = ($this->placeholder() && $this->option('placeholder') !== 'color');
 
@@ -751,28 +710,26 @@ class ImageSet extends SourceSet {
         }
 
         foreach(array_reverse($this->sources) as $source) {
-          // !important is used to override the fallback ratio set on the `.ratio__fill` element.
-          $property   = "padding-top: " . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%{$important};";
+          // !important is used to override the fallback ratio set on the `.imageset-ratio-fill` element.
+          $property   = "padding-top: " . utils::formatFloat(1 / $source->ratio() * 100, 10) . "%;";
           $media      = $source->media();
           
-          $rule = "{$jsSelector}.{$this->uniqueClassName()} .{$this->className('__ratio-fill')} { {$property} }";
+          $rule = ".imageset.-id\:{$this->hash()} .imageset-ratio-fill { {$property} }";
 
           if($placeholder && $multiple) {
             $sourceRatio = $source->ratio();
             if(!utils::compareFloats($imageRatio, $sourceRatio)) {
-              $selector = "{$jsSelector}.{$this->uniqueClassName()} .{$this->className('__placeholder')}";
+              $placeholderSelector = ".imageset.-id\:{$this->hash()} .imageset-placeholder";
               if($sourceRatio > $imageRatio) {
-                $rule .= " $selector { width: 100%; height: auto; }";
+                $rule .= " $placeholderSelector { width: 100%; height: auto; }";
               } else {
-                $rule .= " $selector { height: 100%; width: auto; }";
+                $rule .= " $placeholderSelector { height: 100%; width: auto; }";
               }
             }
           }
 
           if($media) {
             $rule = '@media ' . $media . ' { ' . $rule . ' }';
-          } else if ($compatMode) {
-            $rule = '';
           }
 
           if(!empty($rule)) {

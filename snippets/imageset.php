@@ -54,7 +54,7 @@ use Html;
     <?php endif ?>
 
     <?php if($imageset->option('ratio') || $imageset->option('lazyload') || $imageset->option('placeholder')): ?>
-      <span class="<?= $imageset->className('__ratio-fill') ?>"<?= (!$imageset->hasCssRules() || $imageset->option('noscript.priority') === 'compatibility') ? ' style="padding-top: ' . utils::formatFloat(1 / $imageset->ratio() * 100, 10) . '%;"' : '' ?>></span>
+      <span class="imageset-ratio-fill"<?= (!$imageset->hasCssRules()) ? ' style="padding-top: ' . utils::formatFloat(1 / $imageset->ratio() * 100, 10) . '%;"' : '' ?>></span>
     <?php endif ?>
   
     <?php if($placeholder = $imageset->placeholder()) echo $placeholder->html(); ?>
@@ -84,44 +84,34 @@ use Html;
     <?php endif ?>
 
     <?php if($imageset->option('noscript')): ?>
+
       <noscript>
-
-        <?php if($imageset->option('noscript.priority') === 'ratio'): ?>
           
-          <?php if($imageset->count() > 1): ?>
-            
-            <picture>
-              <?php foreach($imageset->alternativeSources() as $source): ?>
-                <?= $source->tag(['lazyload' => false]) ?>
-              <?php endforeach ?>
-              <img <?= $imageset->srcAttributes(['lazyload' => false], true) ?>
-                   <?= $imageset->sizesAttributes(['lazyload' => false], true) ?>
-                   class="<?= $imageset->className('__fallback') ?>"
-                   <?= $imageset->altAttribute() ?>
-                   <?= $imageset->trailingSlash() ?>>
-            </picture>
-
-          <?php else: ?>
-
+        <?php if($imageset->count() > 1): ?>
+          
+          <picture>
+            <?php foreach($imageset->alternativeSources() as $source): ?>
+              <?= $source->tag(['lazyload' => false]) ?>
+            <?php endforeach ?>
             <img <?= $imageset->srcAttributes(['lazyload' => false], true) ?>
                  <?= $imageset->sizesAttributes(['lazyload' => false], true) ?>
-                 class="<?= $imageset->className('__fallback') ?>"
+                 class="imageset-fallback"
                  <?= $imageset->altAttribute() ?>
                  <?= $imageset->trailingSlash() ?>>
+          </picture>
 
-          <?php endif ?>
-      
         <?php else: ?>
 
-        <img <?= $imageset->srcAttributes(['lazyload' => false], true) ?>
-             <?= $imageset->sizesAttributes(['lazyload' => false], true) ?>
-             <?= $imageset->altAttribute() ?>
-             class="<?= $imageset->className('__fallback') ?>"
-             <?= $imageset->trailingSlash() ?>>
-      
+          <img <?= $imageset->srcAttributes(['lazyload' => false], true) ?>
+               <?= $imageset->sizesAttributes(['lazyload' => false], true) ?>
+               class="imageset-fallback"
+               <?= $imageset->altAttribute() ?>
+               <?= $imageset->trailingSlash() ?>>
+
         <?php endif ?>
 
       </noscript>
+      
     <?php endif ?>
 
   </span>

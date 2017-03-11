@@ -33,15 +33,16 @@
 
   var prefix = 'imageset';
 
-  var __wrapperClass                    = prefix,
-      __wrapperLazyloadClass            = prefix + '--lazyload',
-      __wrapperLoadedClass              = prefix + '--loaded',
-      __wrapperPlaceholderClass         = prefix + '--placeholder',
-      __wrapperPlaceholderStyleClass    = prefix + '--placeholder--',
-      __wrapperAlphaClass               = prefix + '--alpha',
-      __wrapperPlaceholderRenderedClass = prefix + '--placeholder--rendered',
-      __imageElementClass               = prefix + '__element',
-      __placeholderElementClass         = prefix + '__placeholder';
+  var __wrapperClass                    = 'imageset',
+      __wrapperLazyloadClass            = __wrapperClass + '  -lazyload',
+      __wrapperLoadedClass              = 'is-loaded',
+      __wrapperPlaceholderClass         = __wrapperClass + ' -placeholder',
+      __wrapperPlaceholderStyleClass    = '-placeholder:',
+      __wrapperAlphaClass               = '-alpha',
+      __wrapperPlaceholderRenderedClass = 'is-placeholder-rendered',
+      __imageElementClass               = __wrapperClass + '-element',
+      __placeholderElementClass         = __wrapperClass + '-placeholder',
+      __operaMiniClass                  = 'operamini';
 
   /* =====  Variable Shortcuts  ============================================= */
 
@@ -210,6 +211,8 @@
     window.lazySizesConfig      = window.lazySizesConfig || {};
     window.lazySizesConfig.init = false;
 
+    addClass(docElement, __operaMiniClass);
+
     var loadImageSet = function(el) {
         
       var sources = el.getElementsByTagName("source"),
@@ -237,9 +240,9 @@
         var fallbackSource = sources.length > 0 ? sources[sources.length - 1] : img,
             candidates     = fallbackSource[_getAttribute](_dataSrcset).split(/,\s+/);
 
-        for(var n = sources.length; n >= 0; n--) {
+        while(sources.length > 0) {
           // Delete sources elements 
-          sources[n].parentNode.removeChild(sources[n]);
+          sources[0].parentNode.removeChild(sources[0]);
         }
 
         img.src = candidates.pop().replace(/\s+\d+[wx]$/, '');

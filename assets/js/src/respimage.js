@@ -1,2 +1,2 @@
-//=require respimage/respimage.js
-//=require respimage/plugins/mutation/ri.mutation.js
+//=require includes/respimage.js
+//=require includes/ri.mutation.js

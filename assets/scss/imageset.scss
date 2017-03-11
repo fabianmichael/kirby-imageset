@@ -3,33 +3,23 @@
  * 
  * @copyright (c) 2016 Fabian Michael <https://fabianmichael.de>
  * @link https://github.com/fabianmichael/kirby-imageset
+ *
  */
 
-// =====  Default settings  ================================================= //
-
-$imageset--namespace            : imageset                  !default;
-
-// Enable Noscript fallback selector?
-$imageset--noscript-fallback    : true                      !default;
-$imageset--js-enabled-selector  : ".js"                     !default;
+// -----  Default Settings  ------------------------------------------------- //
 
 // Duration of the unveil animation for loaded images
-$imageset--unveil-duration      : .5s                       !default;
+$imageset-unveil-duration : .5s !default;
 
 // A short delay gives the browser time to »breathe« after
 // an imageset has loaded, often resulting in a smoother
 // animation. This default is not based on scientific
 // research, but rather on personal experience.
-$imageset--unveil-delay         : .05s                      !default;
+$imageset-unveil-delay    : .05s !default;
 
+/* -----  ImageSet Component  ----------------------------------------------- */
 
-// =====  ImageSet  ========================================================= //
-
-@if not $imageset--noscript-fallback {
-  $imageset--js-enabled-selector: "";
-}
-
-.#{$imageset--namespace} {
+.imageset {
   /* Fixes a glitch in Firefox, where (in rare cases) a
      black border appears for no abvious reason at the
      left side of an imageset. */
@@ -37,186 +27,218 @@ $imageset--unveil-delay         : .05s                      !default;
     
   /* Improve rendering speed in supported browsers. */
   contain: content;
+}
 
-  &--ratio {
-    display: inline-block;
-    width: 100%;
-    position: relative;
-    
-    /* Create a new stacking context for this imageset.
-       See comments below to learn about why this
-       is important. */
-    z-index: 0;
+/* ·····  ImageSet with Ratio-Placeholder  ·································· */
 
-    /* Image with a ratio placeholder */
-    .#{$imageset--namespace}__element {
-      display: block;
-      position: absolute;
-      left: 0;
-      top: 0;
+.imageset.-ratio {
+  display: inline-block;
 
-      /* Override issues introduced by common rules
-         for responsive images,
-         e.g. `img { max-width: 100%; height: auto; }` */
-      width:      100% !important;
-      height:     100% !important;
-      max-width:  none !important;
-      max-height: none !important;
-      zoom: 1;
-    }
+  /* Remove bottom margin (borrowed from Inuit CSS) */
+  vertical-align: middle;
+  width: 100%;
+  position: relative;
+  
+  /* Create a new stacking context for this imageset.
+     See comments below to learn about why this
+     is important. */
+  z-index: 0;
+}
+
+.imageset.-ratio .imageset-element {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  /* Override issues introduced by common rules
+     for responsive images,
+     e.g. `img { max-width: 100%; height: auto; }` */
+  width:      100% !important;
+  height:     100% !important;
+  max-width:  none !important;
+  max-height: none !important;
+  zoom: 1;
+}
+
+.imageset.-multiple-ratios .imageset-element {
+  // Prevent flash of a skewed image after ratio has
+  // changed, but new image was not loaded yet.
+  // Not supported in IE & EDGE <= 14
+  // DEACTIVATED DUE TO PERFORMANCE ISSUES!
+  // object-fit: cover;
+}
+
+.imageset.-ratio .imageset-ratio-fill {
+  display: block;
+  overflow: hidden;
+  position: relative;
+  z-index: -1;
+  /* Setting the width of the placeholder element and
+     adding `overflow: hidden` prevents rendering bugs
+     in IE 11. */
+  width: 100%;
+}
+
+.imageset.-ratio .imageset-element {
+  z-index: 2;
+}
+
+.js .imageset.-ratio.-lazyload .imageset-element {
+  /* The actual image is kept behind the placeholder.
+     Rather than fading in the image, the placeholder is
+     faded out instead. This prevents the image layer to
+     switch from hardware-accelerated rendering during the
+     animation to CPU rendering after the animation has
+     ended, because this can cause rendering issues in
+     WebKit- and Blink-based (and possibly any other)
+     browsers. */
+  z-index: 1;
+}
+
+.js .imageset.-alpha.-lazyload .imageset-element {
+  /* Images with transparency require a different fading
+     technique, as the placeholder would shine through,
+     after the final image was loaded. */
+  opacity: 0;
+  will-change: opacity;
+
+  @media screen {
+    transition: opacity $imageset-unveil-duration;
   }
+}
 
-  &--multiple-ratios &__element {
-    // Prevent flash of a skewed image after ratio has
-    // changed, but new image was not loaded yet.
-    // Not supported in IE & EDGE <= 14
-    // DEACTIVATED DUE TO PERFORMANCE ISSUES!
-    // object-fit: cover;
+.js .imageset.-alpha.-lazyload.is-loaded .imageset-element {
+  opacity: 1;
+  will-change: auto;
+}
+
+.imageset-placeholder {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  max-width: none !important;
+  max-height: none !important;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+}
+
+.js .imageset.-lazyload .imageset-placeholder {
+  /* Placeholder will be placed on top of the actual
+     image element. This will only be applied, when
+     JavaScript is enabled. */
+  
+  // A nice addition here would be:
+  // `will-change: opacity;`, but it causes
+  // subpixel-rendering issues in Safari 10 :-(
+  //will-change: opacity;
+  
+  /* Visibility of placeholder is changed to hidden after
+     the transition. */
+  @media screen {
+    transition:
+      opacity $imageset-unveil-duration $imageset-unveil-delay,
+      visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
   }
+  
+  /* The actual placeholder is in front of the actual
+     image, so we don’t have to fade in the image, which
+     would lead to artifacts in WebKit- and Blink-based
+     browsers. */
+  z-index: 2;
 
-  &__ratio-fill {
-    display: block;
-    overflow: hidden;
-    position: relative;
-    z-index: -1;
-    /* Setting the width of the placeholder element and
-       adding `overflow: hidden` prevents rendering bugs
-       in IE 11. */
-    width: 100%;
-  }
+  /* Prevent user interaction like accidently saving the
+     placeholder via tap/right-click */
+  pointer-events: none;
 
-  &--ratio &__element {
-    z-index: 2;
-  }
+  /* Background color is needed to avoid `image-rendering`
+     property beeing ignored when layer is rendered on
+     the GPU during animation
+     Tested in: Chrome 49, Safari 9.1 */
+  background-color: #efefef;
+}
 
-  #{$imageset--js-enabled-selector} &--ratio#{&}--lazyload &__element {
-    /* The actual image is kept behind the placeholder.
-       Rather than fading in the image, the placeholder is
-       faded out instead. This prevents the image layer to
-       switch from hardware-accelerated rendering during the
-       animation to CPU rendering after the animation has
-       ended, because this can cause rendering issues in
-       WebKit- and Blink-based (and possibly any other)
-       browsers. */
-    z-index: 1;
-  }
+.imageset.-alpha .imageset-placeholder {
+  visibility: hidden;
+}
 
-  #{$imageset--js-enabled-selector} &--alpha#{&}--lazyload &__element {
-    /* Images with transparency require a different fading
-       technique, as the placeholder would shine through,
-       after the final image was loaded. */
-    opacity: 0;
-    will-change: opacity;
+.js .imageset.-alpha .imageset-placeholder {
+    visibility: visible;
 
-    @media screen {
-      transition: opacity $imageset--unveil-duration;
-    }
-  }
-
-  #{$imageset--js-enabled-selector} &--alpha#{&}--lazyload#{&}--loaded &__element {
-    opacity: 1;
-    will-change: auto;
-  }
-
-  &__placeholder {
-    display: block;
-    position: absolute;
-    z-index: 1;
-    top: 50%;
-    left: 50%;
-    width: 101%;
-    height: 101%;
-    max-width: none !important;
-    //max-height: none !important;
-    transform: translate(-50%, -50%);
-    overflow: hidden;
-    contain: strict;
-    //object-fit: cover;
-    //object-position: 50% 50%;
-  }
-
-  #{$imageset--js-enabled-selector} #{&}--lazyload &__placeholder {
-    /* Placeholder will be placed on top of the actual
-       image element. This will only be applied, when
-       JavaScript is enabled. */
-    
-    // A nice addition here would be:
-    // `will-change: opacity;`, but it causes
-    // subpixel-rendering issues in Safari 10 :-(
-    //will-change: opacity;
-    
-    /* Visibility of placeholder is changed to hidden after
-       the transition. */
     @media screen {
       transition:
-        opacity $imageset--unveil-duration $imageset--unveil-delay,
-        visibility 0s ($imageset--unveil-duration + $imageset--unveil-delay + .25s);
-    }
-    
-    /* The actual placeholder is in front of the actual
-       image, so we don’t have to fade in the image, which
-       would lead to artifacts in WebKit- and Blink-based
-       browsers. */
-    z-index: 2;
-
-    /* Prevent user interaction like accidently saving the
-       placeholder via tap/right-click */
-    pointer-events: none;
-
-    /* Background color is needed to avoid `image-rendering`
-       property beeing ignored when layer is rendered on
-       the GPU during animation
-       Tested in: Chrome 49, Safari 9.1 */
-    background-color: #efefef;
-  }
-
-  &--alpha &__placeholder {
-    visibility: hidden;
-
-    #{$imageset--js-enabled-selector} & {
-      visibility: visible;
-
-      @media screen {
-        transition:
-          opacity $imageset--unveil-duration $imageset--unveil-delay,
-          visibility 0s ($imageset--unveil-duration + $imageset--unveil-delay + .25s);
-      }
+        opacity $imageset-unveil-duration $imageset-unveil-delay,
+        visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
     }
   }
 
-  #{$imageset--js-enabled-selector} &--alpha:not(&--placeholder--color) &__placeholder {
-    background-color: transparent;
-  }
+.js .imageset.-alpha:not(.-placeholder\:color) .imageset-placeholder {
+  background-color: transparent;
+}
 
-  &--placeholder--mosaic &__placeholder {
-    /* autoprefixer: off */
-    /* Mosaic placeholders should render crisp! */
-    -ms-interpolation-mode: nearest-neighbor;   /* IE 10, 11 */
-    image-rendering: -moz-crisp-edges;          /* Firefox */
-    image-rendering: -o-crisp-edges;            /* Opera */
-    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
-    image-rendering: crisp-edges;               /* Safari 10+ */
-    image-rendering: pixelated;                 /* Opera 26+, Chrome */
-  }
+.imageset.-placeholder\:mosaic .imageset-placeholder {
+  /* autoprefixer: off */
+  /* Mosaic placeholders should render crisp! */
+  -ms-interpolation-mode: nearest-neighbor;   /* IE 10, 11 */
+  image-rendering: -moz-crisp-edges;          /* Firefox */
+  image-rendering: -o-crisp-edges;            /* Opera */
+  image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+  image-rendering: crisp-edges;               /* Safari 10+ */
+  image-rendering: pixelated;                 /* Opera 26+, Chrome */
+}
 
-  #{$imageset--js-enabled-selector} &--loaded &__placeholder {
-    /* After image is loaded, the placeholder will fade out
-       and then change visibility to allow mouse interation
-       with the loaded image in browsers, where the
-       `pointer-events` property is not supported. */
-    opacity: 0;
-    visibility: hidden;
-  }
+.js .imageset.is-loaded .imageset-placeholder {
+  /* After image is loaded, the placeholder will fade out
+     and then change visibility to allow mouse interation
+     with the loaded image in browsers, where the
+     `pointer-events` property is not supported. */
+  opacity: 0;
+  visibility: hidden;
+}
 
-  &--ratio &__fallback {
-    /* autoprefixer: off */
-    position: absolute;
-    z-index: 5;
-    top: 0;
-    left: 0;
+/* ·····  NoScript Fallback  ················································ */
+
+.imageset.-ratio .imageset-fallback {
+  /* autoprefixer: off */
+  position: absolute;
+  z-index: 5;
+  min-width: 100%;
+  min-height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-interpolation-mode: bicubic;
+}
+
+@supports (object-fit: cover) {
+  .imageset.-ratio .imageset-fallback {
+    min-width: none;
+    min-height: none;
     width: 100%;
     height: 100%;
-    -o-object-fit: cover;
+    top: 0;
+    left: 0;
+    transform: none;
     object-fit: cover;
   }
+}
+
+.no-js .imageset .imageset-element {
+  display: none;
+}
+
+/* ·····  Opera Mini Fixes  ················································· */
+
+.operamini .imageset-placeholder {
+  display: none;
+}
+
+.operamini .imageset.-multiple-ratios .imageset-element {
+  /* autoprefixer: off */
+  -o-object-fit: cover;
+  object-fit: cover;
 }

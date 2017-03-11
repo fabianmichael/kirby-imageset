@@ -1,5 +1,11 @@
 # ImageSet Changelog
 
+- `1.0.0-rc1`
+  - **Leaner CSS classes:** I decided to switch from full-blown BEM syntax to a leaner scheme for ImageKit’s class names. As ImageSet already produces a lot of CSS classes and those will become possibly more as new features are added, BEM seems to be to verbose to keep the generated HTML source readable. The new scheme uses shorter classes for modifiers and state.
+  - **CSS:** Fix collisions with responsive image rules from inuit.css (and possibly other frameworks).
+  - **Fix some errors in Opera Mini** regarding distorted images and JavaScript errors.
+  - **Improved noscript-fallback:** Removed `noscript.priority`, because due to better CSS positioning of the placeholder, it is not needed any more.
+
 - `1.0.0-beta2`
   - **Caching** ImageSets are now cached, so existance checks on load can be skipped after the first page load, resulting in major speed bumps. Can be disabled in options.
   - **Improved Transparency Detection** now also works for 8-bit palette GIF or PNG images.
