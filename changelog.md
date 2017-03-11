@@ -5,6 +5,7 @@
   - **CSS:** Fix collisions with responsive image rules from inuit.css (and possibly other frameworks).
   - **Fix some errors in Opera Mini** regarding distorted images and JavaScript errors.
   - **Improved noscript-fallback:** Removed `noscript.priority`, because due to better CSS positioning of the placeholder, it is not needed any more.
+  - **SASS:** Adjusted SASS file by removing nested selectors for better readibility.
 
 - `1.0.0-beta2`
   - **Caching** ImageSets are now cached, so existance checks on load can be skipped after the first page load, resulting in major speed bumps. Can be disabled in options.
