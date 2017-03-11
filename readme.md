@@ -529,7 +529,7 @@ Just place a copy of `site/plugins/imageset/snippets/imageset.php` in your snipp
 </details>
 
 <details>
-  <summary>**Does ist support SVG images?**</summary>
+  <summary>**Does it support SVG images?**</summary>
   There is only basic support for SVG images. That means, if you supply an SVG image as source file for your image set, the plugin will generate markup for the SVG image, using the `<img>` tag. But at SVG is a very complex document format, there is no simple way in PHP to generate placeholder thumbnails (imagemagick does not work reliably with every SVG file), so placeholder style will be ignored and the SVG file will be shown in its original aspect-ratio. Everything set in the `$sizes` parameter will be ignored.
 </details>
 
