@@ -540,11 +540,15 @@ Just place a copy of `site/plugins/imageset/snippets/imageset.php` in your snipp
 
 ## 9 Known Bugs & Limitations
 
-Safari 10
-: When an image set appears within an element that uses CSS multi-colum layout (`column-count > 1`), the fade-in animation for lazy-loaded image sets does not work. However, the loaded image is displayed correctly. Currently, there is no way to fix this as far as I know.
+**Safari 10**
 
-Printing
-: Although it’s possible to trigger loading of images when a user hits the print button, that does not necessarily mean that images are generated before the browser generates its print preview or the user starts to print. A workaround for this is to preload all images after the page has been loaded. This ensures that image sets are loaded after other resources like JS and CSS files, but loads every image on the page and thus basically disables lazy-loading: <pre><code>&lt;script&gt;
+When an image set appears within an element that uses CSS multi-colum layout (`column-count > 1`), the fade-in animation for lazy-loaded image sets does not work. However, the loaded image is displayed correctly. Currently, there is no way to fix this as far as I know.
+
+**Printing**
+
+Although it’s possible to trigger loading of images when a user hits the print button, that does not necessarily mean that images are generated before the browser generates its print preview or the user starts to print. A workaround for this is to preload all images after the page has been loaded. This ensures that image sets are loaded after other resources like JS and CSS files, but loads every image on the page and thus basically disables lazy-loading:
+
+<pre><code>&lt;script&gt;
 window.lazySizesConfig = window.lazySizesConfig || {};
 window.lazySizesConfig.preloadAfterLoad = true;
 &lt;/script&gt;
