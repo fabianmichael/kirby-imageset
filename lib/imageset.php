@@ -889,17 +889,14 @@ class ImageSet extends SourceSet {
    */
   public function altAttribute($options = null) {
     $options   = array_merge($this->options, is_array($options) ? $options : []);
-    $alt       = $options['alt'];
 
-    if(empty($alt)) {
-      return 'alt=""';
+    if($options['output.xhtml']) {
+      $alt = html::encode($options['alt'], false);
     } else {
-      if($options['output.xhtml']) {
-        return html::attr('alt', html::encode($alt, false));
-      } else {
-        return html::attr('alt', htmlspecialchars($alt));
-      }
+      $alt = htmlspecialchars($options['alt']);
     }
+
+    return 'alt="' . trim($alt) . '"';
   }
 
 
