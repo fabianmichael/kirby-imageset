@@ -533,7 +533,7 @@ Just place a copy of `site/plugins/imageset/snippets/imageset.php` in your snipp
 
 <details>
   <summary><strong>Is it a good idea to apply custom CSS to my image sets?</strong></summary>
-  In general, it is not recommended to apply any custom CSS to anything inside the wrapper tag, as the HTML & CSS structure may possibly change with an update of ImageSet. It is recommended to apply all styles regarding custom positioning or sizing to the wrapping <code>&gt;span class=&quot;imageset […]&quot;&gt;</code>code> tag. You can use the <code>class</code> option to add custom classes, if you need different styles for different image sets.
+  In general, it is not recommended to apply any custom CSS to anything inside the wrapper tag, as the HTML & CSS structure may possibly change with an update of ImageSet. It is recommended to apply all styles regarding custom positioning or sizing to the wrapping <code>&lt;span class=&quot;imageset […]&quot;&gt;</code>code> tag. You can use the <code>class</code> option to add custom classes, if you need different styles for different image sets.
 </details>
 
 ## 9 Known Bugs & Limitations
