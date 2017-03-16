@@ -518,7 +518,7 @@ Just place a copy of `site/plugins/imageset/snippets/imageset.php` in your snipp
 
 <details>
     <summary><strong>Will ImageSet slow down my site?</strong></summary>
-    ImageSet has been designed for performance. But as it uses Kirby’s built-in thumbs API, the plugin needs check the existence of every thumb on every page load. On pages with dozens of image sets and hundreds of corresponding thumbs, you may notice a performance impact. In these cases, it is recommended to enable Kirby’s page cache or to switch to a web hosting plan that comes with fast SSD storage. When a page has to generate hundreds of thumbnails on load, this may also exceed your maximum script execution time. In the latter case, consider to use the [ImageKit](https://github.com/fabianmichael/kirby-imagekit) plugin for asynchronous thumbnail creation or cloud-based service.
+    ImageSet has been designed for performance. But as it uses Kirby’s built-in thumbs API, the plugin needs check the existence of every thumb on every page load. On pages with dozens of image sets and hundreds of corresponding thumbs, you may notice a performance impact. In these cases, it is recommended to enable Kirby’s page cache or to switch to a web hosting plan that comes with fast SSD storage. When a page has to generate hundreds of thumbnails on load, this may also exceed your maximum script execution time. In the latter case, consider to use the <a href="https://github.com/fabianmichael/kirby-imagekit">ImageKit</a> plugin for asynchronous thumbnail creation or cloud-based service.
 </details>
 
 <details>
@@ -528,12 +528,12 @@ Just place a copy of `site/plugins/imageset/snippets/imageset.php` in your snipp
 
 <details>
   <summary><strong>Does it support SVG images?</strong></summary>
-  There is only basic support for SVG images. That means, if you supply an SVG image as source file for your image set, the plugin will generate markup for the SVG image, using the `<img>` tag. But at SVG is a very complex document format, there is no simple way in PHP to generate placeholder thumbnails (imagemagick does not work reliably with every SVG file), so placeholder style will be ignored and the SVG file will be shown in its original aspect-ratio. Everything set in the `$sizes` parameter will be ignored.
+  There is only basic support for SVG images. That means, if you supply an SVG image as source file for your image set, the plugin will generate markup for the SVG image, using the <code>&lt;img&gt;</code> tag. But at SVG is a very complex document format, there is no simple way in PHP to generate placeholder thumbnails (imagemagick does not work reliably with every SVG file), so placeholder style will be ignored and the SVG file will be shown in its original aspect-ratio. Everything set in the <code>$sizes</code> parameter will be ignored.
 </details>
 
 <details>
   <summary><strong>Is it a good idea to apply custom CSS to my image sets?</strong></summary>
-  In general, it is not recommended to apply any custom CSS to anything inside the wrapper tag, as the HTML & CSS structure may possibly change with an update of ImageSet. It is recommended to apply all styles regarding custom positioning or sizing to the wrapping `<span class="imageset […]">` tag. You can use the `class` option to add custom classes, if you need different styles for different image sets.
+  In general, it is not recommended to apply any custom CSS to anything inside the wrapper tag, as the HTML & CSS structure may possibly change with an update of ImageSet. It is recommended to apply all styles regarding custom positioning or sizing to the wrapping <code>&gt;span class=&quot;imageset […]&quot;&gt;</code>code> tag. You can use the <code>class</code> option to add custom classes, if you need different styles for different image sets.
 </details>
 
 ## 9 Known Bugs & Limitations
