@@ -165,7 +165,7 @@ The settings listed below are meant to be defined in your `config.php` and chang
 
 | Option              | Default value | Possible values | Description                                                                                                                                                                                                                                                     |
 |:--------------------|:--------------|:--------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `imageset.license`    | `''`          | — |Enter your license code here, once your site goes live.<br>[<img src="https://img.shields.io/badge/%E2%80%BA-Buy%20a%20license-green.svg" alt="Buy a license">](http://sites.fastspring.com/fabianmichael/product/imageset)  * |
+| `imageset.license`    | `''`          | — |Enter your license code here, once your site goes live.<br>*See the [License](#10-license) section of this document for more information.* |
 | `imageset.styles.consolidate` | `false` | `true`, `false` | If you use image sets with multiple aspect-ratios, the plugin needs an inline `<style>` element for each of those. This is common practice in web design and works in every browser, but throws a validation error as this is not officially part of the HTML5 spec. Enabling this setting will consolidate all inline style decorations and move them to head `<head>` of your document.<br><br>⚠️ *You should only enable this feature, if passing the validator is really important for your project and if you don’t use AJAX to load markup containing image sets dynamically.* |
 | `imageset.tags.image` | `true` | `true`, `false` | If enabled, ImageSet will replace Kirby’s built-in *image* Kirbytag with one that will generate image sets instead of plain image tags. |
 | `imageset.tags.image.sizes.default` | `''` | any defined preset name | Set the default size of image sets generated via the *image* Kirbytag. If this option is set, ImageSet will always generate image sets whenever the image Kirbytag is used, and no size parameter was given. |
@@ -556,8 +556,10 @@ window.lazySizesConfig.preloadAfterLoad = true;
 
 ImageSet can be evaluated as long as you want on how many private servers you want. To deploy ImageSet on any public server, you need to buy a license. See `license.md` for terms and conditions.
 
-[<img src="https://img.shields.io/badge/%E2%80%BA-Buy%20a%20license-green.svg" alt="Buy a license">](http://sites.fastspring.com/fabianmichael/product/imageset).<br>
-*The plugin is also available as a [bundle](http://sites.fastspring.com/fabianmichael/product/imgbundle1) with [ImageKit](https://github.com/fabianmichael/kirby-imagekit), a plugin for bringing responsive images with superpowers to you Kirby-driven site.*
+*The plugin is also available as a bundle with ImageKit, a plugin that brings asynchronous thumbnail creation and advanced image optimization for your site.*
+
+[<img src="https://fabianmichael.de/shared/buy-imageset.png" width="142" height="48" alt="Buy ImageSet">](http://sites.fastspring.com/fabianmichael/product/imageset) [<img src="https://fabianmichael.de/shared/buy-bundle.png" width="310" height="48" alt="Buy the ImageKit + ImageSet Bundle">](http://sites.fastspring.com/fabianmichael/product/imgbundle1)
+
 
 However, even with a valid license code, it is discouraged to use it in any project, that promotes racism, sexism, homophobia, animal abuse or any other form of hate-speech.
 
