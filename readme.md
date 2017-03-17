@@ -556,7 +556,7 @@ window.lazySizesConfig.preloadAfterLoad = true;
 
 ImageSet can be evaluated as long as you want on how many private servers you want. To deploy ImageSet on any public server, you need to buy a license. See `license.md` for terms and conditions.
 
-*The plugin is also available as a bundle with ImageKit, a plugin that brings asynchronous thumbnail creation and advanced image optimization for your site.*
+*The plugin is also available as a bundle with [ImageKit](https://github.com/fabianmichael/kirby-imagekit), a plugin that brings asynchronous thumbnail creation and advanced image optimization for your site.*
 
 [<img src="https://fabianmichael.de/shared/buy-imageset.png" width="142" height="48" alt="Buy ImageSet">](http://sites.fastspring.com/fabianmichael/product/imageset) [<img src="https://fabianmichael.de/shared/buy-bundle.png" width="310" height="48" alt="Buy the ImageKit + ImageSet Bundle">](http://sites.fastspring.com/fabianmichael/product/imgbundle1)
 
