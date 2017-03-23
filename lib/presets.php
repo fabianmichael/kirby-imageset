@@ -18,11 +18,9 @@ class Presets {
 
   protected static $presets = [];
   protected static $saved   = [];
+  protected static $initial = null;
 
   public static function save($name) {
-    if(array_key_exists('initial', static::$saved)) {
-      throw new Exception('Initial presets are saved on initialization and cannot not be overridden at a later point.');  
-    }
     static::$saved[$name] = static::$presets;
   }
 
@@ -60,10 +58,10 @@ class Presets {
 
   public static function init($presets) {
     static::set($presets);
-    static::save('initial');
+    static::$initial = $presets;
   }
 
   public static function reset() {
-    static::load('initial');
+    static::$presets = static::$initial;
   }
 }
