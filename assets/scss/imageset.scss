@@ -123,6 +123,8 @@ $imageset-unveil-delay    : .05s !default;
   height: 100%;
   max-width: none !important;
   max-height: none !important;
+  min-width: 100%;
+  min-height: 100%;
   transform: translate(-50%, -50%);
   overflow: hidden;
 }

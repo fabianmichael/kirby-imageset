@@ -1,5 +1,11 @@
 # ImageSet Changelog
 
+- unversioned
+  - Fix mosaic placeholder rendering rendered too small.
+
+- `1.0.1` (2017/03/22)
+  - Fixes a problem that caused the dynamic presets API to throw a fatal error.
+
 - `1.0.0` (2017/03/16)
   - Fix alt attribute not added under certain conditions.
 
