@@ -38,9 +38,9 @@ class Mosaic extends Base {
 
     $this->thumb = $this->source->thumb($params);
 
-    // if(!$wasAlreadyThere && !utils::optimizerAvailable('gifsicle')) {
-    //   $this->applyMosaicEffect($this->destination->root);
-    // }
+    if(!$wasAlreadyThere && !utils::optimizerAvailable('gifsicle')) {
+      $this->applyMosaicEffect($this->destination->root);
+    }
   }
 
   public function html() {

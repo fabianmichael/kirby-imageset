@@ -12,6 +12,7 @@ use F;
 use Obj;
 use Str;
 
+
 /**
  * Utility class for retrieving information about the plugin
  * version and it’s license.
