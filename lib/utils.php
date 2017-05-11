@@ -156,7 +156,7 @@ class Utils {
             throw new Exception('Could not create temporary thumbnail for ' . $media->root() . '. Please check your thumb configuration.');
           }
 
-          $tmpFile  = $tmpThumb->destination->root;
+          $tmpFile = $tmpThumb->destination->root;
 
           $color = ColorThief::getColor($tmpFile);
           
