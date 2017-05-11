@@ -134,11 +134,12 @@ class Utils {
 
           $hash   = md5(microtime(true));
           $params = [
-            'imagekit.lazy' => false,
-            'quality'       => 100,
-            'filename'      => "{safeName}-{$hash}-tmp.{extension}",
-            'overwrite'     => true,
-            'upscale'       => true,
+            'imagekit.lazy'     => false,
+            'imagekit.optimize' => false,
+            'quality'           => 100,
+            'filename'          => "{safeName}-{$hash}-tmp.{extension}",
+            'overwrite'         => true,
+            'upscale'           => true,
           ];
 
           if($width > $height) {
@@ -149,14 +150,18 @@ class Utils {
 
           // Do color caclulation in thumb file and delete
           // it after done.
-          if($media instanceof File) {
-            $destinationRoot = $media->thumb($params)->root();
-          } else {
-            $destinationRoot = (new Thumb($media, $params))->destination()->root;
+          $tmpThumb = new Thumb($media, $params);
+          
+          if(!is_null($tmpThumb->error)) {
+            throw new Exception('Could not create temporary thumbnail for ' . $media->root() . '. Please check your thumb configuration.');
           }
 
-          $color = ColorThief::getColor($destinationRoot);
-          f::remove($destinationRoot);
+          $tmpFile  = $tmpThumb->destination->root;
+
+          $color = ColorThief::getColor($tmpFile);
+          
+          f::remove($tmpFile);
+
         } else {
           $color = ColorThief::getColor($file, 10);
         }
