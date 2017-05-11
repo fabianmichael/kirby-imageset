@@ -105,7 +105,6 @@ class ImageSet extends SourceSet {
    * @param Kirby $kirby
    */
   public function __construct(Media $image = null, $sizes = 'default', $options = null, Kirby $kirby = null) {
-
     if(get_class($image) === 'Media') {
       // The "Media" class does not provide some methods like
       // thumb(), so instances of Media need to be converted
@@ -114,6 +113,7 @@ class ImageSet extends SourceSet {
     }
 
     parent::__construct($image, array_merge(static::$defaults, is_array($options) ? $options : []));
+    
     $this->kirby   = $kirby ?: kirby();
 
     if(is_null(static::$fileCache)) {
@@ -121,10 +121,15 @@ class ImageSet extends SourceSet {
       static::$plugin    = Plugin::instance();
     }
 
-    $this->sizes = (is_string($sizes) && presets::exists($sizes)) ? presets::get($sizes) : $sizes;
+    if(is_string($sizes) && presets::exists($sizes)) {
+      $this->sizes = presets::get($sizes);
+    } else {
+      $this->sizes = $sizes;
+    };
 
     // Try to load ImageSet from cache
     $cacheValue = $this->option('cache', false) ? static::$fileCache->get($this->image, $this->hash()) : null;
+
     if(!is_null($cacheValue) && $cacheValue['imageset.version'] === static::$plugin->version() && $cacheValue['site.url'] === $this->kirby->urls()->index()) {
       $this->cache['html'] = $cacheValue['html'];
     } else {
@@ -411,9 +416,7 @@ class ImageSet extends SourceSet {
       }
       $hash .= serialize($safeOptions);
 
-      $hash = hexdec(substr(md5($hash), 0, 15));
-
-      $this->cache['hash'] = utils::base62($hash);
+      $this->cache['hash'] = md5($hash);
     }
 
     return $this->cache['hash'];
@@ -750,7 +753,6 @@ class ImageSet extends SourceSet {
    * 
    * @return boolean `true`, if the ImageSet has some CSS rules, otherwise `false`.
    */
-
   public function hasCssRules() {
     return !empty($this->cssRules());
   }
