@@ -50,21 +50,6 @@
 
   var ua                       = navigator.userAgent;
 
-  var _addEventListener        = 'addEventListener',
-      _getAttribute            = 'getAttribute',
-      _MutationObserver        = 'MutationObserver',
-      _classList               = 'classList',
-      _className               = 'className',
-      _hasAttribute            = 'hasAttribute',
-
-      _dataSrc                 = 'data-src',
-      _dataSrcset              = 'data-srcset',
-
-      _devicePixelRatio        = 'devicePixelRatio',
-      _naturalWidth            = 'naturalWidth',
-      _naturalHeight           = 'naturalHeight',
-      _mozOpaque               = 'mozOpaque'; 
-
   /* =====  Utilities & Helper Functions  =================================== */
   
   /* -----  Polyfills &  ---------------------------------------------------- */
@@ -80,7 +65,7 @@
     if(document.readyState != 'loading') {
       fn();
     } else {
-      document[_addEventListener]('DOMContentLoaded', fn);
+      document.addEventListener('DOMContentLoaded', fn);
     }
   }
 
@@ -106,8 +91,8 @@
   }
 
   function imageLoaded(img, fn) {
-    if(!img.complete || (typeof img[_naturalWidth] === "undefined") || img[_naturalWidth] === 0) {
-      img[_addEventListener]("load", fn);
+    if(!img.complete || (typeof img.naturalWidth === "undefined") || img.naturalWidth === 0) {
+      img.addEventListener("load", fn);
     } else {
       fn();
     }
@@ -148,39 +133,39 @@
   // Class utilities using `classList` API if available.
   // Fallbacks inspired by: https://gist.github.com/devongovett/1381839
   var hasClass = (function() {
-    return docElement[_classList] ?
-      function(el, cls) { return el[_classList].contains(cls); } :
-      function(el, cls) { return !!~el[_className].split(/\s+/).indexOf(cls); };
+    return docElement.classList ?
+      function(el, cls) { return el.classList.contains(cls); } :
+      function(el, cls) { return !!~el.className.split(/\s+/).indexOf(cls); };
   })();
 
   var addClass = (function() {
-    return docElement[_classList] ?
-      function(el, cls) { el[_classList].add(cls); } :
+    return docElement.classList ?
+      function(el, cls) { el.classList.add(cls); } :
       function(el, cls) {
-        var classes = el[_className].split(/\s+/);
+        var classes = el.className.split(/\s+/);
         if(!~classes.indexOf(cls)) {
           classes.push(cls);
-          el[_className] = classes.join(" ");
+          el.className = classes.join(" ");
         }
       };
   })();
 
   var removeClass = (function() {
-    return docElement[_classList] ?
-      function(el, cls) { return el[_classList].remove(cls); } :
+    return docElement.classList ?
+      function(el, cls) { return el.classList.remove(cls); } :
       function(el, cls) {
-        var tokens = el[_className].split(/\s+/),
+        var tokens = el.className.split(/\s+/),
             index  = tokens.indexOf(cls);
         if(!!~index) {
           tokens.splice(index, 1);
-          el[_className] = tokens.join(" ");
+          el.className = tokens.join(" ");
         }
       };
   })();
 
   function fixCanvasResolution(canvas, ctx) {
     // Adjustments for HiDPI/Retina screens
-    var devicePixelRatio  = window[_devicePixelRatio] || 1,
+    var devicePixelRatio  = window.devicePixelRatio || 1,
         backingStoreRatio = ctx.webkitBackingStorePixelRatio || 1, // Compatibility with (older?) Safari
         pixelRatio        = devicePixelRatio / backingStoreRatio;
 
@@ -213,7 +198,7 @@
 
     addClass(docElement, __operaMiniClass);
 
-    var loadImageSet = function(el) {
+    var loadImageSetForOperaMini = function(el) {
         
       var sources = el.getElementsByTagName("source"),
           img     = el[_getElementsByClassName](__imageElementClass)[0];
@@ -228,17 +213,17 @@
         // here for possible implementations in the future.
         for(var i = 0, l = sources.length; i < l; i++) {
           var s = sources[i];
-          if(s[_hasAttribute](_dataSrcset)) s.srcset = s[_getAttribute](_dataSrcset);
-          if(s[_hasAttribute](_dataSrc))    s.src    = s[_getAttribute](_dataSrc);
+          if(s.hasAttribute('data-srcset')) s.srcset = s.getAttribute('data-srcset');
+          if(s.hasAttribute('data-src'))    s.src    = s.getAttribute('data-src');
         }
 
-        if(img[_hasAttribute](_dataSrcset)) img.srcset = img[_getAttribute](_dataSrcset);
-        if(img[_hasAttribute](_dataSrc))    img.src    = img[_getAttribute](_dataSrc);
+        if(img.hasAttribute('data-srcset')) img.srcset = img.getAttribute('data-srcset');
+        if(img.hasAttribute('data-src'))    img.src    = img.getAttribute('data-src');
 
       } else {
         
         var fallbackSource = sources.length > 0 ? sources[sources.length - 1] : img,
-            candidates     = fallbackSource[_getAttribute](_dataSrcset).split(/,\s+/);
+            candidates     = fallbackSource.getAttribute('data-srcset').split(/,\s+/);
 
         while(sources.length > 0) {
           // Delete sources elements 
@@ -252,7 +237,7 @@
     ready(function() {
       var imagesets = document[_getElementsByClassName](__wrapperClass);
       for(var i = 0, l = imagesets.length; i < l; i++) {
-        loadImageSet(imagesets[i]);
+        loadImageSetForOperaMini(imagesets[i]);
       }
     });
 
@@ -269,7 +254,7 @@
   var placeholderRegexp = new RegExp(__wrapperPlaceholderStyleClass + '([a-z0-9_-]+)\\s*', 'i');
 
   function getPlaceholderStyle(wrapper) {
-    var result = wrapper[_className].match(placeholderRegexp);
+    var result = wrapper.className.match(placeholderRegexp);
     return result ? result[1] : false;
   }
 
@@ -298,8 +283,8 @@
 
           fixCanvasResolution(canvas, ctx);
 
-          var width        = source[_naturalWidth],
-              height       = source[_naturalHeight],
+          var width        = source.naturalWidth,
+              height       = source.naturalHeight,
               scaledWidth  = el.offsetWidth,
               scaledHeight = (el.offsetWidth / width * height + 0.5) | 0;
 
@@ -312,7 +297,7 @@
           ctx.imageSmoothingEnabled = false;
           
           canvas.setAttribute("aria-hidden", true);
-          canvas[_className] = source[_className];
+          canvas.className = source.className;
           
           RenderQueue.add(function(){
             ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
@@ -331,8 +316,8 @@
       var source = el[_getElementsByClassName](__placeholderElementClass)[0];
 
       var process = function() {
-        var width        = source[_naturalWidth],
-            height       = source[_naturalHeight],
+        var width        = source.naturalWidth,
+            height       = source.naturalHeight,
             scaledWidth  = el.offsetWidth,
             scaledHeight = (el.offsetWidth / width * height + 0.5) | 0,
             
@@ -343,12 +328,12 @@
         canvas.width  = scaledWidth;
         canvas.height = scaledHeight;
 
-        if(!alpha && _mozOpaque in canvas) {
-          canvas[_mozOpaque] = true;
+        if(!alpha && 'mozOpaque' in canvas) {
+          canvas.mozOpaque = true;
         }
         
         canvas.setAttribute("aria-hidden", true);
-        canvas[_className] = source[_className];
+        canvas.className = source.className;
         
         RenderQueue.add(function(){
           ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
@@ -568,8 +553,8 @@
       var source   = el[_getElementsByClassName](__placeholderElementClass)[0];
 
       var process = function() {
-        var width        = source[_naturalWidth],
-            height       = source[_naturalHeight],
+        var width        = source.naturalWidth,
+            height       = source.naturalHeight,
             scaledWidth  = el.offsetWidth,
             scaledHeight = Math.round(el.offsetWidth / width * height), // (scaledWidth / width * height + 0.5) | 0, // faster Math.round() hack // same as: 
             canvas       = document.createElement("canvas"),
@@ -579,12 +564,12 @@
         canvas.width  = scaledWidth;
         canvas.height = scaledHeight;
 
-        if(!alpha && _mozOpaque in canvas) {
-          canvas[_mozOpaque] = true;
+        if(!alpha && 'mozOpaque' in canvas) {
+          canvas.mozOpaque = true;
         }
         
         canvas.setAttribute("aria-hidden", true);
-        canvas[_className] = source[_className];
+        canvas.className = source.className;
         
         RenderQueue.add(function(){
           ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
@@ -629,7 +614,7 @@
 
     function init() {
 
-      document[_addEventListener]('lazybeforeunveil', function (e) {
+      document.addEventListener('lazybeforeunveil', function (e) {
 
         var element = e.target,
             wrapper = element.parentNode;
@@ -651,24 +636,24 @@
           });
         };
 
-        element[_addEventListener]("load", cb);
+        element.addEventListener("load", cb);
       });
 
       imagesetElements = document[_getElementsByClassName](__wrapperPlaceholderClass);
 
-      if(!!window[_MutationObserver]) {
+      if(!!window.MutationObserver) {
         // Use MutationObserver to check for new elements,
         // if supported.
-        new window[_MutationObserver]( debouncedCheckImagesets ).observe( docElement, {childList: true, subtree: true, attributes: false, characterData: false } );
+        new window.MutationObserver( debouncedCheckImagesets ).observe( docElement, {childList: true, subtree: true, attributes: false, characterData: false } );
       } else {
         // Otherwise, fallback to Mutation Events and add
         // a setInterval for as a safety fallback.
-        docElement[_addEventListener]('DOMNodeInserted', debouncedCheckImagesets, true);
-        docElement[_addEventListener]('DOMAttrModified', debouncedCheckImagesets, true);
+        docElement.addEventListener('DOMNodeInserted', debouncedCheckImagesets, true);
+        docElement.addEventListener('DOMAttrModified', debouncedCheckImagesets, true);
         setInterval(debouncedCheckImagesets, 999);
       }
 
-      window[_addEventListener]('hashchange', debouncedCheckImagesets, true);
+      window.addEventListener('hashchange', debouncedCheckImagesets, true);
 
       debouncedCheckImagesets();
     }
@@ -680,7 +665,8 @@
 
   })();
 
-  ready(imageset.init);
+  imageset.init();
+  //ready(imageset.init);
 
 })(window, document, Math, Date);
 
