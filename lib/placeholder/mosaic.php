@@ -8,6 +8,7 @@
 
 namespace Kirby\Plugins\ImageSet\Placeholder;
 
+use Exception;
 use Html;
 use Kirby\Plugins\ImageSet\Utils;
 
@@ -56,8 +57,13 @@ class Mosaic extends Base {
  
   // http://php.net/manual/de/function.imagetruecolortopalette.php#44803
   protected function applyMosaicEffect($root, $dither = true, $paletteColors = 16) {  
-  
-    $image = imagecreatefromgif($root);
+    
+    if($this->extension === 'png') {
+      $image = imagecreatefrompng($root);
+    } else {
+      $image = imagecreatefromgif($root);
+    }
+    
     imagepalettetotruecolor($image);
   
     $width        = imagesx($image);
@@ -69,7 +75,11 @@ class Mosaic extends Base {
     imagecolormatch($colorsHandle, $image);
     imagedestroy($colorsHandle);
     
-    imagegif($image, $root);
+    if($this->extension === 'png') {
+      imagegif($image, $root);
+    } else {
+      imagepng($image, $root);
+    }
   }
   
 }

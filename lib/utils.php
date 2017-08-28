@@ -12,6 +12,7 @@ use ColorThief\ColorThief;
 use Exception;
 use F;
 use File;
+use RuntimeException;
 use Thumb;
 
 class Utils {
@@ -111,6 +112,8 @@ class Utils {
   }
 
 
+  const COLOR_THIEF_TRANSPARENCY_EXCEPTION = 'Unable to compute the color palette of a blank or transparent image.';
+
   public static function dominantColor($media, $useCache = true) {
     static $cache     = [];
 
@@ -128,9 +131,11 @@ class Utils {
         $width    = $media->width();
         $height   = $media->height();
         $pixels   = $width * $height;
-        $useThumb = ($pixels > 250000);
+        $useThumb = ($pixels > 250000); // Input image has more than 0.25 megapixels
   
         if($useThumb) {
+          // Use temporary thumbnail to calculate dominant color
+          // to reduce memory and CPU usage
 
           $hash   = md5(microtime(true));
           $params = [
@@ -158,15 +163,27 @@ class Utils {
 
           $tmpFile = $tmpThumb->destination->root;
 
-          $color = ColorThief::getColor($tmpFile);
+          try {
+            $color = utils::rgb2hex(ColorThief::getColor($tmpFile));
+          } catch(RuntimeException $e) {
+            if($e->getMessage() == self::COLOR_THIEF_TRANSPARENCY_EXCEPTION) {
+              $color = 'transparent';
+            }
+          }
           
           f::remove($tmpFile);
 
         } else {
-          $color = ColorThief::getColor($file, 10);
-        }
+          // get dominant color from source file.
 
-        $color = utils::rgb2hex($color);
+          try {
+            $color = utils::rgb2hex(ColorThief::getColor($media->root(), 10));
+          } catch(RuntimeException $e) {
+            if($e->getMessage() == self::COLOR_THIEF_TRANSPARENCY_EXCEPTION) {
+              $color = 'transparent';
+            }
+          }
+        }
           
         if($useCache) {
           static::$fileCache->set($media, 'color', $color);
