@@ -26,7 +26,7 @@ $imageset-unveil-delay    : .05s !default;
   overflow: hidden;
     
   /* Improve rendering speed in supported browsers. */
-  contain: content;
+  // contain: content;
 }
 
 /* ·····  ImageSet with Ratio-Placeholder  ·································· */

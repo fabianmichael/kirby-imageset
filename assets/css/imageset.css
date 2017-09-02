@@ -13,7 +13,6 @@
      left side of an imageset. */
   overflow: hidden;
   /* Improve rendering speed in supported browsers. */
-  contain: content;
 }
 
 /* ·····  ImageSet with Ratio-Placeholder  ·································· */
