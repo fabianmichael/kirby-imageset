@@ -25,9 +25,7 @@
 ;(function(window, document, Math, Date, undefined) {
   'use strict';
 
-  var _getElementsByClassName = 'getElementsByClassName';
-
-  if(!document[_getElementsByClassName]){ return; }  
+  if(!document.getElementsByClassName){ return; }  
 
   /* =====  Configuration  ================================================== */
 
@@ -52,7 +50,7 @@
 
   /* =====  Utilities & Helper Functions  =================================== */
   
-  /* -----  Polyfills &  ---------------------------------------------------- */
+  /* -----  Polyfills  ------------------------------------------------------ */
       
   // Shim layer with setTimeout fallback. Look only for unprefixed
   // requestAnimationFrame, because all modern browsern already removed the
@@ -201,7 +199,7 @@
     var loadImageSetForOperaMini = function(el) {
         
       var sources = el.getElementsByTagName("source"),
-          img     = el[_getElementsByClassName](__imageElementClass)[0];
+          img     = el.getElementsByClassName(__imageElementClass)[0];
     
       // Wrapper should be loaded to trigger css hook like
       // on other browsers.
@@ -235,7 +233,7 @@
     };
 
     ready(function() {
-      var imagesets = document[_getElementsByClassName](__wrapperClass);
+      var imagesets = document.getElementsByClassName(__wrapperClass);
       for(var i = 0, l = imagesets.length; i < l; i++) {
         loadImageSetForOperaMini(imagesets[i]);
       }
@@ -277,7 +275,7 @@
 
         var canvas      = document.createElement("canvas"),
             ctx         = canvas.getContext("2d"),
-            source      = el[_getElementsByClassName](__placeholderElementClass)[0];
+            source      = el.getElementsByClassName(__placeholderElementClass)[0];
 
         var process = function() {
 
@@ -299,13 +297,15 @@
           canvas.setAttribute("aria-hidden", true);
           canvas.className = source.className;
           
-          RenderQueue.add(function(){
+          return function() {
             ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
             source.parentNode.replaceChild(canvas, source);
-          });
+          };
         };
 
-        imageLoaded(source, process);
+        return function() {
+          imageLoaded(source, process);
+        };
       };
     }
 
@@ -313,7 +313,7 @@
 
     var applyPlaceholderBlur = function(el, radius, mul_sum, shg_sum) {
 
-      var source = el[_getElementsByClassName](__placeholderElementClass)[0];
+      var source = el.getElementsByClassName(__placeholderElementClass)[0];
 
       var process = function() {
         var width        = source.naturalWidth,
@@ -335,19 +335,26 @@
         canvas.setAttribute("aria-hidden", true);
         canvas.className = source.className;
         
-        RenderQueue.add(function(){
+        //return function() {
           ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
           stackBlur[alpha ? 'canvasRGBA' : 'canvasRGB'](canvas, 0, 0, scaledWidth, scaledHeight, radius, mul_sum, shg_sum);
           source.parentNode.replaceChild(canvas, source);
-        });
+        //};
       };
 
-      imageLoaded(source, function() { process(); });
+      return function() {
+        imageLoaded(source, process);
+      };
 
     };
 
-    placeholderRenderer.blurred = function(el) { applyPlaceholderBlur(el, 15, 512, 17); };
-    placeholderRenderer.lqip    = function(el) { applyPlaceholderBlur(el,  7, 512, 15); };
+    placeholderRenderer.blurred = function(el) {
+      return applyPlaceholderBlur(el, 15, 512, 17);
+    };
+    
+    placeholderRenderer.lqip = function(el) {
+      return applyPlaceholderBlur(el, 7, 512, 15);
+    };
 
     /* ···  Triangles  ······················································ */
 
@@ -550,7 +557,7 @@
 
     placeholderRenderer.triangles = function(el) {
 
-      var source   = el[_getElementsByClassName](__placeholderElementClass)[0];
+      var source   = el.getElementsByClassName(__placeholderElementClass)[0];
 
       var process = function() {
         var width        = source.naturalWidth,
@@ -571,26 +578,39 @@
         canvas.setAttribute("aria-hidden", true);
         canvas.className = source.className;
         
-        RenderQueue.add(function(){
-          ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
-          triangleMosaicFilter(canvas, 40, alpha);
-          source.parentNode.replaceChild(canvas, source);
-        });
+        
+        ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
+        triangleMosaicFilter(canvas, 40, alpha);
+        source.parentNode.replaceChild(canvas, source);
+        
       };
 
-      imageLoaded(source, function() { process(); });
+      return function() {
+        imageLoaded(source, process);
+      };
     };
 
   }
 
   /* =====  ImageSet  ======================================================= */
 
-  var imageset = (function() {
+  function ImageSet() {
+
+    // ---  settings
+
+    var settings = window.imagesetConfig = extend({
+      
+      autoUpdate: true,
+      placeholderRendering: 'async',
+
+    }, window.imagesetConfig || {});
     
-    var imagesetElements;
+    var imagesetElements = document.getElementsByClassName(__wrapperPlaceholderClass);
+
+    // ---  private methods
     
     function checkImagesets() {
-      var style, wrapper;
+      var style, wrapper, renderer;
 
       for(var i = 0, l = imagesetElements.length; i < l; i++) {
         if(!imagesetElements[i]) continue;
@@ -604,43 +624,56 @@
         if(style && placeholderRenderer[style]) {
           // Render placeholder, if a renderer for given
           // imageset exists.
+          
           addClass(wrapper, __wrapperPlaceholderRenderedClass);
-          placeholderRenderer[style](wrapper);
+          renderer = placeholderRenderer[style](wrapper);
+
+          if(settings.placeholderRendering === 'async') {
+            RenderQueue.add(renderer);
+          } else {
+            renderer();
+          }
         }
       }
+
     }
 
     var debouncedCheckImagesets = debounce(checkImagesets);
 
-    function init() {
+    // ---  public methods
 
-      document.addEventListener('lazybeforeunveil', function (e) {
+    // ---  initialization
 
-        var element = e.target,
-            wrapper = element.parentNode;
+    // ···  transition
 
-        if(!hasClass(element, __imageElementClass)) return;
+    document.addEventListener('lazybeforeunveil', function (e) {
 
-        while(!hasClass(wrapper, __wrapperClass)) {
-          // Get imageset container element by traversing up the DOM tree
-          wrapper = wrapper.parentNode;
-        }
+      var element = e.target,
+          wrapper = element.parentNode;
 
-        // Define a callback function which gets invoked, after an image has
-        // finally loaded.
-        var cb = function () {
-          element.removeEventListener("load", cb);
-          rAF(function () {
-            // Asynchronously add loaded class
-            addClass(wrapper, __wrapperLoadedClass);
-          });
-        };
+      if(!hasClass(element, __imageElementClass)) return;
 
-        element.addEventListener("load", cb);
-      });
+      while(!hasClass(wrapper, __wrapperClass)) {
+        // Get imageset container element by traversing up the DOM tree
+        wrapper = wrapper.parentNode;
+      }
 
-      imagesetElements = document[_getElementsByClassName](__wrapperPlaceholderClass);
+      // Define a callback function which gets invoked, after an image has
+      // finally loaded.
+      var cb = function () {
+        element.removeEventListener("load", cb);
+        rAF(function () {
+          // Asynchronously add loaded class
+          addClass(wrapper, __wrapperLoadedClass);
+        });
+      };
 
+      element.addEventListener("load", cb);
+    });
+
+    // ··· auto-update
+
+    if(settings.autoUpdate) {
       if(!!window.MutationObserver) {
         // Use MutationObserver to check for new elements,
         // if supported.
@@ -654,19 +687,21 @@
       }
 
       window.addEventListener('hashchange', debouncedCheckImagesets, true);
-
+      
       debouncedCheckImagesets();
+    } else {
+      checkImagesets();
     }
 
-
     return {
-      init: init,
+      update: checkImagesets,
     };
 
-  })();
+  }
 
-  imageset.init();
-  //ready(imageset.init);
+  var imageset = new ImageSet();
+
+  window.imageset = imageset;
 
 })(window, document, Math, Date);
 
