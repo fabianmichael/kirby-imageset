@@ -94,7 +94,11 @@ $imageset-unveil-delay    : .05s !default;
      WebKit- and Blink-based (and possibly any other)
      browsers. */
   // z-index: 1;
+  opacity: 0;
   backface-visibility: hidden;
+  @media screen {
+    transition: opacity $imageset-unveil-duration;
+  }
 }
 
 .js .imageset.-alpha.-lazyload .imageset-element {
@@ -109,7 +113,7 @@ $imageset-unveil-delay    : .05s !default;
   }
 }
 
-.js .imageset.-alpha.-lazyload.is-loaded .imageset-element {
+.js .imageset.-lazyload.is-loaded .imageset-element {
   opacity: 1;
   will-change: auto;
 }

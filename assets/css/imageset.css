@@ -64,8 +64,15 @@
      ended, because this can cause rendering issues in
      WebKit- and Blink-based (and possibly any other)
      browsers. */
+  opacity: 0;
   -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
+}
+
+@media screen {
+  .js .imageset.-ratio.-lazyload .imageset-element {
+    transition: opacity 0.5s;
+  }
 }
 
 .js .imageset.-alpha.-lazyload .imageset-element {
@@ -82,7 +89,7 @@
   }
 }
 
-.js .imageset.-alpha.-lazyload.is-loaded .imageset-element {
+.js .imageset.-lazyload.is-loaded .imageset-element {
   opacity: 1;
   will-change: auto;
 }
