@@ -55,10 +55,6 @@
   width: 100%;
 }
 
-.imageset.-ratio .imageset-element {
-  z-index: 2;
-}
-
 .js .imageset.-ratio.-lazyload .imageset-element {
   /* The actual image is kept behind the placeholder.
      Rather than fading in the image, the placeholder is
@@ -68,7 +64,8 @@
      ended, because this can cause rendering issues in
      WebKit- and Blink-based (and possibly any other)
      browsers. */
-  z-index: 1;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
 }
 
 .js .imageset.-alpha.-lazyload .imageset-element {
@@ -93,7 +90,6 @@
 .imageset-placeholder {
   display: block;
   position: absolute;
-  z-index: 1;
   top: 50%;
   left: 50%;
   width: 100%;
@@ -104,6 +100,8 @@
   min-height: 100%;
   transform: translate(-50%, -50%);
   overflow: hidden;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
 }
 
 .js .imageset.-lazyload .imageset-placeholder {
@@ -116,7 +114,6 @@
      image, so we don’t have to fade in the image, which
      would lead to artifacts in WebKit- and Blink-based
      browsers. */
-  z-index: 2;
   /* Prevent user interaction like accidently saving the
      placeholder via tap/right-click */
   pointer-events: none;

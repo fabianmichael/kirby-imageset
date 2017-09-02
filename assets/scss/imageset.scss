@@ -81,7 +81,7 @@ $imageset-unveil-delay    : .05s !default;
 }
 
 .imageset.-ratio .imageset-element {
-  z-index: 2;
+  // z-index: 2;
 }
 
 .js .imageset.-ratio.-lazyload .imageset-element {
@@ -93,7 +93,8 @@ $imageset-unveil-delay    : .05s !default;
      ended, because this can cause rendering issues in
      WebKit- and Blink-based (and possibly any other)
      browsers. */
-  z-index: 1;
+  // z-index: 1;
+  backface-visibility: hidden;
 }
 
 .js .imageset.-alpha.-lazyload .imageset-element {
@@ -116,7 +117,7 @@ $imageset-unveil-delay    : .05s !default;
 .imageset-placeholder {
   display: block;
   position: absolute;
-  z-index: 1;
+  //z-index: 1;
   top: 50%;
   left: 50%;
   width: 100%;
@@ -127,6 +128,7 @@ $imageset-unveil-delay    : .05s !default;
   min-height: 100%;
   transform: translate(-50%, -50%);
   overflow: hidden;
+  backface-visibility: hidden;
 }
 
 .js .imageset.-lazyload .imageset-placeholder {
@@ -151,7 +153,7 @@ $imageset-unveil-delay    : .05s !default;
      image, so we don’t have to fade in the image, which
      would lead to artifacts in WebKit- and Blink-based
      browsers. */
-  z-index: 2;
+  //z-index: 2;
 
   /* Prevent user interaction like accidently saving the
      placeholder via tap/right-click */
