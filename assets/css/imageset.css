@@ -17,9 +17,8 @@
 
 /* ·····  ImageSet with Ratio-Placeholder  ·································· */
 .imageset.-ratio {
-  display: inline-block;
+  display: block;
   /* Remove bottom margin (borrowed from Inuit CSS) */
-  vertical-align: middle;
   width: 100%;
   position: relative;
   /* Create a new stacking context for this imageset.
@@ -66,6 +65,7 @@
   opacity: 0;
   -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
+  will-change: opacity;
 }
 
 @media screen {
@@ -130,23 +130,13 @@
   background-color: #efefef;
 }
 
-@media screen {
-  .js .imageset.-lazyload .imageset-placeholder {
-    transition: opacity 0.5s 0.05s, visibility 0s 0.8s;
-  }
-}
-
 .imageset.-alpha .imageset-placeholder {
   visibility: hidden;
 }
 
-.js .imageset.-alpha .imageset-placeholder {
-  visibility: visible;
-}
-
 @media screen {
   .js .imageset.-alpha .imageset-placeholder {
-    transition: opacity 0.5s 0.05s, visibility 0s 0.8s;
+    transition: opacity 0.5s 0.05s;
   }
 }
 
@@ -176,8 +166,6 @@
      and then change visibility to allow mouse interation
      with the loaded image in browsers, where the
      `pointer-events` property is not supported. */
-  opacity: 0;
-  visibility: hidden;
 }
 
 /* ·····  NoScript Fallback  ················································ */

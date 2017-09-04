@@ -630,6 +630,7 @@
   var __wrapperClass                    = 'imageset',
       __wrapperLazyloadClass            = __wrapperClass + '  -lazyload',
       __wrapperLoadedClass              = 'is-loaded',
+      __wrapperErrorClass               = 'has-error',
       __wrapperPlaceholderClass         = __wrapperClass + ' -placeholder',
       __wrapperPlaceholderStyleClass    = '-placeholder:',
       __wrapperAlphaClass               = '-alpha',
@@ -1203,6 +1204,10 @@
     
     var imagesetElements = document.getElementsByClassName(__wrapperPlaceholderClass);
 
+    var _paused = false;
+
+    var queue = [];
+
     // ---  private methods
     
     function checkImagesets() {
@@ -1256,15 +1261,33 @@
 
       // Define a callback function which gets invoked, after an image has
       // finally loaded.
-      var cb = function () {
-        element.removeEventListener("load", cb);
+      var success = function () {
+        element.removeEventListener("load", success);
         rAF(function () {
           // Asynchronously add loaded class
           addClass(wrapper, __wrapperLoadedClass);
         });
       };
 
-      element.addEventListener("load", cb);
+      var error = function () {
+        element.removeEventListener("error", error);
+        rAF(function () {
+
+          var errorOverlay = document.createElement('span');
+          addClass(errorOverlay, 'imageset-error');
+          //errorOverlay.innerHTML = __errorIcon;
+          wrapper.appendChild(errorOverlay);
+
+          // Asynchronously add loaded class
+          rAF(function() {
+            addClass(wrapper, __wrapperErrorClass);
+          });
+        });
+      };
+
+      
+      element.addEventListener("load", success);
+      element.addEventListener("error", error);
     });
 
     // ··· auto-update
