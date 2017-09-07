@@ -53,7 +53,7 @@ kirbytext::$tags['image'] = [
     // try to get the title from the image object and use it as alt text
     if($file) {
 
-      if(empty($alt) and $file->alt() != '') {
+      if(empty($alt) && $file->alt() != '') {
         $alt = $file->alt();
       }
 
@@ -96,6 +96,7 @@ kirbytext::$tags['image'] = [
       if($makeImageSet) {
         return imageset($file, $size, [
           'class' => trim($class . (empty($link) ? ' ' . $sizeClass : '')),
+          'alt'   => $alt,
         ]);
       } else {
         return html::img($url, array(
@@ -122,6 +123,7 @@ kirbytext::$tags['image'] = [
       if(!empty($caption)) {
         $figure->append('<figcaption>' . html($caption) . '</figcaption>');
       }
+
       return $figure;
     } else {
       $class = trim($tag->attr('class') . ' ' . $tag->attr('imgclass'));

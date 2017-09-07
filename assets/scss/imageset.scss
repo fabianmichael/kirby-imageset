@@ -9,13 +9,13 @@
 // -----  Default Settings  ------------------------------------------------- //
 
 // Duration of the unveil animation for loaded images
-$imageset-unveil-duration : .5s !default;
+$imageset-unveil-duration: .5s !default;
 
-// A short delay gives the browser time to »breathe« after
+// A short delay gives the browser time to “breathe” after
 // an imageset has loaded, often resulting in a smoother
 // animation. This default is not based on scientific
 // research, but rather on personal experience.
-$imageset-unveil-delay    : .05s !default;
+$imageset-unveil-delay: .05s !default;
 
 /* -----  ImageSet Component  ----------------------------------------------- */
 
@@ -26,7 +26,7 @@ $imageset-unveil-delay    : .05s !default;
   overflow: hidden;
     
   /* Improve rendering speed in supported browsers. */
-  // contain: content;
+  contain: content;
 }
 
 /* ·····  ImageSet with Ratio-Placeholder  ·································· */
@@ -238,6 +238,61 @@ $imageset-unveil-delay    : .05s !default;
 
 .no-js .imageset .imageset-element {
   display: none;
+}
+
+/* ·····  Error Handling  ··················································· */
+
+.js .imageset .imageset-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity $imageset-unveil-duration;
+  pointer-events: none;
+  user-select: none;
+}
+
+.js .imageset .imageset-error {
+  background: rgba(#fff, 0.75) url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%0A%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M15%2C10.2803438%20L12.7537186%2C11.7778647%20L9.75371856%2C9.77786474%20L6.75371856%2C11.7778647%20L3.75371856%2C9.77786474%20L1%2C11.6136771%20L1%2C7.19820434e-15%20L15%2C9.76996262e-15%20L15%2C10.2803438%20Z%20M15%2C12.0831194%20L15%2C16%20L1%2C16%20L1%2C13.4164528%20L3.75371856%2C11.5806404%20L6.75371856%2C13.5806404%20L9.75371856%2C11.5806404%20L12.7537186%2C13.5806404%20L15%2C12.0831194%20Z%20M10%2C2.22044605e-15%20L15%2C5%20L15%2C3.44509285e-15%20L10%2C2.22044605e-15%20Z%20M13%2C6%20L9%2C2%20L9%2C6%20L13%2C6%20Z%22/%3E%0A%3C/svg%3E%0A') no-repeat 10px 10px;
+  border: 1px solid #ccc;
+  padding: 36px 10px 10px;
+  box-sizing: border-box;
+}
+
+.no-js .imageset:not(.-alpha) .imageset-fallback:-moz-broken {
+  background-color: rgba(#fff, 0.75);
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.js .imageset .imageset-error,
+.no-js .imageset .imageset-fallback {
+  font-size: 12px !important;
+  line-height: 20px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 
+    'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', 
+    sans-serif !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  font-feature-settings: normal !important;
+  color: #000 !important;
+  text-shadow: none !important;
+}
+
+.js .imageset .imageset-error {
+  overflow: hidden !important;
+}
+
+.js .imageset.has-error .imageset-error {
+  opacity: 1;
+}
+
+.js .imageset.-lazyload.has-error .imageset-element {
+  opacity: 0;
 }
 
 /* ·····  Opera Mini Fixes  ················································· */

@@ -18,7 +18,9 @@ gulp.task("styles", function () {
       outputStyle  : 'expanded',
     }))
     .pipe(postcss([
-      assets({ loadPaths: ['assets/images/'] }),
+      assets({ loadPaths: [
+        'assets/images/'
+      ] }),
     ]))
     .pipe(autoprefixer({
         browsers: ['last 2 versions'],

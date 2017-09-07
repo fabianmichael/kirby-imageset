@@ -693,7 +693,6 @@
     }
   }
 
-
   var RenderQueue = (function() {
     var queue       = [],
         inProgress  = false;
@@ -866,6 +865,8 @@
     var isSafari                    = (ua.indexOf("Safari") !== -1 && ua.indexOf("Chrome") === -1);
     var supportsPixelatedImages     = ('imageRendering' in docElement.style || 'msInterpolationMode' in docElement.style);
 
+    console.log("is safari?", isSafari, supportsPixelatedImages);
+
     if(!supportsPixelatedImages || isSafari) {
 
       placeholderRenderer.mosaic = function(el) {
@@ -894,10 +895,10 @@
           canvas.setAttribute("aria-hidden", true);
           canvas.className = source.className;
           
-          return function() {
+          //return function() {
             ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
             source.parentNode.replaceChild(canvas, source);
-          };
+          //};
         };
 
         return function() {
@@ -1275,13 +1276,20 @@
 
           var errorOverlay = document.createElement('span');
           addClass(errorOverlay, 'imageset-error');
-          //errorOverlay.innerHTML = __errorIcon;
+
+          if(element.hasAttribute('alt') && element.alt !== '') {
+
+            errorOverlay.setAttribute('aria-hidden', true);
+            errorOverlay.appendChild(document.createTextNode(element.alt));
+          }
+
           wrapper.appendChild(errorOverlay);
 
           // Asynchronously add loaded class
           rAF(function() {
             addClass(wrapper, __wrapperErrorClass);
           });
+
         });
       };
 

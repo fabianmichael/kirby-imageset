@@ -32,7 +32,7 @@
     "gulp-sass": "^3.1.0",
     "gulp-uglify": "^2.1.0",
     "lazysizes": "*",
-    "postcss-assets": "^4.1.0",
+    "postcss-assets": "^4.2.0",
     "respimage": "*"
   }
 }
