@@ -80,9 +80,9 @@ $imageset-unveil-delay: .05s !default;
   width: 100%;
 }
 
-.imageset.-ratio .imageset-element {
-  // z-index: 2;
-}
+// .imageset.-ratio .imageset-element {
+//   z-index: 2;
+// }
 
 .js .imageset.-ratio.-lazyload .imageset-element {
   /* The actual image is kept behind the placeholder.
@@ -93,10 +93,10 @@ $imageset-unveil-delay: .05s !default;
      ended, because this can cause rendering issues in
      WebKit- and Blink-based (and possibly any other)
      browsers. */
-  // z-index: 1;
-  opacity: 0;
+  z-index: 1;
+  //opacity: 0;
   backface-visibility: hidden;
-  will-change: opacity;
+  // will-change: opacity;
   @media screen {
     transition: opacity $imageset-unveil-duration;
   }
@@ -122,7 +122,7 @@ $imageset-unveil-delay: .05s !default;
 .imageset-placeholder {
   display: block;
   position: absolute;
-  //z-index: 1;
+  z-index: 1;
   top: 50%;
   left: 50%;
   width: 100%;
@@ -148,17 +148,17 @@ $imageset-unveil-delay: .05s !default;
   
   /* Visibility of placeholder is changed to hidden after
      the transition. */
-  // @media screen {
-  //   transition:
-  //     opacity $imageset-unveil-duration $imageset-unveil-delay,
-  //     visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
-  // }
+  @media screen {
+    transition:
+      opacity $imageset-unveil-duration $imageset-unveil-delay,
+      visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
+  }
   
   /* The actual placeholder is in front of the actual
      image, so we don’t have to fade in the image, which
      would lead to artifacts in WebKit- and Blink-based
      browsers. */
-  //z-index: 2;
+  z-index: 2;
 
   /* Prevent user interaction like accidently saving the
      placeholder via tap/right-click */
@@ -172,16 +172,16 @@ $imageset-unveil-delay: .05s !default;
 }
 
 .imageset.-alpha .imageset-placeholder {
-  visibility: hidden;
+  //visibility: hidden;
 }
 
 .js .imageset.-alpha .imageset-placeholder {
-    //visibility: visible;
+    visibility: visible;
 
     @media screen {
       transition:
-        opacity $imageset-unveil-duration $imageset-unveil-delay;
-        // visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
+        opacity $imageset-unveil-duration $imageset-unveil-delay,
+        visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
     }
   }
 
@@ -205,8 +205,8 @@ $imageset-unveil-delay: .05s !default;
      and then change visibility to allow mouse interation
      with the loaded image in browsers, where the
      `pointer-events` property is not supported. */
-  //opacity: 0;
-  //visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* ·····  NoScript Fallback  ················································ */
@@ -244,6 +244,7 @@ $imageset-unveil-delay: .05s !default;
 
 .js .imageset .imageset-error {
   position: absolute;
+  z-index: 3;
   top: 0;
   left: 0;
   width: 100%;
@@ -293,6 +294,8 @@ $imageset-unveil-delay: .05s !default;
 
 .js .imageset.-lazyload.has-error .imageset-element {
   opacity: 0;
+  visibility: hidden;
+  transition: none;
 }
 
 /* ·····  Opera Mini Fixes  ················································· */

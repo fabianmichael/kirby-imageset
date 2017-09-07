@@ -63,10 +63,9 @@
      ended, because this can cause rendering issues in
      WebKit- and Blink-based (and possibly any other)
      browsers. */
-  opacity: 0;
+  z-index: 1;
   -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
-  will-change: opacity;
 }
 
 @media screen {
@@ -97,6 +96,7 @@
 .imageset-placeholder {
   display: block;
   position: absolute;
+  z-index: 1;
   top: 50%;
   left: 50%;
   width: 100%;
@@ -121,6 +121,7 @@
      image, so we don’t have to fade in the image, which
      would lead to artifacts in WebKit- and Blink-based
      browsers. */
+  z-index: 2;
   /* Prevent user interaction like accidently saving the
      placeholder via tap/right-click */
   pointer-events: none;
@@ -131,13 +132,19 @@
   background-color: #efefef;
 }
 
-.imageset.-alpha .imageset-placeholder {
-  visibility: hidden;
+@media screen {
+  .js .imageset.-lazyload .imageset-placeholder {
+    transition: opacity 0.5s 0.05s, visibility 0s 0.8s;
+  }
+}
+
+.js .imageset.-alpha .imageset-placeholder {
+  visibility: visible;
 }
 
 @media screen {
   .js .imageset.-alpha .imageset-placeholder {
-    transition: opacity 0.5s 0.05s;
+    transition: opacity 0.5s 0.05s, visibility 0s 0.8s;
   }
 }
 
@@ -167,6 +174,8 @@
      and then change visibility to allow mouse interation
      with the loaded image in browsers, where the
      `pointer-events` property is not supported. */
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* ·····  NoScript Fallback  ················································ */
@@ -202,6 +211,7 @@
 /* ·····  Error Handling  ··················································· */
 .js .imageset .imageset-error {
   position: absolute;
+  z-index: 3;
   top: 0;
   left: 0;
   width: 100%;
@@ -251,6 +261,8 @@
 
 .js .imageset.-lazyload.has-error .imageset-element {
   opacity: 0;
+  visibility: hidden;
+  transition: none;
 }
 
 /* ·····  Opera Mini Fixes  ················································· */
