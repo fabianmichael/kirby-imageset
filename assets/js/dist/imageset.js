@@ -1336,7 +1336,8 @@
       
       debouncedCheckImagesets();
     } else {
-      checkImagesets();
+      // If autoUpdate is disabled, check imagesets just once.
+      ready(checkImagesets);
     }
 
     return {

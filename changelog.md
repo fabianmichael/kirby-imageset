@@ -1,7 +1,13 @@
 # ImageSet Changelog
 
-- unversioned
-  - Fix mosaic placeholder rendering rendered too small.
+- `1.1.0-beta1` (2017/09/08)
+  - [Fix] Fix mosaic placeholder rendering rendered too small.
+  - [Fix] Remove double-loading settings from config
+  - [Feature] Add JavaScript configuration and API
+  - [Enhancement] Better error message when thumbs directory is missing.
+  - [Feature] Display a broken file icon, when an image couldn’t be loaded and display alt text, if provided.
+  - [Enhancement] Make all placeholder sources inline again to guarantee instand placeholder rendering after page load. This increases the initial HTML payload a bit, but results in fewer requests afterwards.
+  - [Fix] Using the color placeholder style on a completely transparent image will not cause the plugin to fail any more.
 
 - `1.0.1` (2017/03/22)
   - Fixes a problem that caused the dynamic presets API to throw a fatal error.
