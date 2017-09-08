@@ -26,7 +26,7 @@ class Cache {
     try {     
       $this->driver = new FileCache($this->cacheRoot);
     } catch(Error $e) {
-      throw new Error('The thumbs directory does not exist.', $e->getCode());
+      throw new Error("The thumbs directory does not exist at \"$this->cacheRoot\".", $e->getCode());
     }
   }
   
