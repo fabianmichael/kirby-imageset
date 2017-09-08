@@ -39,8 +39,10 @@
       __wrapperPlaceholderStyleClass    = '-placeholder:',
       __wrapperAlphaClass               = '-alpha',
       __wrapperPlaceholderRenderedClass = 'is-placeholder-rendered',
+      __wrapperPlaceholderErrorClass    = 'has-placeholder-error',
       __imageElementClass               = __wrapperClass + '-element',
       __placeholderElementClass         = __wrapperClass + '-placeholder',
+      __errorOverlayClass               = 'imageset-error',
       __operaMiniClass                  = 'operamini';
 
   /* =====  Variable Shortcuts  ============================================= */
@@ -89,11 +91,27 @@
     };
   }
 
-  function imageLoaded(img, fn) {
+  function imageLoaded(img, success, failure) {
+    failure = failure || false;
+
     if(!img.complete || (typeof img.naturalWidth === "undefined") || img.naturalWidth === 0) {
-      img.addEventListener("load", fn);
+
+      var successCallback = function () {
+        this.removeEventListener('load', successCallback);
+        success();
+      };
+
+      img.addEventListener('load', successCallback);
+
+      if(!!failure) {
+        var testImg = new Image();
+        testImg.addEventListener('error', function() {
+          failure();
+        });
+        testImg.src = img.src;
+      }
     } else {
-      fn();
+      success();
     }
   }
 
@@ -196,14 +214,14 @@
 
     addClass(docElement, __operaMiniClass);
 
-    var loadImageSetForOperaMini = function(el) {
+    var loadImageSetForOperaMini = function(wrapper) {
         
-      var sources = el.getElementsByTagName("source"),
-          img     = el.getElementsByClassName(__imageElementClass)[0];
+      var sources = wrapper.getElementsByTagName("source"),
+          img     = wrapper.getElementsByClassName(__imageElementClass)[0];
     
       // Wrapper should be loaded to trigger css hook like
       // on other browsers.
-      addClass(el, __wrapperLoadedClass);
+      addClass(wrapper, __wrapperLoadedClass);
 
       if(window.HTMLPictureElement) {
         // As of December 2016, Opera Mini does not support
@@ -256,9 +274,16 @@
     return result ? result[1] : false;
   }
 
-  var placeholderRenderer = {};
+  function handlePlaceholderError(wrapper) {
+    console.log("error", wrapper);
+    addClass(wrapper, __wrapperPlaceholderErrorClass);
+  }
+
+
 
   /* -----  Placeholder Render Functions  ----------------------------------- */
+  
+  var placeholderRenderer = {};
 
   if(!!window.CanvasRenderingContext2D) {
     // only register placeholder rendering functions, if
@@ -269,15 +294,13 @@
     var isSafari                    = (ua.indexOf("Safari") !== -1 && ua.indexOf("Chrome") === -1);
     var supportsPixelatedImages     = ('imageRendering' in docElement.style || 'msInterpolationMode' in docElement.style);
 
-    console.log("is safari?", isSafari, supportsPixelatedImages);
-
     if(!supportsPixelatedImages || isSafari) {
 
-      placeholderRenderer.mosaic = function(el) {
+      placeholderRenderer.mosaic = function(wrapper) {
 
         var canvas      = document.createElement("canvas"),
             ctx         = canvas.getContext("2d"),
-            source      = el.getElementsByClassName(__placeholderElementClass)[0];
+            source      = wrapper.getElementsByClassName(__placeholderElementClass)[0];
 
         var process = function() {
 
@@ -285,8 +308,8 @@
 
           var width        = source.naturalWidth,
               height       = source.naturalHeight,
-              scaledWidth  = el.offsetWidth,
-              scaledHeight = (el.offsetWidth / width * height + 0.5) | 0;
+              scaledWidth  = wrapper.offsetWidth,
+              scaledHeight = (wrapper.offsetWidth / width * height + 0.5) | 0;
 
           canvas.width  = scaledWidth;
           canvas.height = scaledHeight;
@@ -299,29 +322,28 @@
           canvas.setAttribute("aria-hidden", true);
           canvas.className = source.className;
           
-          //return function() {
-            ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
-            source.parentNode.replaceChild(canvas, source);
-          //};
+          ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
+          source.parentNode.replaceChild(canvas, source);
+          addClass(wrapper, __wrapperPlaceholderRenderedClass);
         };
 
         return function() {
-          imageLoaded(source, process);
+          imageLoaded(source, process, function() { handlePlaceholderError(wrapper); });
         };
       };
     }
 
     /* ···  Blurred & LQIP  ················································· */
 
-    var applyPlaceholderBlur = function(el, radius, mul_sum, shg_sum) {
+    var applyPlaceholderBlur = function(wrapper, radius, mul_sum, shg_sum) {
 
-      var source = el.getElementsByClassName(__placeholderElementClass)[0];
+      var source = wrapper.getElementsByClassName(__placeholderElementClass)[0];
 
       var process = function() {
         var width        = source.naturalWidth,
             height       = source.naturalHeight,
-            scaledWidth  = el.offsetWidth,
-            scaledHeight = (el.offsetWidth / width * height + 0.5) | 0,
+            scaledWidth  = wrapper.offsetWidth,
+            scaledHeight = (wrapper.offsetWidth / width * height + 0.5) | 0,
             
             canvas       = document.createElement("canvas"),
             ctx          = canvas.getContext("2d"),
@@ -337,15 +359,14 @@
         canvas.setAttribute("aria-hidden", true);
         canvas.className = source.className;
         
-        //return function() {
-          ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
-          stackBlur[alpha ? 'canvasRGBA' : 'canvasRGB'](canvas, 0, 0, scaledWidth, scaledHeight, radius, mul_sum, shg_sum);
-          source.parentNode.replaceChild(canvas, source);
-        //};
+        ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
+        stackBlur[alpha ? 'canvasRGBA' : 'canvasRGB'](canvas, 0, 0, scaledWidth, scaledHeight, radius, mul_sum, shg_sum);
+        source.parentNode.replaceChild(canvas, source);
+        addClass(wrapper, __wrapperPlaceholderRenderedClass);
       };
 
       return function() {
-        imageLoaded(source, process);
+        imageLoaded(source, process, function() { handlePlaceholderError(wrapper); });
       };
 
     };
@@ -557,18 +578,18 @@
       }
     };
 
-    placeholderRenderer.triangles = function(el) {
+    placeholderRenderer.triangles = function(wrapper) {
 
-      var source   = el.getElementsByClassName(__placeholderElementClass)[0];
+      var source   = wrapper.getElementsByClassName(__placeholderElementClass)[0];
 
       var process = function() {
         var width        = source.naturalWidth,
             height       = source.naturalHeight,
-            scaledWidth  = el.offsetWidth,
-            scaledHeight = Math.round(el.offsetWidth / width * height), // (scaledWidth / width * height + 0.5) | 0, // faster Math.round() hack // same as: 
+            scaledWidth  = wrapper.offsetWidth,
+            scaledHeight = Math.round(wrapper.offsetWidth / width * height), // (scaledWidth / width * height + 0.5) | 0, // faster Math.round() hack // same as: 
             canvas       = document.createElement("canvas"),
             ctx          = canvas.getContext("2d"),
-            alpha        = hasClass(el, __wrapperAlphaClass);
+            alpha        = hasClass(wrapper, __wrapperAlphaClass);
 
         canvas.width  = scaledWidth;
         canvas.height = scaledHeight;
@@ -584,11 +605,12 @@
         ctx.drawImage(source, 0, 0, scaledWidth, scaledHeight);
         triangleMosaicFilter(canvas, 40, alpha);
         source.parentNode.replaceChild(canvas, source);
-        
+        addClass(wrapper, __wrapperPlaceholderRenderedClass);
+        console.log('placeholder rendered');
       };
 
       return function() {
-        imageLoaded(source, process);
+        imageLoaded(source, process, function() { handlePlaceholderError(wrapper); });
       };
     };
 
@@ -630,8 +652,7 @@
         if(style && placeholderRenderer[style]) {
           // Render placeholder, if a renderer for given
           // imageset exists.
-          
-          addClass(wrapper, __wrapperPlaceholderRenderedClass);
+
           renderer = placeholderRenderer[style](wrapper);
 
           if(settings.placeholderRendering === 'async') {
@@ -645,8 +666,6 @@
     }
 
     var debouncedCheckImagesets = debounce(checkImagesets);
-
-    // ---  public methods
 
     // ---  initialization
 
@@ -679,7 +698,7 @@
         rAF(function () {
 
           var errorOverlay = document.createElement('span');
-          addClass(errorOverlay, 'imageset-error');
+          addClass(errorOverlay, __errorOverlayClass);
 
           if(element.hasAttribute('alt') && element.alt !== '') {
 
