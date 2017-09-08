@@ -4,6 +4,7 @@ namespace Kirby\Plugins\ImageSet;
 
 use Cache\Driver\File as FileCache;
 use Dir;
+use Error;
 use F;
 use File;
 use Folder;
@@ -20,8 +21,13 @@ class Cache {
   
   protected function __construct($kirby) {
     $this->kirby     = $kirby;
-    $this->cacheRoot = $kirby->roots()->thumbs();      
-    $this->driver = new FileCache($this->cacheRoot);
+    $this->cacheRoot = $kirby->roots()->thumbs(); 
+
+    try {     
+      $this->driver = new FileCache($this->cacheRoot);
+    } catch(Error $e) {
+      throw new Error('The thumbs directory does not exist.', $e->getCode());
+    }
   }
   
   public static function instance($kirby = null) {
