@@ -80,9 +80,9 @@ $imageset-unveil-delay: .05s !default;
   width: 100%;
 }
 
-.imageset.-ratio .imageset-element {
-  // z-index: 2;
-}
+// .imageset.-ratio .imageset-element {
+//   z-index: 2;
+// }
 
 .js .imageset.-ratio.-lazyload .imageset-element {
   /* The actual image is kept behind the placeholder.
@@ -93,10 +93,10 @@ $imageset-unveil-delay: .05s !default;
      ended, because this can cause rendering issues in
      WebKit- and Blink-based (and possibly any other)
      browsers. */
-  // z-index: 1;
-  opacity: 0;
+  z-index: 1;
+  //opacity: 0;
   backface-visibility: hidden;
-  will-change: opacity;
+  // will-change: opacity;
   @media screen {
     transition: opacity $imageset-unveil-duration;
   }
@@ -122,7 +122,7 @@ $imageset-unveil-delay: .05s !default;
 .imageset-placeholder {
   display: block;
   position: absolute;
-  //z-index: 1;
+  z-index: 1;
   top: 50%;
   left: 50%;
   width: 100%;
@@ -148,17 +148,17 @@ $imageset-unveil-delay: .05s !default;
   
   /* Visibility of placeholder is changed to hidden after
      the transition. */
-  // @media screen {
-  //   transition:
-  //     opacity $imageset-unveil-duration $imageset-unveil-delay,
-  //     visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
-  // }
+  @media screen {
+    transition:
+      opacity $imageset-unveil-duration $imageset-unveil-delay,
+      visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
+  }
   
   /* The actual placeholder is in front of the actual
      image, so we don’t have to fade in the image, which
      would lead to artifacts in WebKit- and Blink-based
      browsers. */
-  //z-index: 2;
+  z-index: 2;
 
   /* Prevent user interaction like accidently saving the
      placeholder via tap/right-click */
@@ -172,16 +172,16 @@ $imageset-unveil-delay: .05s !default;
 }
 
 .imageset.-alpha .imageset-placeholder {
-  visibility: hidden;
+  //visibility: hidden;
 }
 
 .js .imageset.-alpha .imageset-placeholder {
-    //visibility: visible;
+    visibility: visible;
 
     @media screen {
       transition:
-        opacity $imageset-unveil-duration $imageset-unveil-delay;
-        // visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
+        opacity $imageset-unveil-duration $imageset-unveil-delay,
+        visibility 0s ($imageset-unveil-duration + $imageset-unveil-delay + .25s);
     }
   }
 
@@ -200,13 +200,13 @@ $imageset-unveil-delay: .05s !default;
   image-rendering: pixelated;                 /* Opera 26+, Chrome */
 }
 
-.js .imageset.is-loaded .imageset-placeholder {
+.js .imageset.is-loaded:not(.has-error) .imageset-placeholder {
   /* After image is loaded, the placeholder will fade out
      and then change visibility to allow mouse interation
      with the loaded image in browsers, where the
      `pointer-events` property is not supported. */
-  //opacity: 0;
-  //visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
 }
 
 /* ·····  NoScript Fallback  ················································ */
@@ -244,6 +244,7 @@ $imageset-unveil-delay: .05s !default;
 
 .js .imageset .imageset-error {
   position: absolute;
+  z-index: 3;
   top: 0;
   left: 0;
   width: 100%;
@@ -255,15 +256,19 @@ $imageset-unveil-delay: .05s !default;
 }
 
 .js .imageset .imageset-error {
-  background: rgba(#fff, 0.75) url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%0A%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M15%2C10.2803438%20L12.7537186%2C11.7778647%20L9.75371856%2C9.77786474%20L6.75371856%2C11.7778647%20L3.75371856%2C9.77786474%20L1%2C11.6136771%20L1%2C7.19820434e-15%20L15%2C9.76996262e-15%20L15%2C10.2803438%20Z%20M15%2C12.0831194%20L15%2C16%20L1%2C16%20L1%2C13.4164528%20L3.75371856%2C11.5806404%20L6.75371856%2C13.5806404%20L9.75371856%2C11.5806404%20L12.7537186%2C13.5806404%20L15%2C12.0831194%20Z%20M10%2C2.22044605e-15%20L15%2C5%20L15%2C3.44509285e-15%20L10%2C2.22044605e-15%20Z%20M13%2C6%20L9%2C2%20L9%2C6%20L13%2C6%20Z%22/%3E%0A%3C/svg%3E%0A') no-repeat 10px 10px;
-  border: 1px solid #ccc;
+  background: 
+    url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%0A%20%20%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M15%2C10.2803438%20L12.7537186%2C11.7778647%20L9.75371856%2C9.77786474%20L6.75371856%2C11.7778647%20L3.75371856%2C9.77786474%20L1%2C11.6136771%20L1%2C7.19820434e-15%20L15%2C9.76996262e-15%20L15%2C10.2803438%20Z%20M15%2C12.0831194%20L15%2C16%20L1%2C16%20L1%2C13.4164528%20L3.75371856%2C11.5806404%20L6.75371856%2C13.5806404%20L9.75371856%2C11.5806404%20L12.7537186%2C13.5806404%20L15%2C12.0831194%20Z%20M10%2C2.22044605e-15%20L15%2C5%20L15%2C3.44509285e-15%20L10%2C2.22044605e-15%20Z%20M13%2C6%20L9%2C2%20L9%2C6%20L13%2C6%20Z%22/%3E%0A%3C/svg%3E%0A') no-repeat 10px 10px,
+    //linear-gradient(to bottom right, transparent 0%, transparent calc(50% - .5px), #888 calc(50% - .75px), #888 calc(50% + .75px), transparent calc(50% + .75px), transparent 100%) rgba(#fff, 0.75);
+    //url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' preserveAspectRatio='none' viewBox='0 0 10 10' stroke='%23ccc' stroke-width='1'><line vector-effect='non-scaling-stroke' x1='0' y1='0' x2='10' y2='10'/><line vector-effect='non-scaling-stroke' x1='10' y1='0' x2='0' y2='10'/></svg>") 0 0 / 100% 100% no-repeat;
+    rgba(#fff, 0.75);
+  border: 1px solid #888;
   padding: 36px 10px 10px;
   box-sizing: border-box;
 }
 
 .no-js .imageset:not(.-alpha) .imageset-fallback:-moz-broken {
   background-color: rgba(#fff, 0.75);
-  border: 1px solid #ccc;
+  border: 1px solid #888;
   padding: 10px;
   box-sizing: border-box;
 }
@@ -293,6 +298,13 @@ $imageset-unveil-delay: .05s !default;
 
 .js .imageset.-lazyload.has-error .imageset-element {
   opacity: 0;
+  visibility: hidden;
+  transition: none;
+}
+
+.js .imageset.has-placeholder-error .imageset-placeholder {
+  visibility: hidden;
+  transition: none;
 }
 
 /* ·····  Opera Mini Fixes  ················································· */
