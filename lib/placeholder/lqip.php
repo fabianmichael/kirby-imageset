@@ -36,7 +36,7 @@ class Lqip extends Base {
    public function html() {
 
     $attr = [
-      'src'          => $this->thumb->url(),
+      'src'          => $this->thumb->dataUri(),
       'class'        => $this->option('class'),
       'alt'          => ' ', // one space generates creates empty alt attribute 
       'aria-hidden'  => 'true',
