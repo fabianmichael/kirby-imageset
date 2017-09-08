@@ -29,6 +29,7 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
     - [2.2.2 Git Submodule](#222-git-submodule)
     - [2.2.3 Copy and Paste](#223-copy-and-paste)
   - [2.3 Template Setup](#23-template-setup)
+  - [2.4 JavaScript Configuration & API](#24-javascript-configuration--api)
 - [3 Global Configuration](#3-global-configuration)
 - [4 Usage](#4-usage)
   - [4.1 Template API](#41-template-api)
