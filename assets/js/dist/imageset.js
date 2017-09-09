@@ -871,7 +871,6 @@
   }
 
   function handlePlaceholderError(wrapper) {
-    console.log("error", wrapper);
     addClass(wrapper, __wrapperPlaceholderErrorClass);
   }
 
