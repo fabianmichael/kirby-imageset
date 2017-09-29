@@ -222,7 +222,7 @@ imageset(Media $image, mixed $sizes = 'default', array $options = null)
 Whenever your source image is inside Kirby's content folder, you should use Kirby’s API to retrieve the image as a `File` object, so you can use the `imageset()` method. In this case, you don’t have to specify the `$image` parameter:
 
 ```php
-if($image = $page->image('sample.jpg')):
+if($image = $page->image('sample.jpg')) {
   echo $image->imageset('200,400,600');
 }
 ```
