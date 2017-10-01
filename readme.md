@@ -132,13 +132,13 @@ In order to make ImageSet work properly, you have to include the corresponding C
 <!-- replaces "no-js" class on html element with "js" -->
 <script>(function(d,c,r){d[c]=r.test(d[c])?d[c].replace(r,'$1js$2'):[d[c],'js'].join(' ')})(document.documentElement,'className',/(?:(^|\s)no-js(\s|$))/)</script>
 
-<?= css('site/plugins/imageset/assets/css/imageset.min.css') ?>
+<?= css('assets/plugins/imageset/css/imageset.min.css') ?>
 ```
 
 If you use lazy loading, also add the following line anywhere after the previous code in your template, it is recommended to include the file before the closing `</head>` tag to ensure that it loads as fast as possible. If this is not possible, you can also include the script right before the closing body tag, but this lreads to later execution and can easily result in the flashing of un-rendered placeholders.
 
 ```php
-<?= js('site/plugins/imageset/assets/js/dist/imageset.js') ?>
+<?= js('assets/plugins/imageset/js/dist/imageset.js') ?>
 ```
 
 Not all browsers are providing [native support](http://caniuse.com/#feat=picture) for the `<picture>` element. If your site does not already include a polyfill for this, you might also want to add the following lines within the `<head>` of your site to load the *respimage* polyfill conditionally and as fast as possible.
