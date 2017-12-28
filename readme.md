@@ -1,5 +1,3 @@
-<img src="https://fabianmichael.de/shared/imagekit-logo-github.png" alt="Imagekit Logo" width="120" height="120" />
-
 # ImageSet
 
 ![GitHub release](https://img.shields.io/github/release/fabianmichael/kirby-imageset.svg?maxAge=2592000) ![License](https://img.shields.io/badge/license-commercial-green.svg) ![Kirby Version](https://img.shields.io/badge/Kirby-2.3%2B-red.svg)
@@ -579,7 +577,8 @@ ImageSet can be evaluated as long as you want on how many private servers you wa
 
 *The plugin is also available as a bundle with [ImageKit](https://github.com/fabianmichael/kirby-imagekit), a plugin that brings asynchronous thumbnail creation and advanced image optimization for your site.*
 
-[<img src="https://fabianmichael.de/shared/buy-imageset.png" width="142" height="48" alt="Buy ImageSet">](http://sites.fastspring.com/fabianmichael/product/imageset) [<img src="https://fabianmichael.de/shared/buy-bundle.png" width="310" height="48" alt="Buy the ImageKit + ImageSet Bundle">](http://sites.fastspring.com/fabianmichael/product/imgbundle1)
+→ [Buy ImageSet](http://sites.fastspring.com/fabianmichael/product/imageset)  
+→ [Buy the ImageKit + ImageSet Bundle](http://sites.fastspring.com/fabianmichael/product/imgbundle1)
 
 
 However, even with a valid license code, it is discouraged to use it in any project, that promotes racism, sexism, homophobia, animal abuse or any other form of hate-speech.
