@@ -1,4 +1,5 @@
 @charset "UTF-8";
+
 /*!
  * ImageSet - responsive, lazy-loading images for Kirby CMS
  * 
@@ -6,7 +7,9 @@
  * @link https://github.com/fabianmichael/kirby-imageset
  *
  */
+
 /* -----  ImageSet Component  ----------------------------------------------- */
+
 .imageset {
   /* Fixes a glitch in Firefox, where (in rare cases) a
      black border appears for no abvious reason at the
@@ -17,6 +20,7 @@
 }
 
 /* ·····  ImageSet with Ratio-Placeholder  ·································· */
+
 .imageset.-ratio {
   display: block;
   /* Remove bottom margin (borrowed from Inuit CSS) */
@@ -65,7 +69,7 @@
      browsers. */
   z-index: 1;
   -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 @media screen {
@@ -108,7 +112,7 @@
   transform: translate(-50%, -50%);
   overflow: hidden;
   -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .js .imageset.-lazyload .imageset-placeholder {
@@ -179,6 +183,7 @@
 }
 
 /* ·····  NoScript Fallback  ················································ */
+
 .imageset.-ratio .imageset-fallback {
   /* autoprefixer: off */
   position: absolute;
@@ -209,6 +214,7 @@
 }
 
 /* ·····  Error Handling  ··················································· */
+
 .js .imageset .imageset-error {
   position: absolute;
   z-index: 3;
@@ -220,9 +226,9 @@
   transition: opacity 0.5s;
   pointer-events: none;
   -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .js .imageset .imageset-error {
@@ -271,6 +277,7 @@
 }
 
 /* ·····  Opera Mini Fixes  ················································· */
+
 .operamini .imageset-placeholder {
   display: none;
 }
@@ -280,3 +287,6 @@
   -o-object-fit: cover;
   object-fit: cover;
 }
+
+
+/*# sourceMappingURL=imageset.css.map*/
