@@ -61,13 +61,13 @@ $imageset-unveil-delay: .05s !default;
   zoom: 1;
 }
 
-.imageset.-multiple-ratios .imageset-element {
-  // Prevent flash of a skewed image after ratio has
-  // changed, but new image was not loaded yet.
-  // Not supported in IE & EDGE <= 14
-  // DEACTIVATED DUE TO PERFORMANCE ISSUES!
-  // object-fit: cover;
-}
+// .imageset.-multiple-ratios .imageset-element {
+//   /* Prevent flash of a skewed image after ratio has
+//      changed, but new image was not loaded yet.
+//      Not supported in IE & EDGE <= 14
+//      CURRENTLY DEACTIVATED DUE TO PERFORMANCE ISSUES! */
+//    object-fit: cover;
+// }
 
 .imageset.-ratio .imageset-ratio-fill {
   display: block;
