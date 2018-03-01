@@ -1,11 +1,11 @@
 /*!
- * ImageSet (1.0.0-beta1)
+ * ImageSet (1.1.0-beta1)
  *
  * This script file is needed for lazyloading imagesets,
  * generated with ImageSet for Kirby and rendering placeholder
  * effeccts
  *
- * Copyright (c) 2016 Fabian Michael <hallo@fabianmichael.de>
+ * Copyright (c) 2016-2018 Fabian Michael <hallo@fabianmichael.de>
  * @license SEE LICENSE IN license.md
  *
  * This script also includes:
@@ -755,6 +755,8 @@
 
 })(window, document, Math, Date);
 
-//=require includes/ls.static-gecko-picture.js
+import 'lazysizes/plugins/print/ls.print.js';
+import 'lazysizes';
+
 //=require includes/ls.print.js
 //=require includes/lazysizes.js
