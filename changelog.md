@@ -1,5 +1,14 @@
 # ImageSet Changelog
 
+- `1.1.0-beta2` (2018/03/03)
+  - [Enhancement] Extensive rewrite of frontend code in ES6-compatible syntax, using a new approach for imageset loading.
+  - [Enhancement] The build process now uses webpack (except for the readme) instead of Gulp for besser handling of dependencies in the script.
+  - [Removed] Removed settings API, because it’s benefits are neglectable while it adds lots of complexity.
+  - [Breaking] Removed IE 10 from the list of supported browsers … he’s dead, Jim! Also replaced support for "Edge 12+" with "✓", because Edge has a rolling release-cycle.
+  - [Breaking] Raised PHP support to 5.6, because I won’t test new features on older versions than that any more in the future.
+  - [Readme] Removed settings API section.
+  - [Readme] Added note how to set `display: block` to all image sets.
+
 - `1.1.0-beta1` (2017/09/08)
   - [Fix] Fix mosaic placeholder rendering rendered too small.
   - [Fix] Remove double-loading settings from config

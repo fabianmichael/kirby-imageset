@@ -1,23 +1,9 @@
-/*!
- * ImageSet (1.1.0-beta1)
- *
- * This script file is needed for lazyloading imagesets,
- * generated with ImageSet for Kirby and rendering placeholder
- * effeccts
- *
- * Copyright (c) 2016-2018 Fabian Michael <hallo@fabianmichael.de>
- * @license SEE LICENSE IN license.md
- *
- * This script also includes:
- *
- *   StackBlur 0.6
- *   Copyright (c) 2010 Mario Klingemann <mario@quasimondo.com>
- *   https://github.com/Quasimondo/QuasimondoJS
- *
- *   lazysizes 2.0.7 (with "static-gecko-picture" plugin)
- *   Copyright (C) 2015 Alexander Farkas, released under MIT license
- *   https://github.com/aFarkas/lazysizes
+/*
+ * ImageSet - responsive, lazy-loading images for Kirby CMS
  * 
+ * @copyright (c) 2016-2018 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ *
  */
 'use strict';
 
@@ -26,10 +12,7 @@ import rAF         from './utils/rAF';
 import ready       from './utils/ready';
 import debounce    from './utils/debounce';
 
-import 'lazysizes/plugins/print/ls.print.js';
-import 'lazysizes';
-
-/* =====  Configuration  ================================================== */
+/* =====  Globals  ========================================================== */
 
 const __wrapperClass                    = 'imageset';
 const __wrapperLoadedClass              = 'is-loaded';
@@ -42,8 +25,11 @@ const __imageElementClass               = __wrapperClass + '-element';
 const __placeholderElementClass         = __wrapperClass + '-placeholder';
 const __errorOverlayClass               = 'imageset-error';
 const __operaMiniClass                  = 'operamini';
+const __placeholderstyleRegexp          = new RegExp(__wrapperPlaceholderStyleClass + '([a-z0-9_-]+)\\s*', 'i');
 
-const isOperaMini = (Object.prototype.toString.call(window.operamini) === '[object OperaMini]');
+const isOperaMini                       = (Object.prototype.toString.call(window.operamini) === '[object OperaMini]');
+
+/* =====  Placeholder Renderers  ============================================ */
 
 import trianglesPlaceholder     from './placeholder/triangles';
 import mosaicPlaceholder        from './placeholder/mosaic';
@@ -56,9 +42,7 @@ const placeholder = {
   lqip:      blurPlaceholderGenerator( 7, 512, 15),
 };
 
-
-
-const __placeholderstyleRegexp = new RegExp(__wrapperPlaceholderStyleClass + '([a-z0-9_-]+)\\s*', 'i');
+/* =====  ImageSet Class  =================================================== */
 
 class ImageSet {
   
@@ -107,7 +91,7 @@ class ImageSet {
   }
 
   getPlaceholderElement() {
-    if(this.placeholderElement === undefined) {
+    if(this.placeholderElement === undefined) { // strong type check necessary, because could also be "null" if imageset has no placeholder
       this.placeholderElement = this.wrapper.querySelector('.' + __placeholderElementClass);
     }
 
@@ -147,26 +131,27 @@ class ImageSet {
   }
 }
 
-const imagesetElements = document.getElementsByClassName(__wrapperClass);
-
-function checkImagesets() {
-  for(let i = 0, l = imagesetElements.length, item; (i < l) && (item = imagesetElements[i]); i++) {
-
-    if(item._imageset) {
-      // skip imagesets that have been already initialized
-      // console.log("skipped!", item);
-      continue; 
-    }
-
-    item._imageset = new ImageSet(item);
-  }
-}
-
-var debouncedCheckImagesets = debounce(checkImagesets);
-
-/* =====  Variable Shortcuts  ============================================= */
+/* =====  Initialization  =================================================== */
 
 if(!isOperaMini) {
+  /* ---  Regular Initialization  ------------------------------------------- */
+
+  var imagesetElements = document.getElementsByClassName(__wrapperClass);
+
+  var checkImagesets = function() {
+    for(let i = 0, l = imagesetElements.length, item; (i < l) && (item = imagesetElements[i]); i++) {
+  
+      if(item._imageset) {
+        // skip imagesets that have been already initialized
+        continue; 
+      }
+  
+      item._imageset = new ImageSet(item);
+    }
+  };
+  
+  var debouncedCheckImagesets = debounce(checkImagesets);
+  
 
   if(window.MutationObserver) {
     // Use MutationObserver to check for new elements,
@@ -187,8 +172,10 @@ if(!isOperaMini) {
 
 
 } else {
+  /* ---  Opera Mini  ------------------------------------------------------- */
+
   // Opera Mini has limited DOM Event support and does not
-  // work with lazysizes. So we shortcut the loading process
+  // work with lazysizes. So we use a different loading process
   // of lazy-loading and disable lazysizes.
   window.lazySizesConfig      = window.lazySizesConfig || {};
   window.lazySizesConfig.init = false;
@@ -227,7 +214,7 @@ if(!isOperaMini) {
         sources[0].parentNode.removeChild(sources[0]);
       }
 
-      img.src = candidates.pop().replace(/\s+\d+[wx]$/, '');
+      img.setAttribute('src', candidates.pop().replace(/\s+\d+[wx]$/, ''));
     }
   };
 
@@ -238,3 +225,8 @@ if(!isOperaMini) {
     }
   });
 }
+
+/* =====  Lazyloader  ======================================================= */
+
+import 'lazysizes/plugins/print/ls.print.js';
+import 'lazysizes';

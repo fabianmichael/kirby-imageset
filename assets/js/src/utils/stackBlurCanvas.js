@@ -1,4 +1,9 @@
 /* eslint-disable */
+/*
+ * Bases on StackBlur 0.6
+ * Copyright (c) 2010 Mario Klingemann <mario@quasimondo.com>
+ * https://github.com/Quasimondo/QuasimondoJS
+ */
 
 // var mul_table = [
 //         512,512,456,512,328,456,335,512,405,328,271,456,388,335,292,512,

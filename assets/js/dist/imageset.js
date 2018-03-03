@@ -102,6 +102,36 @@ exports.default = function (img, success) {
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (canvas, ctx) {
+  // Adjustments for HiDPI/Retina screens
+  var devicePixelRatio = window.devicePixelRatio || 1;
+  var backingStoreRatio = ctx.webkitBackingStorePixelRatio || 1; // Compatibility with (older?) Safari
+  var pixelRatio = devicePixelRatio / backingStoreRatio;
+
+  if (devicePixelRatio !== backingStoreRatio) {
+    var oldWidth = canvas.width;
+    var oldHeight = canvas.height;
+    canvas.width = oldWidth * pixelRatio;
+    canvas.height = oldHeight * pixelRatio;
+    //canvas.style.width  = oldWidth  + 'px';
+    //canvas.style.height = oldHeight + 'px';
+    ctx.scale(pixelRatio, pixelRatio);
+  }
+
+  return pixelRatio;
+};
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports) {
 
 (function(window, factory) {
@@ -804,60 +834,16 @@ exports.default = function (img, success) {
 
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (canvas, ctx) {
-  // Adjustments for HiDPI/Retina screens
-  var devicePixelRatio = window.devicePixelRatio || 1;
-  var backingStoreRatio = ctx.webkitBackingStorePixelRatio || 1; // Compatibility with (older?) Safari
-  var pixelRatio = devicePixelRatio / backingStoreRatio;
-
-  if (devicePixelRatio !== backingStoreRatio) {
-    var oldWidth = canvas.width;
-    var oldHeight = canvas.height;
-    canvas.width = oldWidth * pixelRatio;
-    canvas.height = oldHeight * pixelRatio;
-    //canvas.style.width  = oldWidth  + 'px';
-    //canvas.style.height = oldHeight + 'px';
-    ctx.scale(pixelRatio, pixelRatio);
-  }
-
-  return pixelRatio;
-};
-
-/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/*!
- * ImageSet (1.1.0-beta1)
- *
- * This script file is needed for lazyloading imagesets,
- * generated with ImageSet for Kirby and rendering placeholder
- * effeccts
- *
- * Copyright (c) 2016-2018 Fabian Michael <hallo@fabianmichael.de>
- * @license SEE LICENSE IN license.md
- *
- * This script also includes:
- *
- *   StackBlur 0.6
- *   Copyright (c) 2010 Mario Klingemann <mario@quasimondo.com>
- *   https://github.com/Quasimondo/QuasimondoJS
- *
- *   lazysizes 2.0.7 (with "static-gecko-picture" plugin)
- *   Copyright (C) 2015 Alexander Farkas, released under MIT license
- *   https://github.com/aFarkas/lazysizes
+/*
+ * ImageSet - responsive, lazy-loading images for Kirby CMS
  * 
+ * @copyright (c) 2016-2018 Fabian Michael <https://fabianmichael.de>
+ * @link https://github.com/fabianmichael/kirby-imageset
+ *
  */
 
 
@@ -879,27 +865,27 @@ var _debounce = __webpack_require__(6);
 
 var _debounce2 = _interopRequireDefault(_debounce);
 
-__webpack_require__(7);
-
-__webpack_require__(1);
-
-var _triangles = __webpack_require__(8);
+var _triangles = __webpack_require__(7);
 
 var _triangles2 = _interopRequireDefault(_triangles);
 
-var _mosaic = __webpack_require__(9);
+var _mosaic = __webpack_require__(8);
 
 var _mosaic2 = _interopRequireDefault(_mosaic);
 
-var _blur = __webpack_require__(10);
+var _blur = __webpack_require__(9);
 
 var _blur2 = _interopRequireDefault(_blur);
+
+__webpack_require__(11);
+
+__webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/* =====  Configuration  ================================================== */
+/* =====  Globals  ========================================================== */
 
 var __wrapperClass = 'imageset';
 var __wrapperLoadedClass = 'is-loaded';
@@ -912,8 +898,11 @@ var __imageElementClass = __wrapperClass + '-element';
 var __placeholderElementClass = __wrapperClass + '-placeholder';
 var __errorOverlayClass = 'imageset-error';
 var __operaMiniClass = 'operamini';
+var __placeholderstyleRegexp = new RegExp(__wrapperPlaceholderStyleClass + '([a-z0-9_-]+)\\s*', 'i');
 
 var isOperaMini = Object.prototype.toString.call(window.operamini) === '[object OperaMini]';
+
+/* =====  Placeholder Renderers  ============================================ */
 
 var placeholder = {
   triangles: _triangles2.default,
@@ -922,7 +911,7 @@ var placeholder = {
   lqip: (0, _blur2.default)(7, 512, 15)
 };
 
-var __placeholderstyleRegexp = new RegExp(__wrapperPlaceholderStyleClass + '([a-z0-9_-]+)\\s*', 'i');
+/* =====  ImageSet Class  =================================================== */
 
 var ImageSet = function () {
   function ImageSet(wrapper) {
@@ -979,6 +968,7 @@ var ImageSet = function () {
     key: 'getPlaceholderElement',
     value: function getPlaceholderElement() {
       if (this.placeholderElement === undefined) {
+        // strong type check necessary, because could also be "null" if imageset has no placeholder
         this.placeholderElement = this.wrapper.querySelector('.' + __placeholderElementClass);
       }
 
@@ -1027,26 +1017,26 @@ var ImageSet = function () {
   return ImageSet;
 }();
 
-var imagesetElements = document.getElementsByClassName(__wrapperClass);
-
-function checkImagesets() {
-  for (var i = 0, l = imagesetElements.length, item; i < l && (item = imagesetElements[i]); i++) {
-
-    if (item._imageset) {
-      // skip imagesets that have been already initialized
-      // console.log("skipped!", item);
-      continue;
-    }
-
-    item._imageset = new ImageSet(item);
-  }
-}
-
-var debouncedCheckImagesets = (0, _debounce2.default)(checkImagesets);
-
-/* =====  Variable Shortcuts  ============================================= */
+/* =====  Initialization  =================================================== */
 
 if (!isOperaMini) {
+  /* ---  Regular Initialization  ------------------------------------------- */
+
+  var imagesetElements = document.getElementsByClassName(__wrapperClass);
+
+  var checkImagesets = function checkImagesets() {
+    for (var i = 0, l = imagesetElements.length, item; i < l && (item = imagesetElements[i]); i++) {
+
+      if (item._imageset) {
+        // skip imagesets that have been already initialized
+        continue;
+      }
+
+      item._imageset = new ImageSet(item);
+    }
+  };
+
+  var debouncedCheckImagesets = (0, _debounce2.default)(checkImagesets);
 
   if (window.MutationObserver) {
     // Use MutationObserver to check for new elements,
@@ -1065,8 +1055,10 @@ if (!isOperaMini) {
 
   debouncedCheckImagesets();
 } else {
+  /* ---  Opera Mini  ------------------------------------------------------- */
+
   // Opera Mini has limited DOM Event support and does not
-  // work with lazysizes. So we shortcut the loading process
+  // work with lazysizes. So we use a different loading process
   // of lazy-loading and disable lazysizes.
   window.lazySizesConfig = window.lazySizesConfig || {};
   window.lazySizesConfig.init = false;
@@ -1104,7 +1096,7 @@ if (!isOperaMini) {
         sources[0].parentNode.removeChild(sources[0]);
       }
 
-      img.src = candidates.pop().replace(/\s+\d+[wx]$/, '');
+      img.setAttribute('src', candidates.pop().replace(/\s+\d+[wx]$/, ''));
     }
   };
 
@@ -1115,6 +1107,8 @@ if (!isOperaMini) {
     }
   });
 }
+
+/* =====  Lazyloader  ======================================================= */
 
 /***/ }),
 /* 4 */
@@ -1181,63 +1175,6 @@ exports.default = function (fn, delay) {
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/*
-This lazySizes extension adds better support for print.
-In case the user starts to print lazysizes will load all images.
-*/
-(function(window, factory) {
-	var globalInstall = function(){
-		factory(window.lazySizes);
-		window.removeEventListener('lazyunveilread', globalInstall, true);
-	};
-
-	factory = factory.bind(null, window, window.document);
-
-	if(typeof module == 'object' && module.exports){
-		factory(__webpack_require__(1));
-	} else if(window.lazySizes) {
-		globalInstall();
-	} else {
-		window.addEventListener('lazyunveilread', globalInstall, true);
-	}
-}(window, function(window, document, lazySizes) {
-	/*jshint eqnull:true */
-	'use strict';
-	var config, elements, onprint, printMedia;
-	// see also: http://tjvantoll.com/2012/06/15/detecting-print-requests-with-javascript/
-	if(window.addEventListener){
-		config = (lazySizes && lazySizes.cfg) || window.lazySizesConfig || {};
-		elements = config.lazyClass || 'lazyload';
-		onprint = function(){
-			var i, len;
-			if(typeof elements == 'string'){
-				elements = document.getElementsByClassName(elements);
-			}
-
-			if(lazySizes){
-				for(i = 0, len = elements.length; i < len; i++){
-					lazySizes.loader.unveil(elements[i]);
-				}
-			}
-		};
-
-		addEventListener('beforeprint', onprint, false);
-
-		if(!('onbeforeprint' in window) && window.matchMedia && (printMedia = matchMedia('print')) && printMedia.addListener){
-			printMedia.addListener(function(){
-				if(printMedia.matches){
-					onprint();
-				}
-			});
-		}
-	}
-}));
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
 "use strict";
 
 
@@ -1280,7 +1217,7 @@ exports.default = function (imageset) {
   (0, _imageLoaded2.default)(source, process, error);
 };
 
-var _fixCanvasResolution = __webpack_require__(2);
+var _fixCanvasResolution = __webpack_require__(1);
 
 var _fixCanvasResolution2 = _interopRequireDefault(_fixCanvasResolution);
 
@@ -1485,7 +1422,7 @@ function renderTriangles(canvas, side, alpha) {
 ;
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1547,7 +1484,7 @@ exports.default = function (imageset) {
   (0, _imageLoaded2.default)(source, process, error);
 };
 
-var _fixCanvasResolution = __webpack_require__(2);
+var _fixCanvasResolution = __webpack_require__(1);
 
 var _fixCanvasResolution2 = _interopRequireDefault(_fixCanvasResolution);
 
@@ -1561,7 +1498,7 @@ var isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAge
 var supportsPixelatedImages = 'imageRendering' in document.documentElement.style || 'msInterpolationMode' in document.documentElement.style;
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1611,14 +1548,14 @@ var _imageLoaded = __webpack_require__(0);
 
 var _imageLoaded2 = _interopRequireDefault(_imageLoaded);
 
-var _stackBlurCanvas = __webpack_require__(11);
+var _stackBlurCanvas = __webpack_require__(10);
 
 var _stackBlurCanvas2 = _interopRequireDefault(_stackBlurCanvas);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1628,6 +1565,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 /* eslint-disable */
+/*
+ * Bases on StackBlur 0.6
+ * Copyright (c) 2010 Mario Klingemann <mario@quasimondo.com>
+ * https://github.com/Quasimondo/QuasimondoJS
+ */
 
 // var mul_table = [
 //         512,512,456,512,328,456,335,512,405,328,271,456,388,335,292,512,
@@ -2175,6 +2117,62 @@ exports.default = {
   rgb: stackBlurCanvasRGB
 };
 
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+This lazySizes extension adds better support for print.
+In case the user starts to print lazysizes will load all images.
+*/
+(function(window, factory) {
+	var globalInstall = function(){
+		factory(window.lazySizes);
+		window.removeEventListener('lazyunveilread', globalInstall, true);
+	};
+
+	factory = factory.bind(null, window, window.document);
+
+	if(typeof module == 'object' && module.exports){
+		factory(__webpack_require__(2));
+	} else if(window.lazySizes) {
+		globalInstall();
+	} else {
+		window.addEventListener('lazyunveilread', globalInstall, true);
+	}
+}(window, function(window, document, lazySizes) {
+	/*jshint eqnull:true */
+	'use strict';
+	var config, elements, onprint, printMedia;
+	// see also: http://tjvantoll.com/2012/06/15/detecting-print-requests-with-javascript/
+	if(window.addEventListener){
+		config = (lazySizes && lazySizes.cfg) || window.lazySizesConfig || {};
+		elements = config.lazyClass || 'lazyload';
+		onprint = function(){
+			var i, len;
+			if(typeof elements == 'string'){
+				elements = document.getElementsByClassName(elements);
+			}
+
+			if(lazySizes){
+				for(i = 0, len = elements.length; i < len; i++){
+					lazySizes.loader.unveil(elements[i]);
+				}
+			}
+		};
+
+		addEventListener('beforeprint', onprint, false);
+
+		if(!('onbeforeprint' in window) && window.matchMedia && (printMedia = matchMedia('print')) && printMedia.addListener){
+			printMedia.addListener(function(){
+				if(printMedia.matches){
+					onprint();
+				}
+			});
+		}
+	}
+}));
+
+
 /***/ })
 /******/ ]);
-//# sourceMappingURL=imageset.js.map
