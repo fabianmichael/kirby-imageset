@@ -1,12 +1,14 @@
-//jshint node: true
+/* eslint-env node */
 const path               = require('path');
 const ExtractTextPlugin  = require('extract-text-webpack-plugin');
-
-// store environment variable to allow switches between 
+const CssoWebpackPlugin  = require('csso-webpack-plugin').default;
+const UglifyJsPlugin     = require('uglifyjs-webpack-plugin');
+  
+// Store environment variable to allow switches between 
 // dev server and production builds.
 const ENV = process.env.NODE_ENV || 'development';
 
-module.exports = {
+var config = {
 
   entry: {
     'js/dist/imageset.js':  './assets/js/src/imageset.js',
@@ -16,9 +18,7 @@ module.exports = {
 
   output: {
     filename: '[name]',
-    // chunkFilename: 'js/[name].bundle.js',
     path: path.resolve(__dirname, 'assets'),
-    publicPath: '/assets/plugins/imageset/',
   },
 
   module: {
@@ -42,19 +42,21 @@ module.exports = {
           use: [
             {
               loader: 'css-loader',
-              options: { /*importLoaders: true,*/ sourceMap: true }
+              options: {
+                sourceMap: (ENV === 'development'),
+              }
             },
             'resolve-url-loader',
             {
               loader: 'postcss-loader',
               options: {
-                sourceMap: true,
+                sourceMap: (ENV === 'development'),
               },
             },
             {
               loader: 'sass-loader',
               options: {
-                sourceMap: true,
+                sourceMap: (ENV === 'development'),
                 precision: 10,
                 data: `$ENV: ${ENV};`,
               }
@@ -70,9 +72,6 @@ module.exports = {
     colors: true
   },
   
-  devtool: 'source-map',
-  // devtool: 'inline-source-map', => would needed for live workspace in chrome dev tools
-
   plugins: [
     new ExtractTextPlugin({
       filename: (getPath) => {
@@ -82,6 +81,24 @@ module.exports = {
       allChunks: true
     }),
   ],
-
-
 };
+
+if(ENV === 'development') {
+  config.devtool = 'source-map';
+}
+
+if(ENV === 'production') {
+
+  config.entry['js/dist/imageset.min.js']  = './assets/js/src/imageset.js';
+  config.entry['js/dist/respimage.min.js'] = './assets/js/src/respimage.js';
+
+  config.plugins.push(new UglifyJsPlugin({
+    include: /\.min\.js$/,
+  }));
+
+  config.plugins.push(new CssoWebpackPlugin({
+    pluginOutputPostfix: 'min',
+  }));
+}
+
+module.exports = config;
