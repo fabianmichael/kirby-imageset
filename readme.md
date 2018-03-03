@@ -8,8 +8,6 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 
 **NOTE:** This is a commercial plugin. In order to use it on a production server, you need to buy a license. For details on ImageSet’s license model, scroll down to the [License](#10-license) section of this document.
 
-![Placeholder styles available in ImageSet](https://fabianmichael.de/shared/imageset-animation.gif)
-
 ***
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -27,7 +25,6 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
     - [2.2.2 Git Submodule](#222-git-submodule)
     - [2.2.3 Copy and Paste](#223-copy-and-paste)
   - [2.3 Template Setup](#23-template-setup)
-  - [2.4 JavaScript Configuration & API](#24-javascript-configuration--api)
 - [3 Global Configuration](#3-global-configuration)
 - [4 Usage](#4-usage)
   - [4.1 Template API](#41-template-api)
@@ -56,15 +53,15 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 ## 1 Key Features
 
 - **Responsive Images** Add responsive images in different sizes to your website with ease by using ImageSet’s convenient template API.
-- **Easy to Use** ImageSet provides a convenient API for generating responsive image sets and also works with Kirbytext.
+- **Easy to Use** ImageSet provides a convenient API for generating responsive imagesets from within your templates and it also works with Kirbytext.
 - **Lazy Loading** It supports lazy loading for saving valuable bandwidth (especially on mobile) and faster page loads for everyone.*
--  **Placeholders & Ratios** ImageSet comes with placeholders in 5 beautiful styles and reserves screen space for images to avoid reflows (aka *page-jumps*) while the page is being loaded.
--  **Art Direction** Define different sizes and crop ratios for different screen sizes and/or media types.
--  **Progressive Enhancement** In case of doubt, the plugin works without JavaScript or native support for responsive images as a conditionally loaded polyfill is included for older browsers.
--  **Web Standards** ImageSet produces HTML5-based markup (using the `<picture>` element and `srcset`-attribute).
--  **Works with AJAX** ImageSet works with dynamic content, as new image sets are automatically detected and handled.
-**Error Handling** When an image could not be loaded (e.g. due to a connection error), the plugin will display a broken image icon and alt text if supplied.
--  **Small Footprint** Frontend code has been designed for performance and comes with a minimal footprint. Only ~1,5 kB CSS + ~7,5 kB JavaScript (+ 5,7 kB Polyfill for older browsers), when minified & gzipped.
+- **Placeholders & Ratios** ImageSet comes with placeholders in 5 beautiful styles and reserves screen space for images before they are loaded to avoid reflows (aka *page-jumps*) while the page is being loaded.
+- **Art Direction** Define different sizes and crop ratios for different screen sizes and/or any other media query conditions.
+- **Progressive Enhancement** In case of doubt, the plugin works without JavaScript or native support for responsive images as a conditionally loaded polyfill is included for older browsers.
+- **Web Standards** ImageSet produces HTML5-based markup (using the `<picture>` element and `srcset`-attribute).
+- **Works with AJAX** ImageSet works with dynamic content, as new image sets are automatically detected and handled.
+- **Error Handling** When an image could not be loaded (e.g. due to a connection error), the plugin will display a broken image icon and alt text if supplied.
+- **Small Footprint** Frontend code has been designed for performance and comes with a minimal footprint. Less than ~2 kB CSS + ~8 kB JavaScript (+ ~6 kB Polyfill for older browsers), when minified & gzipped.
 
 *) Lazy loading uses the very performant [lazysizes](https://github.com/aFarkas/lazysizes) script and requires JavaScript to be activated on the client. However, the plugin provides a `<noscript>`-fallback which is enabled by default.
 
@@ -76,10 +73,10 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 
 #### 2.1.1 Server Requirements
 
--  PHP 5.4.0+
+-  PHP 5.6.0+
 -  Kirby 2.3.0+
 -  GD Library for PHP or ImageMagick command-line tools to resize images.
--  [ImageKit for Kirby CMS](https://github.com/fabianmichael/kirby-imagekit) 1.1.0+ *(optional, but recommended for pages containing lots of imagesets and/or image sizes)*
+-  [ImageKit for Kirby CMS](https://github.com/fabianmichael/kirby-imagekit) 1.1.0+ *(optional, but recommended for pages containing lots of image sets and/or image sizes)*
 
 #### 2.1.2 Browser Support
 
@@ -87,7 +84,7 @@ ImageSet has been tested in the following browsers, but should work with any bro
 
 | IE | Edge    | Firefox | Safari (OS X) | Safari (iOS) | Chrome | Opera | Opera mini |
 |:-----------------:|:-------:|:-------:|:------:|:------:| :-----: | :-----: | :----: |
-| 10+               | 12+       | ✓*       | 9+     | 9+      | ✓ | ✓ | ✓** |
+| 11+               | ✓       | ✓*       | 9+     | 9+      | ✓ | ✓ | ✓** |
 
 *) Includes Firefox ESR
 
@@ -111,7 +108,7 @@ This will download and copy *ImageSet* into `site/plugins/imageset`.
 
 #### 2.2.2 Git Submodule
 
-To install this plugin as a git submodule, execute the following command from the root of your kirby project:
+To install this plugin as a git submodule, execute the following command from the root of your Kirby project:
 
 ```
 git submodule add https://github.com/fabianmichael/kirby-imageset.git site/plugins/imageset
@@ -133,10 +130,10 @@ In order to make ImageSet work properly, you have to include the corresponding C
 <?= css('assets/plugins/imageset/css/imageset.min.css') ?>
 ```
 
-If you use lazy loading, also add the following line anywhere after the previous code in your template, it is recommended to include the file before the closing `</head>` tag to ensure that it loads as fast as possible. If this is not possible, you can also include the script right before the closing body tag, but this lreads to later execution and can easily result in the flashing of un-rendered placeholders.
+If you use lazy loading, also add the following line anywhere after the previous code in your template, it is recommended to include the file before the closing `</head>` tag to ensure that it loads as fast as possible. If this is not possible, you can also include the script right before the closing body tag, but this leads to later execution and can easily result in the flashing of un-rendered placeholders.
 
 ```php
-<?= js('assets/plugins/imageset/js/dist/imageset.js') ?>
+<?= js('assets/plugins/imageset/js/dist/imageset.min.js') ?>
 ```
 
 Not all browsers are providing [native support](http://caniuse.com/#feat=picture) for the `<picture>` element. If your site does not already include a polyfill for this, you might also want to add the following lines within the `<head>` of your site to load the *respimage* polyfill conditionally and as fast as possible.
@@ -156,27 +153,6 @@ Not all browsers are providing [native support](http://caniuse.com/#feat=picture
 Alright, your site should now be prepared for using ImageSet! :-D
 
 <table><tr><td>ℹ️ For a dev environment or low-traffic sites, it is completely fine to link plugin assets directly. However, if performance is critical for your project, it is highly recommended to place a copy of the JS and CSS files linked above in your <code>assets</code> directory and link to them or to bundle up these assets with your regular CSS and JavaScript using the build tool of your choice.</td></tr></table>
-
-### 2.4 JavaScript Configuration & API
-
-✳️ Available from 1.1.0+
-
-ImageSet does everything automagically, from rendering placeholders to detecting dynamically added image sets. However, there might be some use-cases where you need a bit more control over how the ImageSet plugin works. Configuration is done by settings the global `window.imagesetConfig` variable before loading `imageset.js`. The plugin also exposes a global `imageset` variable to the window object, which is used for calling API methods (currently the only available method is `imageset.update()`).
-
-```html
-<script>
-window.imagesetConfig = {
-  autoUpdate: true,
-  placeholderRendering: 'async',
-};
-</script>
-<!-- include imageset.js after setting up configuration -->
-```
-
-| Option | Default value | Possible values | Description |
-|:--------------------|:--------------|:--------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `autoUpdate` | `true` | `true`, `false` | If enabled , ImageSet searches for new imagesets whenever the DOM updates. On pages with lots of animations, you might want to prevent that placeholders are being rendered during animations to keep those as smooth as possible. If this setting is disabled, you have to call `imageset.update()` manually after updating the DOM. |
-| `placeholderRendering` | `'async'` | `'async'`, `'sync'` | `async` Placeholders are rendered using `requestAnimationFrame()` where available, rendering only one placeholder every frame. On long pages with lots of large images, this keeps the browser responding while the page is being loaded, but can possibly result in the flash of un-rendered placeholders.<br>`sync` Placeholders are rendered immediately after new imagesets are detected. Use this setting when a large amount of smaller imagesets is visible above the fold or when placeholder-rendering could otherwise interfere with animations. |
 
 ## 3 Global Configuration
 
@@ -228,6 +204,8 @@ if($image = $page->image('sample.jpg')) {
 **Styling Image Sets**
 
 The markup generated by the plugin is wrapped in a `<span>` tag which has the class `imageset` and additional classes depending on your options. By default, image sets always span the full width of their parent container. You can override this behavior by either wrapping them with another container element that has a constrained width or by using something like `.text .imageset { width: 50% ; }` in your CSS.
+
+Image sets also have have `display: inline-block` on their container element by default to make them behave similar to regular `<img>` tag with all its upsides and downsides. You can safely override this by adding `.imageset.-ratio { display: block; }` somewhere to your stylesheet after `imageset.scss` was included, if you would like image sets to behave like block elements.
 
 ### 4.2 Describing Sizes
 

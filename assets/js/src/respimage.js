@@ -1,2 +1,2 @@
-//=require includes/respimage.js
-//=require includes/ri.mutation.js
+import 'respimage';
+import 'respimage/plugins/mutation/ri.mutation';

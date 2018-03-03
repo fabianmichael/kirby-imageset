@@ -1,7 +1,7 @@
-/*!
+/*
  * ImageSet - responsive, lazy-loading images for Kirby CMS
  * 
- * @copyright (c) 2016 Fabian Michael <https://fabianmichael.de>
+ * @copyright (c) 2016-2018 Fabian Michael <https://fabianmichael.de>
  * @link https://github.com/fabianmichael/kirby-imageset
  *
  */
@@ -35,9 +35,8 @@ $imageset-unveil-delay: .05s !default;
   display: block;
 
   /* Remove bottom margin (borrowed from Inuit CSS) */
-  // vertical-align: middle;
-  width: 100%;
   position: relative;
+  width: 100%;
   
   /* Create a new stacking context for this imageset.
      See comments below to learn about why this
@@ -61,13 +60,13 @@ $imageset-unveil-delay: .05s !default;
   zoom: 1;
 }
 
-.imageset.-multiple-ratios .imageset-element {
-  // Prevent flash of a skewed image after ratio has
-  // changed, but new image was not loaded yet.
-  // Not supported in IE & EDGE <= 14
-  // DEACTIVATED DUE TO PERFORMANCE ISSUES!
-  // object-fit: cover;
-}
+// .imageset.-multiple-ratios .imageset-element {
+//   /* Prevent flash of a skewed image after ratio has
+//      changed, but new image was not loaded yet.
+//      Not supported in IE & EDGE <= 14
+//      CURRENTLY DEACTIVATED DUE TO PERFORMANCE ISSUES! */
+//    object-fit: cover;
+// }
 
 .imageset.-ratio .imageset-ratio-fill {
   display: block;
@@ -172,7 +171,7 @@ $imageset-unveil-delay: .05s !default;
 }
 
 .imageset.-alpha .imageset-placeholder {
-  //visibility: hidden;
+  visibility: hidden;
 }
 
 .js .imageset.-alpha .imageset-placeholder {

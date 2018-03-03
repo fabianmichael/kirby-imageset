@@ -1,12 +1,15 @@
 @charset "UTF-8";
-/*!
+
+/*
  * ImageSet - responsive, lazy-loading images for Kirby CMS
  * 
- * @copyright (c) 2016 Fabian Michael <https://fabianmichael.de>
+ * @copyright (c) 2016-2018 Fabian Michael <https://fabianmichael.de>
  * @link https://github.com/fabianmichael/kirby-imageset
  *
  */
+
 /* -----  ImageSet Component  ----------------------------------------------- */
+
 .imageset {
   /* Fixes a glitch in Firefox, where (in rare cases) a
      black border appears for no abvious reason at the
@@ -17,11 +20,12 @@
 }
 
 /* ·····  ImageSet with Ratio-Placeholder  ·································· */
+
 .imageset.-ratio {
   display: block;
   /* Remove bottom margin (borrowed from Inuit CSS) */
-  width: 100%;
   position: relative;
+  width: 100%;
   /* Create a new stacking context for this imageset.
      See comments below to learn about why this
      is important. */
@@ -65,7 +69,7 @@
      browsers. */
   z-index: 1;
   -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 @media screen {
@@ -108,7 +112,7 @@
   transform: translate(-50%, -50%);
   overflow: hidden;
   -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .js .imageset.-lazyload .imageset-placeholder {
@@ -136,6 +140,10 @@
   .js .imageset.-lazyload .imageset-placeholder {
     transition: opacity 0.5s 0.05s, visibility 0s 0.8s;
   }
+}
+
+.imageset.-alpha .imageset-placeholder {
+  visibility: hidden;
 }
 
 .js .imageset.-alpha .imageset-placeholder {
@@ -179,6 +187,7 @@
 }
 
 /* ·····  NoScript Fallback  ················································ */
+
 .imageset.-ratio .imageset-fallback {
   /* autoprefixer: off */
   position: absolute;
@@ -209,6 +218,7 @@
 }
 
 /* ·····  Error Handling  ··················································· */
+
 .js .imageset .imageset-error {
   position: absolute;
   z-index: 3;
@@ -220,9 +230,9 @@
   transition: opacity 0.5s;
   pointer-events: none;
   -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .js .imageset .imageset-error {
@@ -271,6 +281,7 @@
 }
 
 /* ·····  Opera Mini Fixes  ················································· */
+
 .operamini .imageset-placeholder {
   display: none;
 }
