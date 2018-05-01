@@ -4,8 +4,6 @@
 
 A flexible, responsive image component for [Kirby CMS](http://getkirby.com), featuring lazy loading, fancy placeholders and more.
 
-[<img src="https://img.shields.io/badge/%E2%80%BA-See%20the%20Demo-555555.svg?style=flat" alt="Download mozjpeg">](http://imagesetdemo.fabianmichael.de/)
-
 **NOTE:** This is a commercial plugin. In order to use it on a production server, you need to buy a license. For details on ImageSet’s license model, scroll down to the [License](#10-license) section of this document.
 
 ***
