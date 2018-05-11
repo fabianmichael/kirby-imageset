@@ -292,8 +292,8 @@ The options described in this section define the behavior of a single image set 
 <?= $image->imageset([
     '160-1280,6', 'sizes' => '(min-width: 640px) 100vw, 50vw'
   ], [
-    'class'      => 'awesome-image',
-    'placeholder => 'blurred',
+    'class'       => 'awesome-image',
+    'placeholder' => 'blurred',
   ]) ?>
 ```
 
