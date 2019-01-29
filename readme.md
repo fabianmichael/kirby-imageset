@@ -72,7 +72,7 @@ A flexible, responsive image component for [Kirby CMS](http://getkirby.com), fea
 #### 2.1.1 Server Requirements
 
 -  PHP 5.6.0+
--  Kirby 2.3.0+
+-  Kirby 2.3.0+ (not compatible with Kirby 3)
 -  GD Library for PHP or ImageMagick command-line tools to resize images.
 -  [ImageKit for Kirby CMS](https://github.com/fabianmichael/kirby-imagekit) 1.1.0+ *(optional, but recommended for pages containing lots of image sets and/or image sizes)*
 
