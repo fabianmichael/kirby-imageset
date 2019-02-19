@@ -1,5 +1,0 @@
-Title: ImageSet Test Site
-
-----
-
-Copyright: © (date: Year) (link: https://fabianmichael.de text: Fabian Michael)
