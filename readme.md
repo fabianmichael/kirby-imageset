@@ -553,9 +553,7 @@ ImageSet can be evaluated as long as you want on how many private servers you wa
 
 *The plugin is also available as a bundle with [ImageKit](https://github.com/fabianmichael/kirby-imagekit), a plugin that brings asynchronous thumbnail creation and advanced image optimization for your site.*
 
-→ [Buy ImageSet](http://sites.fastspring.com/fabianmichael/product/imageset)  
-→ [Buy the ImageKit + ImageSet Bundle](http://sites.fastspring.com/fabianmichael/product/imgbundle1)
-
+As of May 22, 2019, I have stopped selling licenses of both ImageKit and ImageSet. If you bought licenses in the past, then thank you for your support.
 
 However, even with a valid license code, it is discouraged to use it in any project, that promotes racism, sexism, homophobia, animal abuse or any other form of hate-speech.
 
