@@ -4,7 +4,7 @@
 
 A flexible, responsive image component for [Kirby CMS](http://getkirby.com), featuring lazy loading, fancy placeholders and more.
 
-**NOTE:** This is a commercial plugin. In order to use it on a production server, you need to buy a license. For details on ImageSet’s license model, scroll down to the [License](#10-license) section of this document.
+**NOTE:** This plugin was realeased under a commercial license at first. As of October 2nd, 2019, the code has been re-issued under the MIT license. As I have stopped sales and development, please note that I do not offer support any longer. If you want to use this plugin with a legacy Kirby 2-website, just use this license key to get rid of any limitations of the trial version: `IMGST1-00000000000000000000000000000000`.
 
 ***
 
@@ -547,23 +547,9 @@ window.lazySizesConfig.preloadAfterLoad = true;
 &lt;/script&gt;
 </code></pre>
 
-## 10 License
-
-ImageSet can be evaluated as long as you want on how many private servers you want. To deploy ImageSet on any public server, you need to buy a license. See `license.md` for terms and conditions.
-
-*The plugin is also available as a bundle with [ImageKit](https://github.com/fabianmichael/kirby-imagekit), a plugin that brings asynchronous thumbnail creation and advanced image optimization for your site.*
-
-As of May 22, 2019, I have stopped selling licenses of both ImageKit and ImageSet. If you bought licenses in the past, then thank you for your support.
-
-However, even with a valid license code, it is discouraged to use it in any project, that promotes racism, sexism, homophobia, animal abuse or any other form of hate-speech.
-
-## 11 Technical Support
-
-Technical support is provided via Email and on GitHub. If you’re facing any problems with running or setting up ImageSet, please send your request to [support@fabianmichael.de](mailto:support@fabianmichael.de) or [create a new issue](https://github.com/fabianmichael/kirby-imageset/issues/new) in this GitHub repository. No representations or guarantees are made regarding the response time in which support questions are answered.
-
 ## 12 Credits
 
-ImageSet is developed and maintained by [Fabian Michael](https://fabianmichael.de), a graphic designer & web developer from Germany.
+ImageSet was developed and maintained by [Fabian Michael](https://fabianmichael.de), a graphic designer & web developer from Germany.
 
 The plugin includes the following third-party components:
 
